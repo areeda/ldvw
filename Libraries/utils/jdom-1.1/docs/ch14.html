@@ -1,0 +1,230 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;14.&nbsp;JDOM</title><meta name="generator" content="DocBook XSL Stylesheets V1.52.2"><meta name="description" content="The complete text of Elliotte Rusty Harold's book Processing XML with Java.         published by Addison-Wesley, November 2002"><script language="javascript"><!--
+/* Only sunsites are allowed to mirror this page and then
+only with explicit, prior permission. For details,
+send email to elharo@metalab.unc.edu */
+if (location.protocol.toLowerCase().indexOf("file") != 0 ) { 
+  if (0 > location.host.toLowerCase().indexOf("cafeconleche.org")
+      && 0 > location.host.toLowerCase().indexOf("ibiblio.org")) {
+    location.href="http://www.cafeconleche.org/books/xmljava/chapters/";
+  }
+} // --></script><link rel="home" href="index.html" title="Processing XML with Java"><link rel="up" href="index.html" title="Processing XML with Java"><link rel="previous" href="ch13s04.html" title="Summary"><link rel="next" href="ch14s02.html" title="Creating XML Elements with JDOM"><link rel="preface" href="pr01.html" title="Preface"><link rel="preface" href="pr02.html" title="Acknowledgements"><link rel="chapter" href="ch01.html" title="Chapter&nbsp;1.&nbsp;XML for Data"><link rel="chapter" href="ch02.html" title="Chapter&nbsp;2.&nbsp;XML Protocols: XML-RPC and SOAP"><link rel="chapter" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Writing XML with Java"><link rel="chapter" href="ch04.html" title="Chapter&nbsp;4.&nbsp;Converting Flat Files to XML"><link rel="chapter" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Reading XML"><link rel="chapter" href="ch06.html" title="Chapter&nbsp;6.&nbsp;SAX"><link rel="chapter" href="ch07.html" title="Chapter&nbsp;7.&nbsp;The XMLReader Interface"><link rel="chapter" href="ch08.html" title="Chapter&nbsp;8.&nbsp;SAX Filters"><link rel="chapter" href="ch09.html" title="Chapter&nbsp;9.&nbsp;The Document Object Model"><link rel="chapter" href="ch10.html" title="Chapter&nbsp;10.&nbsp;Creating XML Documents with DOM"><link rel="chapter" href="ch11.html" title="Chapter&nbsp;11.&nbsp;The Document Object Model Core"><link rel="chapter" href="ch12.html" title="Chapter&nbsp;12.&nbsp;The DOM Traversal Module"><link rel="chapter" href="ch13.html" title="Chapter&nbsp;13.&nbsp;Output from DOM"><link rel="chapter" href="ch14.html" title="Chapter&nbsp;14.&nbsp;JDOM"><link rel="chapter" href="ch15.html" title="Chapter&nbsp;15.&nbsp;The JDOM Model"><link rel="chapter" href="ch16.html" title="Chapter&nbsp;16.&nbsp;XPath"><link rel="chapter" href="ch17.html" title="Chapter&nbsp;17.&nbsp;XSLT"><link rel="appendix" href="apa.html" title="Appendix&nbsp;A.&nbsp;XML APIs Quick Reference"><link rel="appendix" href="apb.html" title="Appendix&nbsp;B.&nbsp;SOAP 1.1 Schemas"><link rel="index" href="ix01.html" title="Index"><link rel="section" href="ch14.html#d0e22062" title="What is JDOM?"><link rel="section" href="ch14s02.html" title="Creating XML Elements with JDOM"><link rel="section" href="ch14s03.html" title="Creating XML Documents with JDOM"><link rel="section" href="ch14s04.html" title="Writing XML Documents with JDOM"><link rel="section" href="ch14s05.html" title="Document Type Declarations"><link rel="section" href="ch14s06.html" title="Namespaces"><link rel="section" href="ch14s07.html" title="Reading XML Documents with JDOM"><link rel="section" href="ch14s08.html" title="Navigating JDOM Trees"><link rel="section" href="ch14s09.html" title="Talking to DOM Programs"><link rel="section" href="ch14s10.html" title="Talking to SAX Programs"><link rel="section" href="ch14s11.html" title="Java Integration"><link rel="section" href="ch14s12.html" title="What JDOM doesn&#8217;t do"><link rel="section" href="ch14s13.html" title="Summary"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;14.&nbsp;JDOM</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch13s04.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch14s02.html">Next</a></td></tr></table><hr></div><div class="chapter"><div class="titlepage"><div><h2 class="title"><a name="ch_jdom"></a>Chapter&nbsp;14.&nbsp;JDOM</h2></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><a href="ch14.html#d0e22062">What is JDOM?</a></dt><dt><a href="ch14s02.html">Creating XML Elements with JDOM</a></dt><dt><a href="ch14s03.html">Creating XML Documents with JDOM</a></dt><dt><a href="ch14s04.html">Writing XML Documents with JDOM</a></dt><dt><a href="ch14s05.html">Document Type Declarations</a></dt><dt><a href="ch14s06.html">Namespaces</a></dt><dt><a href="ch14s07.html">Reading XML Documents with JDOM</a></dt><dt><a href="ch14s08.html">Navigating JDOM Trees</a></dt><dt><a href="ch14s09.html">Talking to DOM Programs</a></dt><dt><a href="ch14s10.html">Talking to SAX Programs</a></dt><dd><dl><dt><a href="ch14s10.html#d0e23116">Configuring SAXBuilder</a></dt><dt><a href="ch14s10.html#d0e23317">SAXOutputter</a></dt></dl></dd><dt><a href="ch14s11.html">Java Integration</a></dt><dd><dl><dt><a href="ch14s11.html#d0e23383">Serializing JDOM Objects</a></dt><dt><a href="ch14s11.html#d0e23410">Synchronizing JDOM Objects</a></dt><dt><a href="ch14s11.html#d0e23421">Testing Equality</a></dt><dt><a href="ch14s11.html#d0e23477">Hash codes</a></dt><dt><a href="ch14s11.html#d0e23499">String representations</a></dt><dt><a href="ch14s11.html#d0e23524">Cloning</a></dt></dl></dd><dt><a href="ch14s12.html">What JDOM doesn&#8217;t do</a></dt><dt><a href="ch14s13.html">Summary</a></dt></dl></div><p>
+   Tree-based APIs like DOM are very useful when programmers want
+   to keep the entire document in memory at once with
+    random access to the entire tree. Unfortunately DOM suffers
+    from a number of design flaws and limitations that make it
+    less than ideal as a Java API for processing XML. These include:
+ </p><div class="itemizedlist"><ul type="disc"><li><p>
+        DOM had to be backwards compatible with the hackish,
+        poorly thought out, unplanned  object models used in third
+        generation web browsers.
+      </p></li><li><p>
+        DOM was designed by a committee trying to reconcile
+        differences
+        between the object models implemented by
+        Netscape, Microsoft, and other vendors. They needed 
+        a solution that was at least minimally acceptable
+        to everybody, which resulted in an API that&#8217;s maximally
+        acceptable to no one.
+      </p></li><li><p>
+        DOM is a cross-language API
+        defined in IDL, and thus
+        limited to those features and classes that are available
+        in essentially all programming languages, including 
+        not fully-object oriented scripting languages like 
+        JavaScript and Visual Basic. It is a lowest common denominator API.
+        It does not take full advantage of Java, nor does it
+        adhere to Java best practices, naming conventions, and 
+        coding standards.
+      </p></li><li><p>
+        DOM must work for both HTML (not just XHTML, but traditional malformed HTML)
+        and XML.
+      </p></li></ul></div><p>
+    Together these constraints made DOM a lot more clumsy and hard-to-use than it
+    should have been. I&#8217;m virtually certain that if you&#8217;ve read
+    the last five chapters, you&#8217;ve often found yourself muttering
+    in rather colorful language
+    about some of the more brain damaged aspects of DOM.
+    I know I certainly did as I wrote those chapters. In almost
+    every case, the specific problem that elicits such complaints
+    is a result of one of the above four constraints on the
+    design of DOM.
+  </p><p>
+    JDOM is a tree-based API for processing XML documents with
+    Java that threw out DOM&#8217;s limitations and assumptions and
+    started from scratch.
+    It is designed purely for XML, purely for Java, and with no
+    concern for backwards compatibility with earlier, similar
+    APIs. It is thus much cleaner and much simpler than DOM. Most
+    developers find JDOM to be far more intuitive and easy to use
+    than DOM. It&#8217;s not that JDOM will enable you to 
+    do anything you can&#8217;t do with DOM.
+    However, writing the same program with JDOM
+    will normally take you less time and have fewer bugs when
+    finished, simply because of  the greater intuitiveness of the API.
+    In many ways, JDOM is to DOM as Java is to C++, a much
+    improved, incompatible replacement for the earlier more
+    complex technology.
+  </p><div class="caution" style="margin-left: 0.5in; margin-right: 0.5in; font-family: Helvetica, Arial, sans"><h3 class="title">Caution</h3><p>
+       JDOM is still in beta at the time of this writing.
+       This chapter is based on the most current CVS version
+       available, which is shortly after beta-8 and somewhere
+       before beta-9. The API has been stabilizing and I don&#8217;t
+       foresee any major changes between now and 1.0.
+       However, a number of the details are likely to shift.
+       I&#8217;d definitely check the method signatures with the
+       latest version of the JavaDoc API documentation. 
+     </p></div><div class="sect1"><div class="titlepage"><div><h2 class="title" style="clear: both"><a name="d0e22062"></a>What is JDOM?</h2></div></div><p>
+   JDOM is an open source, tree-based, pure Java
+   API for parsing, creating, manipulating, and serializing XML
+   documents. JDOM was invented by Brett McLaughlin and Jason
+   Hunter 
+   in the Spring of 2000. I asked Jason how it happened, and
+   here&#8217;s what he told me:
+ </p><blockquote class="blockquote"><p>
+In the early months of 2000, in a time before I knew Brett, I found
+myself working with XML for a contract project and growing increasingly
+frustrated with DOM as a way to solve my problems.  My mind had an
+expectation for what a Java-based XML manipulation API would look like. 
+DOM wasn&#8217;t anything like it.
+</p><p>
+In the spring of 2000, I attended Brett&#8217;s talk on DOM and SAX at the
+O&#8217;Reilly Conference on Enterprise Java.  I was hoping he&#8217;d share with me
+the DOM philosophy so I could see why reality wasn&#8217;t matching my
+expectations.  Rather than clearing things up, I found every fifth slide
+in his presentation was titled "Gotcha!" and listed one more thing you
+had to watch out for.
+</p><p>
+After his talk we sat down together on the lawn in San Jose.  It was a
+gorgeous spring day.  He was just about to release a book that was
+clearly destined to be a bestseller (Java and XML buzzwords in the
+title, what can go wrong, right elharo?).  I was telling him some of
+what that means for a person&#8217;s career, based on my experience with a
+popular servlets book.  I used the opportunity to ask him (someone far
+more expert in XML than myself at the time), "Why does it have to be
+like this?"  He thought about it, we talked about it, and ten minutes
+later we decided to start an open source project to create a
+Java-specific XML object model.  It was the first alternative to DOM in
+the Java world.
+</p><p>
+We worked for about a month designing the early API. We each had our
+role to play.  Brett made sure the API was consistent with XML
+specifications.  I made sure the API was acceptable to a Java programmer
+who wanted to just use XML and get on with their life.  We had two
+private betas, then a public beta 3.  James Duncan Davidson was helpful
+during the two private betas, especially on the interfaces vs classes
+debate.  </p></blockquote><p>  
+   Since then numerous people have contributed to JDOM&#8217;s development
+   including Alex Rosen, Alex Chafee, James Duncan Davidson,
+   Philip Nelson, Jools Enticknap, Bradley
+   S. Huffman, and yours truly. 
+ </p><p>
+   JDOM is open source like SAX and DOM. (Proprietary XML APIs 
+   really have not caught on.) Hunter and McLaughlin publish it
+   under the very
+   liberal Apache license. Essentially you can do anything you
+   want with it except use the name &#8220;JDOM&#8221; for derivative
+   works. It has already been forked once resulting in James
+   Strachan&#8217;s dom4j.
+ </p><table class="sidebar" border="0"><tr><td width="10%"></td><td width="80%" style="font-family: Helvetica, Arial, sans" cellpadding="5"><p class="title" style="font-size: larger" align="center"><b>dom4j</b></p><p>
+     James Strachan forked JDOM in late 2000 to experiment with 
+     using interfaces built by factory methods to represent the nodes 
+     instead of concrete classes built by constructors. The result was
+     dom4j. 
+     </p><p>
+     dom4j has some features I like, including integrated XPath support
+     and a generic 
+     <tt>Node</tt> interface that makes
+     document 
+     navigation a lot simpler.
+     However, in my experience most programmers find it much
+     easier to work with class-based APIs like JDOM than with pure
+     interface-based APIs like dom4j and DOM. Furthermore,
+     classes can enforce constraints such as  &#8220;the name property of an
+     <tt>Element</tt> must be a legal XML name&#8221;.
+     Interfaces can&#8217;t do that. In my opinion, dom4j makes it too
+     easy to slip out of
+     the constraints of XML and produce a  
+     malformed document.
+   </p></td><td width="10%"></td></tr></table><p>
+   Like DOM, JDOM represents an XML document as a tree composed
+   of elements, attributes, comments, processing instructions,
+   text nodes, CDATA sections, and so forth.
+   The entire tree is available at any time. Unlike SAX,
+   JDOM  can access any part of the tree at any time.
+   Unlike DOM, all the different kinds of nodes in the tree are
+   represented by concrete classes rather than interfaces.
+   Furthermore, there is no generic
+   <tt>Node</tt> interface or class which
+   all the different node classes implement or extend.
+   (This is personally my least favorite aspect of the JDOM
+   design. It makes tree-walking and search operations 
+   far more cumbersome than they are in DOM.)
+ </p><p>
+   JDOM is written in and for Java. It consistently uses the Java coding
+   conventions and the class library. For example,
+   all primary JDOM classes have
+   <tt>equals()</tt>, 
+   <tt>toString()</tt>, and
+   <tt>hashCode()</tt> methods.
+   They all implement the
+   <tt>Cloneable</tt>
+   and <tt>Serializable</tt> interfaces.
+   The children of an <tt>Element</tt> or 
+   a <tt>Document</tt> object are stored in a
+   <tt>java.util.List</tt>. JDOM strives to be
+   correct not just with respect to XML but also with respect to
+   Java.
+ </p><p>
+   JDOM does not itself include a parser. Instead it depends
+   on a SAX parser with a custom <tt>ContentHandler</tt>
+   to parse documents and build JDOM models from them.
+   Xerces 1.4.4 is bundled with JDOM. However, it can work 
+   equally well with any
+   SAX2 compliant parser including 
+   Crimson, &AElig;lfred, the Oracle XML Parser for Java, Piccolo,
+   Xerces-2, 
+   and more. Any of these can read an XML document
+   and feed it into JDOM. JDOM can also convert DOM
+   <tt>Document</tt> objects into 
+   JDOM <tt>Document</tt> objects, which is useful
+   for piping the output of existing DOM programs to the input of
+   a JDOM program. However, if you&#8217;re working with a stream of
+   XML data read from a disk or a network, it&#8217;s preferable to use
+   SAX to produce the JDOM tree because it avoids the
+   overhead of building the in-memory tree twice in two different
+   representations. 
+ </p><p>
+   Like DOM (and unlike SAX) JDOM can build a new XML tree in
+   memory. Data for the tree can come from a non-XML source like a database,
+   from literals in the Java program, or 
+   from calculations as in many of the Fibonacci number examples
+   in this book. When creating new XML documents from scratch
+   (rather than reading them from a parser), JDOM checks all the
+   data for well-formedness. For example, unlike many
+   DOM implementations, JDOM does not allow programs to create
+   comments whose data includes the double hyphen
+   <tt>--</tt> or elements and attributes
+   whose namespace mapping conflict in impossible ways.
+ </p><p>
+   Once a document has been loaded into memory, whether by
+   creating it from scratch or by parsing it from a stream,
+   JDOM can modify the document. A JDOM tree is fully
+   read-write. All parts of the tree can be moved, deleted, and
+   added to, subject to the usual restrictions of XML.
+   (For instance, you can add an attribute to an element but not
+   to a comment.) Unlike DOM, there are no annoying read-only
+   sections of the tree that you can&#8217;t change. 
+ </p><p>
+   Finally, when you&#8217;re finished working with a document in
+   memory, JDOM lets you serialize it back out to disk or onto a
+   stream as a sequence of bytes. JDOM provides numerous options
+   to specify the encoding, indenting, line end characters, and
+   other details of serialization.
+   Alternately, if you don&#8217;t want to convert the document to a
+   stream, you can produce a SAX event sequence or a DOM document
+   as output instead. 
+ </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch13s04.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch14s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Summary&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Creating XML Elements with JDOM</td></tr></table></div><hr xmlns:dt="http://xsltsl.org/date-time"><table xmlns:dt="http://xsltsl.org/date-time" width="100%" summary="Cafe con Leche footer"><tr><td width="34%" align="left">Copyright 2001, 2002 Elliotte Rusty Harold</td><td width="32%" align="center"><a href="mailto:elharo@metalab.unc.edu">elharo@metalab.unc.edu</a></td><td width="34%" align="right">Last Modified 
+September 12,
+2002</td></tr><tr><td width="34%" align="left"></td><td width="32%" align="center"><a href="http://www.cafeconleche.org/">Up To Cafe con Leche</a></td><td width="34%" align="right"></td></tr></table></body></html>

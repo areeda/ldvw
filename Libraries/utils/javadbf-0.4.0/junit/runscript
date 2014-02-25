@@ -1,0 +1,1 @@
+java -classpath /usr/local/junit/junit3.8.1/junit.jar:../javadbf.jar:. junit.textui.TestRunner JavaDBFTest

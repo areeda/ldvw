@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="80">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df name="libjson" root=".">
+      <df name="Dependencies">
+        <df name="libbase64++">
+          <in>libbase64++.h</in>
+        </df>
+        <df name="mempool++">
+          <in>mempool.h</in>
+        </df>
+      </df>
+      <df name="Getting Started">
+        <df name="C++ Interface">
+        </df>
+        <df name="Library Interface">
+          <df name="scripts">
+          </df>
+          <df name="styles">
+          </df>
+        </df>
+      </df>
+      <df name="Objects_static">
+      </df>
+      <df name="Source">
+        <df name="JSONDefs">
+          <in>GNU_C.h</in>
+          <in>Strings_Defs.h</in>
+          <in>Unknown_C.h</in>
+          <in>Visual_C.h</in>
+        </df>
+        <in>JSONAllocator.cpp</in>
+        <in>JSONAllocator.h</in>
+        <in>JSONChildren.cpp</in>
+        <in>JSONChildren.h</in>
+        <in>JSONDebug.cpp</in>
+        <in>JSONDebug.h</in>
+        <in>JSONDefs.h</in>
+        <in>JSONGlobals.h</in>
+        <in>JSONIterators.cpp</in>
+        <in>JSONMemory.cpp</in>
+        <in>JSONMemory.h</in>
+        <in>JSONMemoryPool.h</in>
+        <in>JSONNode.cpp</in>
+        <in>JSONNode.h</in>
+        <in>JSONNode_Mutex.cpp</in>
+        <in>JSONPreparse.cpp</in>
+        <in>JSONPreparse.h</in>
+        <in>JSONSharedString.h</in>
+        <in>JSONSingleton.h</in>
+        <in>JSONStream.cpp</in>
+        <in>JSONStream.h</in>
+        <in>JSONValidator.cpp</in>
+        <in>JSONValidator.h</in>
+        <in>JSONWorker.cpp</in>
+        <in>JSONWorker.h</in>
+        <in>JSONWriter.cpp</in>
+        <in>JSON_Base64.h</in>
+        <in>NumberToString.h</in>
+        <in>internalJSONNode.cpp</in>
+        <in>internalJSONNode.h</in>
+        <in>libjson.cpp</in>
+      </df>
+      <df name="TestSuite">
+        <df name="All">
+          <in>main.cpp</in>
+        </df>
+        <df name="Benchmark">
+          <in>main.cpp</in>
+        </df>
+        <df name="TestSuite.xcodeproj">
+          <df name="project.xcworkspace">
+            <df name="xcuserdata">
+              <df name="wallace.xcuserdatad">
+              </df>
+            </df>
+          </df>
+          <df name="xcuserdata">
+            <df name="wallace.xcuserdatad">
+              <df name="xcdebugger">
+              </df>
+              <df name="xcschemes">
+              </df>
+            </df>
+          </df>
+        </df>
+        <in>RunTestSuite2.cpp</in>
+        <in>RunTestSuite2.h</in>
+        <in>StringTest.h</in>
+        <in>TestAssign.cpp</in>
+        <in>TestBinary.cpp</in>
+        <in>TestChildren.cpp</in>
+        <in>TestComments.cpp</in>
+        <in>TestConverters.cpp</in>
+        <in>TestCtors.cpp</in>
+        <in>TestEquality.cpp</in>
+        <in>TestFunctions.cpp</in>
+        <in>TestInequality.cpp</in>
+        <in>TestInspectors.cpp</in>
+        <in>TestIterators.cpp</in>
+        <in>TestMutex.cpp</in>
+        <in>TestNamespace.cpp</in>
+        <in>TestRefCounting.cpp</in>
+        <in>TestSharedString.cpp</in>
+        <in>TestStreams.cpp</in>
+        <in>TestString.cpp</in>
+        <in>TestSuite.cpp</in>
+        <in>TestSuite.h</in>
+        <in>TestValidator.cpp</in>
+        <in>TestWriter.cpp</in>
+        <in>UStringTest.h</in>
+        <in>UnitTest.cpp</in>
+        <in>UnitTest.h</in>
+        <in>main.cpp</in>
+      </df>
+      <df name="TestSuite2">
+        <df name="JSON_Base64">
+          <in>json_decode64.cpp</in>
+          <in>json_decode64.h</in>
+          <in>json_encode64.cpp</in>
+          <in>json_encode64.h</in>
+        </df>
+        <df name="JSONDebug">
+          <in>JSON_ASSERT.cpp</in>
+          <in>JSON_ASSERT.h</in>
+          <in>JSON_ASSERT_SAFE.cpp</in>
+          <in>JSON_ASSERT_SAFE.h</in>
+          <in>JSON_FAIL.cpp</in>
+          <in>JSON_FAIL.h</in>
+          <in>JSON_FAIL_SAFE.cpp</in>
+          <in>JSON_FAIL_SAFE.h</in>
+        </df>
+        <df name="JSONGlobals">
+          <in>jsonSingleton.cpp</in>
+          <in>jsonSingleton.h</in>
+        </df>
+        <df name="JSONValidator">
+          <df name="Resources">
+            <in>validyMacros.h</in>
+          </df>
+          <in>isValidArray.cpp</in>
+          <in>isValidArray.h</in>
+          <in>isValidMember.cpp</in>
+          <in>isValidMember.h</in>
+          <in>isValidNamedObject.cpp</in>
+          <in>isValidNamedObject.h</in>
+          <in>isValidNumber.cpp</in>
+          <in>isValidNumber.h</in>
+          <in>isValidObject.cpp</in>
+          <in>isValidObject.h</in>
+          <in>isValidPartialRoot.cpp</in>
+          <in>isValidPartialRoot.h</in>
+          <in>isValidRoot.cpp</in>
+          <in>isValidRoot.h</in>
+          <in>isValidString.cpp</in>
+          <in>isValidString.h</in>
+          <in>securityTest.cpp</in>
+          <in>securityTest.h</in>
+        </df>
+        <df name="NumberToString">
+          <in>_areFloatsEqual.cpp</in>
+          <in>_areFloatsEqual.h</in>
+          <in>_atof.cpp</in>
+          <in>_atof.h</in>
+          <in>_ftoa.cpp</in>
+          <in>_ftoa.h</in>
+          <in>_itoa.cpp</in>
+          <in>_itoa.h</in>
+          <in>_uitoa.cpp</in>
+          <in>_uitoa.h</in>
+          <in>getLenSize.cpp</in>
+          <in>getLenSize.h</in>
+          <in>isNumeric.cpp</in>
+          <in>isNumeric.h</in>
+        </df>
+        <in>BaseTest.h</in>
+      </df>
+      <in>JSONOptions.h</in>
+      <in>libjson.h</in>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>default</compilerSet>
+      </toolsSet>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile</buildCommand>
+          <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
+          <executablePath></executablePath>
+          <ccTool>
+            <incDir>
+              <pElem>.</pElem>
+            </incDir>
+            <preprocessorList>
+              <Elem>NDEBUG</Elem>
+            </preprocessorList>
+          </ccTool>
+        </makeTool>
+      </makefileType>
+      <item path="Dependencies/mempool++/mempool.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="Source/JSONMemoryPool.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="Source/JSONSingleton.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="TestSuite/All/main.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/Benchmark/main.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/RunTestSuite2.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/RunTestSuite2.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="TestSuite/StringTest.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="TestSuite/TestAssign.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestBinary.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestChildren.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestComments.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestConverters.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestCtors.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestEquality.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestFunctions.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestInequality.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestInspectors.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestIterators.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestMutex.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestNamespace.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestRefCounting.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestSharedString.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestStreams.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestString.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestSuite.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestSuite.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="TestSuite/TestValidator.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/TestWriter.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/UStringTest.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="TestSuite/UnitTest.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite/UnitTest.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="TestSuite/main.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite2/BaseTest.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="TestSuite2/JSONDebug/JSON_ASSERT.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite2/JSONDebug/JSON_ASSERT.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="TestSuite2/JSONDebug/JSON_ASSERT_SAFE.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONDebug/JSON_ASSERT_SAFE.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONDebug/JSON_FAIL.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite2/JSONDebug/JSON_FAIL.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="TestSuite2/JSONDebug/JSON_FAIL_SAFE.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONDebug/JSON_FAIL_SAFE.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONGlobals/jsonSingleton.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONGlobals/jsonSingleton.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/Resources/validyMacros.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidArray.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidArray.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidMember.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidMember.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidNamedObject.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidNamedObject.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidNumber.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidNumber.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidObject.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidObject.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidPartialRoot.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidPartialRoot.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidRoot.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidRoot.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidString.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/isValidString.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/securityTest.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSONValidator/securityTest.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSON_Base64/json_decode64.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSON_Base64/json_decode64.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSON_Base64/json_encode64.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/JSON_Base64/json_encode64.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/_areFloatsEqual.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/_areFloatsEqual.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/_atof.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/_atof.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/_ftoa.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/_ftoa.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/_itoa.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/_itoa.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/_uitoa.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/_uitoa.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/getLenSize.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/getLenSize.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/isNumeric.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="TestSuite2/NumberToString/isNumeric.h"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

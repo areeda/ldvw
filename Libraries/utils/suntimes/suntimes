@@ -1,0 +1,10 @@
+# Simple script to run the SunTimes test client, and thereby calculate sunrise
+# and sunset times using the command line.  You will almost certainly need to
+# modify this script to use the correct installation location of the
+# suntimes.jar and javapopt.jar files
+
+SUNTIMESJAR=/usr/lib/suntimes.jar
+JAVAPOPTJAR=/usr/lib/javapopt.jar
+
+java -classpath $CLASSPATH:$SUNTIMESJAR:$JAVAPOPTJAR com.web_tomorrow.utils.suntimes.SunTimesClient "$@"
+

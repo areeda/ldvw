@@ -1,0 +1,145 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;15.&nbsp;The JDOM Model</title><meta name="generator" content="DocBook XSL Stylesheets V1.52.2"><meta name="description" content="The complete text of Elliotte Rusty Harold's book Processing XML with Java.         published by Addison-Wesley, November 2002"><script language="javascript"><!--
+/* Only sunsites are allowed to mirror this page and then
+only with explicit, prior permission. For details,
+send email to elharo@metalab.unc.edu */
+if (location.protocol.toLowerCase().indexOf("file") != 0 ) { 
+  if (0 > location.host.toLowerCase().indexOf("cafeconleche.org")
+      && 0 > location.host.toLowerCase().indexOf("ibiblio.org")) {
+    location.href="http://www.cafeconleche.org/books/xmljava/chapters/";
+  }
+} // --></script><link rel="home" href="index.html" title="Processing XML with Java"><link rel="up" href="index.html" title="Processing XML with Java"><link rel="previous" href="ch14s13.html" title="Summary"><link rel="next" href="ch15s02.html" title="The Element Class"><link rel="preface" href="pr01.html" title="Preface"><link rel="preface" href="pr02.html" title="Acknowledgements"><link rel="chapter" href="ch01.html" title="Chapter&nbsp;1.&nbsp;XML for Data"><link rel="chapter" href="ch02.html" title="Chapter&nbsp;2.&nbsp;XML Protocols: XML-RPC and SOAP"><link rel="chapter" href="ch03.html" title="Chapter&nbsp;3.&nbsp;Writing XML with Java"><link rel="chapter" href="ch04.html" title="Chapter&nbsp;4.&nbsp;Converting Flat Files to XML"><link rel="chapter" href="ch05.html" title="Chapter&nbsp;5.&nbsp;Reading XML"><link rel="chapter" href="ch06.html" title="Chapter&nbsp;6.&nbsp;SAX"><link rel="chapter" href="ch07.html" title="Chapter&nbsp;7.&nbsp;The XMLReader Interface"><link rel="chapter" href="ch08.html" title="Chapter&nbsp;8.&nbsp;SAX Filters"><link rel="chapter" href="ch09.html" title="Chapter&nbsp;9.&nbsp;The Document Object Model"><link rel="chapter" href="ch10.html" title="Chapter&nbsp;10.&nbsp;Creating XML Documents with DOM"><link rel="chapter" href="ch11.html" title="Chapter&nbsp;11.&nbsp;The Document Object Model Core"><link rel="chapter" href="ch12.html" title="Chapter&nbsp;12.&nbsp;The DOM Traversal Module"><link rel="chapter" href="ch13.html" title="Chapter&nbsp;13.&nbsp;Output from DOM"><link rel="chapter" href="ch14.html" title="Chapter&nbsp;14.&nbsp;JDOM"><link rel="chapter" href="ch15.html" title="Chapter&nbsp;15.&nbsp;The JDOM Model"><link rel="chapter" href="ch16.html" title="Chapter&nbsp;16.&nbsp;XPath"><link rel="chapter" href="ch17.html" title="Chapter&nbsp;17.&nbsp;XSLT"><link rel="appendix" href="apa.html" title="Appendix&nbsp;A.&nbsp;XML APIs Quick Reference"><link rel="appendix" href="apb.html" title="Appendix&nbsp;B.&nbsp;SOAP 1.1 Schemas"><link rel="index" href="ix01.html" title="Index"><link rel="section" href="ch15.html#d0e23688" title="The Document Class"><link rel="section" href="ch15s02.html" title="The Element Class"><link rel="section" href="ch15s03.html" title="The Attribute Class"><link rel="section" href="ch15s04.html" title="The Text Class"><link rel="section" href="ch15s05.html" title="The CDATA Class"><link rel="section" href="ch15s06.html" title="The ProcessingInstruction Class"><link rel="section" href="ch15s07.html" title="The Comment Class"><link rel="section" href="ch15s08.html" title="Namespaces"><link rel="section" href="ch15s09.html" title="The DocType class"><link rel="section" href="ch15s10.html" title="The EntityRef Class"><link rel="section" href="ch15s11.html" title="Summary"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;15.&nbsp;The JDOM Model</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch14s13.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="ch15s02.html">Next</a></td></tr></table><hr></div><div class="chapter"><div class="titlepage"><div><h2 class="title"><a name="ch_jdom_model"></a>Chapter&nbsp;15.&nbsp;The JDOM Model</h2></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><a href="ch15.html#d0e23688">The Document Class</a></dt><dt><a href="ch15s02.html">The Element Class</a></dt><dd><dl><dt><a href="ch15s02.html#d0e24212">Constructors</a></dt><dt><a href="ch15s02.html#d0e24311">Navigation and Search</a></dt><dt><a href="ch15s02.html#d0e25563">Attributes</a></dt></dl></dd><dt><a href="ch15s03.html">The Attribute Class</a></dt><dt><a href="ch15s04.html">The Text Class</a></dt><dt><a href="ch15s05.html">The CDATA Class</a></dt><dt><a href="ch15s06.html">The ProcessingInstruction Class</a></dt><dt><a href="ch15s07.html">The Comment Class</a></dt><dt><a href="ch15s08.html">Namespaces</a></dt><dt><a href="ch15s09.html">The DocType class</a></dt><dt><a href="ch15s10.html">The EntityRef Class</a></dt><dt><a href="ch15s11.html">Summary</a></dt></dl></div><p>
+  JDOM documents are composed of ten basic classes representing the 
+  different kinds of nodes in an XML document:
+</p><div class="itemizedlist"><ul type="disc"><li><p><tt>Document</tt></p></li><li><p><tt>Element</tt></p></li><li><p><tt>Attribute</tt></p></li><li><p><tt>Text</tt></p></li><li><p><tt>ProcessingInstruction</tt></p></li><li><p><tt>Namespace</tt></p></li><li><p><tt>Comment</tt></p></li><li><p><tt>DocType</tt></p></li><li><p><tt>EntityRef</tt></p></li><li><p><tt>CDATA</tt></p></li></ul></div><p>
+  In JDOM, node objects can belong to a <tt>Document</tt>; or 
+  they can exist
+  independently. A complete JDOM <tt>Document</tt>
+  contains a list of its children, which normally
+  includes 
+  <tt>Comment</tt>s,
+  <tt>ProcessingInstruction</tt>s,
+  possibly a single <tt>DocType</tt>, and one
+  <tt>Element</tt> object for the root element.
+  Most of the rest of the structure of the document is built from
+   <tt>Element</tt> objects, each of which contains a list of
+   its contents, as well as separate lists of attributes
+   and namespaces for that element.
+</p><div class="sect1"><div class="titlepage"><div><h2 class="title" style="clear: both"><a name="d0e23688"></a>The Document Class</h2></div></div><p>
+    JDOM&#8217;s <tt>Document</tt> class, summarized in
+    <a href="ch15.html#ZCompactDocument.java" title="Example&nbsp;15.1.&nbsp;The JDOM Document class">Example&nbsp;15.1</a>, represents a complete
+    well-formed
+    XML document. As a node, it is the root of the document tree. 
+    It enforces most of the rules XML imposes on
+    documents. For instance, it is not possible to assign  two
+    <tt>DocType</tt> objects to a single
+    <tt>Document</tt> object
+    because an XML document
+    cannot have two document type declarations. The single
+    exception to this rule is that 
+    it is possible for a <tt>Document</tt>
+    to be temporarily rootless if it&#8217;s built by the no-args
+    constructor. However, in that case, almost anything you do
+    with the document other than setting a root element
+    will throw an
+    <tt>IllegalStateException</tt>, so this
+    is just a temporary convenience, not a loophole that allows
+    you to break the rules of XML.
+  </p><div class="example"><a name="ZCompactDocument.java"></a><p class="title"><b>Example&nbsp;15.1.&nbsp;The JDOM Document class</b></p><pre class="programlisting">package org.jdom;
+
+public class Document implements Serializable, Cloneable {
+
+  protected ContentList content;
+  protected DocType     docType;
+
+  public Document()
+  public Document(Element root, DocType docType)
+  public Document(Element root) 
+  public Document(List newContent, DocType docType) 
+  public Document(List content)
+
+  public boolean  hasRootElement()
+  public Element  getRootElement()
+  public Document setRootElement(Element rootElement)
+  public Element  detachRootElement() 
+  
+  public DocType  getDocType()
+  public Document setDocType(DocType docType)
+  
+  public Document addContent(ProcessingInstruction pi)
+  public Document addContent(Comment comment) 
+  public List     getContent()
+  public List     getContent(Filter filter)
+  public Document setContent(List newContent)
+  public boolean  removeContent(ProcessingInstruction pi)
+  public boolean  removeContent(Comment comment) 
+  
+  // Java utility methods
+  public       String  toString()
+  public final boolean equals(Object o)
+  public final int     hashCode()
+  public       Object  clone() 
+  
+}
+</pre></div><p>
+    As you can probably guess from the setter and getter methods,
+    each <tt>Document</tt> object has the following
+    three
+    properties:
+  </p><div class="itemizedlist"><ul type="disc"><li><p>The root <tt>Element</tt></p></li><li><p>A <tt>DocType</tt> object representing the
+            document type declaration</p></li><li><p>A <tt>List</tt> containing the root
+      <tt>Element</tt> and 
+            any processing instructions or comments in the 
+            prolog and epilog, in document order.</p></li></ul></div><p>
+    The first two may occasionally be null. A document that 
+    does not have a document type declaration will have a null 
+    <tt>DocType</tt>. The root <tt>Element</tt>
+    may also be null, but only temporarily. You can&#8217;t do much of
+    anything to a <tt>Document</tt> until you&#8217;ve
+    set its root <tt>Element</tt>.
+  </p><p>
+    Most of the time all you do with a
+    <tt>Document</tt> is get the root
+    element. From that point forward,
+    you work exclusively with the root element and its descendants
+    until you're ready to serialize the <tt>Document</tt>. For example,
+  </p><div class="informalexample"><pre class="programlisting">Document doc = builder.build("file.xml");
+Element root = doc.getRootElement();
+// work with root&#8230;</pre></div><p>
+   Occasionally, you may need to hunt for a particular processing instruction in
+   the prolog or epilog. For instance, if you were writing a browser, 
+   then you would want to look for an <tt>xml-stylesheet</tt>
+   processing instruction in the prolog by iterating through the list
+   returned by <tt>getContent()</tt> like so:
+  </p><div class="informalexample"><pre class="programlisting">      List content = doc.getContent();
+      Iterator iterator = content.iterator();
+      while (iterator.hasNext()) {
+        Object next = iterator.next();
+        if (next instanceof Element) {
+          // This is the root element. Thus the prolog is
+          // finished.
+          break; 
+        }
+        else if (next instanceof ProcessingInstruction) {
+          ProcessingInstruction candidate 
+           = (ProcessingInstruction) next;
+          if (candidate.getTarget().equals("xml-stylesheet")) {
+            // Load stylesheet&#8230; 
+          }
+        }
+      }&#8230;</pre></div><p>
+    However, it&#8217;s uncommon to pay that much attention to the contents
+    of the prolog (and even rarer to pay attention to the epilog).
+    Consequently, since the <tt>addContent()</tt>,  
+    <tt>setContent()</tt>,  
+    <tt>getContent()</tt>, and 
+    <tt>removeContent()</tt> methods work pretty
+    much the same for
+    <tt>Document</tt> as they do for 
+        <tt>Element</tt>,  
+    I&#8217;m going to defer further discussion of these to the next
+    section.
+  </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch14s13.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="ch15s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Summary&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;The Element Class</td></tr></table></div><hr xmlns:dt="http://xsltsl.org/date-time"><table xmlns:dt="http://xsltsl.org/date-time" width="100%" summary="Cafe con Leche footer"><tr><td width="34%" align="left">Copyright 2001, 2002 Elliotte Rusty Harold</td><td width="32%" align="center"><a href="mailto:elharo@metalab.unc.edu">elharo@metalab.unc.edu</a></td><td width="34%" align="right">Last Modified 
+May 05,
+2002</td></tr><tr><td width="34%" align="left"></td><td width="32%" align="center"><a href="http://www.cafeconleche.org/">Up To Cafe con Leche</a></td><td width="34%" align="right"></td></tr></table></body></html>

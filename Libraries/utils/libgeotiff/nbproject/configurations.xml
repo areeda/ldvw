@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="62">
+  <logicalFolder name="root" displayName="root" projectFiles="true">
+    <df name="libgeotiff" root=".">
+      <df name="autom4te.cache">
+      </df>
+      <df name="bin">
+        <in>applygeo.c</in>
+        <in>csv2html.c</in>
+        <in>geotifcp.c</in>
+        <in>getopt.c</in>
+        <in>listgeo.c</in>
+        <in>makegeo.c</in>
+      </df>
+      <df name="csv">
+        <df name="odbc2csv">
+          <in>odbc2csv.cpp</in>
+          <in>sqlcolumn.cpp</in>
+          <in>sqlcolumn.h</in>
+          <in>sqldirect.cpp</in>
+          <in>sqldirect.h</in>
+        </df>
+        <in>datum.c</in>
+        <in>ellipsoid.c</in>
+        <in>gcs.c</in>
+        <in>pcs.c</in>
+        <in>prime_meridian.c</in>
+        <in>projop_wparm.c</in>
+        <in>unit_of_measure.c</in>
+      </df>
+      <df name="docs">
+        <df name="api">
+        </df>
+      </df>
+      <df name="Header files">
+      </df>
+      <df name="libxtiff">
+        <in>xtiff.c</in>
+        <in>xtiffio.h</in>
+      </df>
+      <df name="m4">
+      </df>
+      <in>cpl_csv.c</in>
+      <in>cpl_csv_incode.c</in>
+      <in>cpl_serv.c</in>
+      <in>cpl_serv.h</in>
+      <in>geo_config.h</in>
+      <in>geo_extra.c</in>
+      <in>geo_free.c</in>
+      <in>geo_get.c</in>
+      <in>geo_incode_defs.h</in>
+      <in>geo_keyp.h</in>
+      <in>geo_names.c</in>
+      <in>geo_new.c</in>
+      <in>geo_normalize.c</in>
+      <in>geo_normalize.h</in>
+      <in>geo_print.c</in>
+      <in>geo_set.c</in>
+      <in>geo_simpletags.c</in>
+      <in>geo_simpletags.h</in>
+      <in>geo_tiffp.c</in>
+      <in>geo_tiffp.h</in>
+      <in>geo_trans.c</in>
+      <in>geo_write.c</in>
+      <in>geokeys.h</in>
+      <in>geonames.h</in>
+      <in>geotiff.h</in>
+      <in>geotiff_proj4.c</in>
+      <in>geotiffio.h</in>
+      <in>geovalues.h</in>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false">
+      <itemPath>Makefile</itemPath>
+      <itemPath>Makefile-libgeotiff.mk</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile-libgeotiff.mk</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <compilerSet>GNU|GNU</compilerSet>
+        <platform>2</platform>
+      </toolsSet>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>$(MAKE) -f Makefile</buildCommand>
+          <cleanCommand>$(MAKE) -f Makefile clean</cleanCommand>
+          <executablePath></executablePath>
+        </makeTool>
+      </makefileType>
+      <item path="bin/applygeo.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="bin/csv2html.c" ex="false" tool="0">
+        <cTool>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="bin/geotifcp.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="bin/getopt.c" ex="true" tool="0">
+      </item>
+      <item path="bin/listgeo.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="bin/makegeo.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="cpl_csv.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="cpl_csv_incode.c" ex="true" tool="0">
+      </item>
+      <item path="cpl_serv.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="csv/datum.c" ex="true" tool="0">
+      </item>
+      <item path="csv/ellipsoid.c" ex="true" tool="0">
+      </item>
+      <item path="csv/gcs.c" ex="true" tool="0">
+      </item>
+      <item path="csv/odbc2csv/odbc2csv.cpp" ex="true" tool="1">
+      </item>
+      <item path="csv/odbc2csv/sqlcolumn.cpp" ex="true" tool="1">
+      </item>
+      <item path="csv/odbc2csv/sqlcolumn.h" ex="true" tool="3">
+      </item>
+      <item path="csv/odbc2csv/sqldirect.cpp" ex="true" tool="1">
+      </item>
+      <item path="csv/odbc2csv/sqldirect.h" ex="true" tool="3">
+      </item>
+      <item path="csv/pcs.c" ex="true" tool="0">
+      </item>
+      <item path="csv/prime_meridian.c" ex="true" tool="0">
+      </item>
+      <item path="csv/projop_wparm.c" ex="true" tool="0">
+      </item>
+      <item path="csv/unit_of_measure.c" ex="true" tool="0">
+      </item>
+      <folder path="libgeotiff/bin">
+        <cTool>
+          <incDir>
+            <pElem>bin</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <folder path="libgeotiff/libxtiff">
+        <cTool>
+          <incDir>
+            <pElem>libxtiff</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <item path="geo_config.h" ex="true" tool="3">
+      </item>
+      <item path="geo_extra.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="geo_free.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="geo_get.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="geo_incode_defs.h" ex="true" tool="3">
+      </item>
+      <item path="geo_names.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="geo_new.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="geo_normalize.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="geo_print.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="geo_set.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="geo_simpletags.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="geo_tiffp.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="geo_trans.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="geo_write.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="geotiff_proj4.c" ex="false" tool="0">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_LIBPROJ=1</Elem>
+            <Elem>CSV_DATA_DIR="/usr/local/share/epsg_csv"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="geotiffio.h" ex="true" tool="3">
+      </item>
+      <item path="libxtiff/xtiff.c" ex="false" tool="0">
+        <cTool>
+          <preprocessorList>
+            <Elem>HAVE_TIFF=1</Elem>
+            <Elem>NDEBUG</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="libxtiff/xtiffio.h" ex="true" tool="3">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

@@ -1,0 +1,12 @@
+Change Log for version 0.4.0
+============================
+
+* DBFs written by DBFWriter didn't have the "End of Data" byte set. Fixed.
+
+* Minor bug in decimal formating. Fixed.
+
+* Append facility implemented. Open the DBFWriter with a File object representing the DBF file to be appended. Then add records by calling addRecord() method.
+
+* Implemented a new feature: "Sync mode". Writes records to file right away when addRecord() is called. Useful while writing large number of records which can cause an "out of memory" situation otherwise. Create DBFWriter with a File object pointing to a non-existent or an empty file to write records in "Sync Mode"
+
+* Code clean up. Improved/better class hierarchy.

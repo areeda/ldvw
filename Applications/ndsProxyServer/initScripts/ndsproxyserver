@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+#       /etc/rc.d/init.d/ndsproxyserver
+# ndsproxyserver    A daemon for LigoDV-web that forwards requests to a 
+#                   public NDS/NDS2 server.  This script controls starting 
+#                   stopping, and check status.
+#
+# chkconfig: 345 60 30
+# descripton: ndsproxyserver is used by ldvw and its external programs to \
+# fprward requests to NDS/NDS2 servers
+#
+# Author: Joseph Areeda joseph.areeda@ligo.org
+#
+# 
+
+# Source function library.
+. /etc/init.d/functions
+
+program=ndsproxyserver
+PIDFILE=/var/run/${program}.pid
+OPTIONS="--proxy"
+
+start() {
+        echo -n "Starting : ${program} "
+
+        touch /var/lock/subsys/
+        return
+}
+
+stop() {
+        echo -n "Shutting down : "
+
+        rm -f /var/lock/subsys/
+        return
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage:  {start|stop|status|restart"
+        exit 1
+        ;;
+esac
+exit $?
+

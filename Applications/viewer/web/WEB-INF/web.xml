@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+    <servlet-mapping>
+        <servlet-name>Ldvw</servlet-name>
+        <url-pattern>/ldvw/</url-pattern>
+        <url-pattern>/ldvw</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>env</servlet-name>
+        <url-pattern>/env</url-pattern>
+    </servlet-mapping>
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+    <servlet>
+        <servlet-name>Ldvw</servlet-name>
+        <icon>
+            <small-icon>/images/logo.png</small-icon>
+        </icon>
+        <display-name>LigoDV-web a general data viewer</display-name>
+        <description>
+            LigoDV-web is a Java program running under Tomcat which uses NDS2 to access LIGO
+            data from multiple servers.  It generates basic plots.
+        </description>
+        <servlet-class>edu.fullerton.ldvw.Ldvw</servlet-class>
+        <init-param>
+            <param-name>myParmName</param-name>
+            <param-value>in case I need to test it someday</param-value>
+        </init-param>
+        <load-on-startup>25</load-on-startup>
+    </servlet>
+    <servlet>
+        <servlet-name>env</servlet-name>
+        <servlet-class>edu.fullerton.ldvw.env</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>home</servlet-name>
+        <servlet-class>edu.fullerton.ldvw.home</servlet-class>
+    </servlet>
+    <display-name>LigoDV-web</display-name>
+    <description>
+        This is version 0.1.54 of a web based version of LigoDV.
+    </description>
+    <version>
+        0
+    </version>
+    <multipart-config>
+        <location>/tmp</location>
+        <max-file-size>4194304</max-file-size>
+        <max-request-size>16777216</max-request-size>
+        <file-size-threshold>2097152</file-size-threshold>
+    </multipart-config>
+</web-app>

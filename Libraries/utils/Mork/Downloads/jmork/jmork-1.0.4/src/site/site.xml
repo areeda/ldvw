@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="Maven">
+	<!-- Publish Date Positions: left, right, navigation-top, navigation-bottom, bottom -->
+	<publishDate position="navigation-bottom" format="MM-dd-yy" />
+	<version position="left"/>
+	<!-- 
+	<skin>
+		<groupId>org.apache.maven</groupId>
+		<artifactId>maven-classic-skin</artifactId>
+	</skin>
+	-->
+	<bannerLeft>
+		<name>Smartwerkz jMork</name>
+		<href>http://www.smartwerkz.com/projects/jmork/</href>
+	</bannerLeft>
+	<bannerRight>
+		<name>smartwerkz</name>
+		<src>http://www.smartwerkz.com/smartwerkz.png</src>
+		<href>http://www.smartwerkz.com/</href>
+	</bannerRight>
+	<body>
+		<links>
+			<item name="Blog" href="http://www.java-community.de/" />
+			<item name="JUpload" href="http://www.jupload.biz/" />
+			<item name="Smartwerkz" href="http://www.smartwerkz.com/" />
+		</links>
+		<menu name="Overview">
+			<item name="jMork" href="index.html" />
+			<item name="What is Mork?" href="mork.html" />
+			<item name="Usage" href="usage.html" />
+			<item name="Download" href="download.html" />
+		</menu>
+		<menu name="Documentation">
+			<item name="Entities" href="entities.html" />
+			<item name="Events" href="events.html" />
+			<item name="Validation" href="validation.html" />
+			<item name="Transformations" href="transformations.html" />
+			<item name="Developer" href="developer.html" />
+		</menu>
+		<menu ref="reports" />
+	</body>
+</project>

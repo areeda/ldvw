@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<project name="MozillaParser" default="all">
+    <description>
+        Java interface for Mozilla HTML parser
+    </description>
+
+    <path id="classpath">
+        <fileset dir="lib" includes="*.jar" />
+    </path>
+
+    <path id="classpath.test.compile">
+        <path refid="classpath" />
+        <pathelement location="bin/MozillaParser.jar" />
+    </path>
+
+    <path id="classpath.test.run">
+        <path refid="classpath.test.compile" />
+        <pathelement location="test/bin" />
+    </path>
+
+    <target name="clean" depends="clean.java,clean.native" />
+
+    <target name="all" depends="compile.java,jar,compile.native,test" />
+
+    <target name="clean.java">
+        <delete dir="build" failonerror="false" />
+        <delete dir="bin" failonerror="false" />
+        <delete dir="test/bin" failonerror="false" />
+    </target>
+
+    <target name="compile.java">
+        <mkdir dir="build" />
+        <javac source="1.5" target="1.5" srcdir="src" destdir="build" classpathref="classpath" excludes="**/test/*.java, **/example/*.java" />
+    </target>
+
+    <target name="compile.test">
+        <mkdir dir="test/bin" />
+        <javac source="1.5" target="1.5" srcdir="test/src" destdir="test/bin" classpathref="classpath.test.compile" />
+    </target>
+
+    <macrodef name="checkenv">
+        <sequential>
+            <fail
+                message="Please specify the path to the Mozilla 'dist' directory by calling &quot;ant -Dmoz.home=/path/to/mozilla/dist&quot;"
+                unless="moz.home"
+            />
+            <fail message="The ${moz.home} directory does not seem to be a valid Mozilla 'dist' directory (missing ${moz.home}/include/mozilla-config.h)">
+                <condition>
+                    <not><available file="${moz.home}/include/mozilla-config.h" /></not>
+                </condition>
+            </fail>
+        </sequential>
+    </macrodef>
+
+    <target name="clean.native">
+        <exec dir="src/native" executable="make">
+            <arg value="clean" />
+        </exec>
+    </target>
+
+    <target name="compile.native">
+        <checkenv />
+        <exec dir="src/native" executable="make" failonerror="true">
+            <arg value="JDK_HOME=${java.home}" />
+            <arg value="MOZ_HOME=${moz.home}" />
+        </exec>
+    </target>
+
+    <target name="jar">
+        <mkdir dir="bin" />
+        <jar destfile="bin/MozillaParser.jar" basedir="build" />
+    </target>
+
+    <target name="test" depends="compile.test,run.test" />
+
+    <target name="run.test">
+        <java fork="true" classpathref="classpath.test.run" classname="TestParser">
+            <env key="DYLD_LIBRARY_PATH" path="bin:${moz.home}/bin" />
+            <env key="LD_LIBRARY_PATH" path="bin:${moz.home}/bin" />
+		</java>
+    </target>
+</project>

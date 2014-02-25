@@ -1,0 +1,5 @@
+13:58:42.937824 trying to get file: /invalid-file mode 1
+13:58:42.937877 requested test number 0 part 0
+13:58:42.937944 fopen() failed with error: 2 No such file or directory
+13:58:42.937970 Error opening file: ./data/test0
+13:58:42.937993 Couldn't open test file: ./data/test0

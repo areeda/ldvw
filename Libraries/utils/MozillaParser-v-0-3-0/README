@@ -1,0 +1,32 @@
+Instructions for building MozillaHtmlParser
+-------------------------------------------
+
+You'll need a freshly-built copy of Mozilla (we've tested this against Firefox
+2.0.0.14) and a JDK (we've tested with Java 5 and 6).
+
+To build on Mac OS X or Linux, you can use ant in the top MozillaHtmlParser
+directory, e.g.:
+
+$ ant -Dmoz.home=/usr/local/mozilla-parser/dist
+
+where /usr/local/mozilla-parser/dist is the "dist" directory of your Mozilla
+build.  It must contain the "include", "lib", and "bin" subdirectories.
+
+Note that on OS X, this will build both a shared library (libMozillaParser.jnilib)
+and an executable (parserWorker).
+
+On Windows, you can use ant if available; otherwise, you'll have to separately
+compile the java source using javac + jar, and build the native components thusly:
+
+$ cd src/native
+$ make JDK_HOME="/c/Program Files/Java/jdk1.6.0_06" MOZ_HOME="c:/mozilla-parser/dist"
+
+The makefile is designed to work within the same MozillaBuild environment used
+to compile the Mozilla codebase.
+
+At one point, the paths specified at compile-time were defined as constants in
+the library, but this is no longer the case.  All that's necessary for the
+parser to function properly is for the OS-specific environment variable
+(LD_LIBRARY_PATH on Linux, DYLD_LIBRARY_PATH on OS X, PATH on Windows) to
+contain both libMozillaParser.so and the Mozilla dist/bin files (i.e. the
+directory containing libxpcom.so or libxpcom.dylib or xpcom.dll).

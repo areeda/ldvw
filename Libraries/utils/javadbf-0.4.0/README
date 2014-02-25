@@ -1,0 +1,56 @@
+JavaDBF
+===========
+
+JavaDBF is a Java library for reading and writing Xbase files.
+This was written when I was in need of a program to communicate 
+with a legacy application which could read and write only 
+dBASE III files. And JavaDBF just does that job.
+
+It does not implement JDBC interfaces but it has a simple API of 
+its own. JavaDBF library is not thread safe. I tested only with 
+dBASE III format though the structure can hold other formats like
+FlagShip, dBASE IV etc. If anyone succeeds in that and please let be know
+about it. Also please send the patch, if any, across to me.
+
+I could not find any authoritative documentation on the structure
+of Xbase files. I ran a search in Google and it came up with a 
+a few links and I used them; it worked fine.
+
+Latest version JavaDBF will be available at: 
+http://sarovar.org/projects/javadbf/
+
+Requirements
+============
+
+You will need JDK 1.3 or later versions.
+For compiling the source code it requires Apache Ant; or you can 
+manually compile and create the jar file.
+
+Compiling and Installing
+========================
+
+If you have Apache Ant installed, type:
+
+ant makejar
+
+Or to manually compile:
+
+mkdir bin
+cd src
+javac -d ../bin com/linuxense/javadbf/*.java
+cd ..
+jar cvf  javadbf.jar bin
+
+Than copy javadbf.jar to an appropriate location and set your CLASSPATH
+variable to include it.
+
+License
+=======
+
+JavaDBF is released under Lesser General Public License (LGPL)
+A copy of GPL is included in this package or you can have the latest
+version from http://www.gnu.org/copyleft/lesser.html.
+
+I very much appreciate your feed back.
+
+Anil Kumar, K. <anil at linuxense dot com>

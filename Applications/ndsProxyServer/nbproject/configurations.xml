@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="90">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>Channels.h</itemPath>
+      <itemPath>NDSConnection.h</itemPath>
+      <itemPath>NDSData.h</itemPath>
+      <itemPath>NDSException.h</itemPath>
+      <itemPath>ProxyServer.h</itemPath>
+      <itemPath>ServerThread.h</itemPath>
+      <itemPath>Utils.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>Channels.cpp</itemPath>
+      <itemPath>NDSConnection.cpp</itemPath>
+      <itemPath>NDSData.cpp</itemPath>
+      <itemPath>NDSException.cpp</itemPath>
+      <itemPath>ProxyServer.cpp</itemPath>
+      <itemPath>ServerThread.cpp</itemPath>
+      <itemPath>Utils.cpp</itemPath>
+      <itemPath>main.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>true</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <incDir>
+            <pElem>/usr/include/nds2-client</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>/usr/include</pElem>
+            <pElem>/usr/include/nds2-client</pElem>
+          </incDir>
+          <commandLine>-O0</commandLine>
+          <warningLevel>2</warningLevel>
+        </ccTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>/usr/local/lib</pElem>
+            <pElem>/usr/lib/sasl2</pElem>
+            <pElem>/usr/lib/x86_64-linux-gnu</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerLibLibItem>boost_regex</linkerLibLibItem>
+            <linkerLibLibItem>pthread</linkerLibLibItem>
+            <linkerLibLibItem>rt</linkerLibLibItem>
+            <linkerLibLibItem>ndsclient</linkerLibLibItem>
+            <linkerLibLibItem>sasl2</linkerLibLibItem>
+            <linkerLibLibItem>stdc++</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+        <requiredProjects>
+          <makeArtifact PL="/home/joe/ligo/nds2/client-svn"
+                        CT="0"
+                        CN="Default"
+                        AC="true"
+                        BL="false"
+                        WD="/home/joe/ligo/nds2/client-svn"
+                        BC="${MAKE} -f Makefile"
+                        CC="${MAKE} -f Makefile clean"
+                        OP="">
+          </makeArtifact>
+        </requiredProjects>
+      </compileType>
+      <item path="Channels.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Channels.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NDSConnection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NDSConnection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NDSData.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NDSData.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NDSException.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NDSException.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ProxyServer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ProxyServer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ServerThread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ServerThread.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Utils.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Utils.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>/usr/include/nds2-client</pElem>
+          </incDir>
+          <warningLevel>2</warningLevel>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>/usr/include/nds2-client</pElem>
+          </incDir>
+          <warningLevel>2</warningLevel>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>/usr/lib/sasl2</pElem>
+            <pElem>/usr/lib/x86_64-linux-gnu</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerLibLibItem>boost_regex</linkerLibLibItem>
+            <linkerLibLibItem>pthread</linkerLibLibItem>
+            <linkerLibLibItem>rt</linkerLibLibItem>
+            <linkerLibLibItem>sasl2</linkerLibLibItem>
+            <linkerLibLibItem>stdc++</linkerLibLibItem>
+            <linkerLibFileItem>/usr/local/lib/libndsclient.a</linkerLibFileItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="Channels.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Channels.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NDSConnection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NDSConnection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NDSData.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NDSData.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NDSException.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NDSException.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ProxyServer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ProxyServer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ServerThread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ServerThread.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Utils.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Utils.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+    <conf name="MacDebug" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>true</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <incDir>
+            <pElem>/opt/local/nds2_client/include</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>/Users/areeda/nds2/include</pElem>
+            <pElem>/opt/local/include</pElem>
+          </incDir>
+          <warningLevel>2</warningLevel>
+        </ccTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>/Users/areeda/nds2/lib</pElem>
+            <pElem>/usr/lib/sasl2</pElem>
+            <pElem>/opt/local/lib</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerLibFileItem>/Users/areeda/nds2/lib/libndsclient.a</linkerLibFileItem>
+            <linkerLibLibItem>sasl2</linkerLibLibItem>
+            <linkerLibLibItem>gssapi_krb5</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex-mt</linkerLibLibItem>
+            <linkerLibLibItem>pthread</linkerLibLibItem>
+            <linkerLibLibItem>stdc++</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+        <requiredProjects>
+          <makeArtifact PL="../nds2-client-0.8.2"
+                        CT="0"
+                        CN="Default"
+                        AC="true"
+                        BL="false"
+                        WD="../nds2-client-0.8.2"
+                        BC="${MAKE} -f Makefile"
+                        CC="${MAKE} -f Makefile clean"
+                        OP="">
+          </makeArtifact>
+        </requiredProjects>
+      </compileType>
+      <item path="Channels.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Channels.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NDSConnection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NDSConnection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NDSData.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NDSData.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NDSException.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NDSException.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ProxyServer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ProxyServer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ServerThread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ServerThread.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Utils.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Utils.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+    <conf name="MacRelease" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>/usr/include/nds2-client</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>/usr/include/nds2-client</pElem>
+          </incDir>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>/usr/lib/sasl2</pElem>
+            <pElem>/usr/lib/x86_64-linux-gnu</pElem>
+          </linkerAddLib>
+          <linkerLibItems>
+            <linkerLibLibItem>ndsclient</linkerLibLibItem>
+            <linkerLibLibItem>boost_regex</linkerLibLibItem>
+            <linkerLibLibItem>pthread</linkerLibLibItem>
+            <linkerLibLibItem>rt</linkerLibLibItem>
+            <linkerLibLibItem>sasl2</linkerLibLibItem>
+            <linkerLibLibItem>stdc++</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="Channels.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Channels.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NDSConnection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NDSConnection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NDSData.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NDSData.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NDSException.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NDSException.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ProxyServer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ProxyServer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ServerThread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ServerThread.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Utils.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Utils.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

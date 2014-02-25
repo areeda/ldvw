@@ -1,0 +1,44 @@
+<project name="crypt" default="all" basedir=".">
+
+    <property name="src" location="src"/>
+    <property name="build" location="build"/>
+    <property name="classes" location="${build}/classes"/>
+    <property name="docs" location="${build}/docs"/>
+    <property environment="env"/>
+
+    <target name="all" depends="compile"/>
+
+    <target name="compile" depends="structure">
+        <javac
+                debug="true"
+                srcdir="${src}"
+                listfiles="yes"
+                destdir="${classes}">
+        </javac>
+
+    </target>
+
+    <target name="docs" depends="structure,compile">
+        <delete dir="${docs}"/>
+        <mkdir dir="${docs}"/>
+        <javadoc
+            Version="true"
+            Package="true"
+            Author="true"
+            Use="true"
+            sourcepath="${src}"
+            destdir="${docs}"
+            packagenames="org.*">
+
+        </javadoc>
+    </target>
+
+
+    <target name="structure">
+        <mkdir dir="${build}"/>
+        <mkdir dir="${classes}"/>
+        <mkdir dir="${docs}"/>
+    </target>
+
+</project>
+

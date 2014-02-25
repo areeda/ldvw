@@ -1,0 +1,290 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	<title>JavaDBF Tutorial</title>
+
+<style type="text/css">
+	.border { background:#000000;margin-top:5px;}
+	.listing {color:#840527; background:#f4f1c1;padding-left:5px;padding-top:1px;margin-left:1px;margin-top:1px; margin-right:1px; margin-bottom:1px;}
+</style>
+</head>
+<body>
+
+<div align="center">
+	<h1 align="center">JavaDBF Library Tutorial</h1>
+	(for JavaDBF ver. 0.4.0 and above)<br>
+	Anil Kumar K.<br>
+	anil at linuxense dot com<br>
+	<a href="http://www.linuxense.com/">Linuxense Information Systems Pvt. Ltd.</a>, Trivandrum, India
+</div>
+
+<h2>1. Introduction</h2>
+JavaDBF is a Java library for reading and writing XBase files. There are plenty
+of legacy applications around with <tt>.dbf</tt> as their primary storage format. JavaDBF was initially written for data transfer with such
+applications.
+<p>
+Other than that, there are requirements to export data from a Java application 
+to a spreadshet program like GNumeric, Excel or Lotus 123. A DBF file would be
+more appropriate in such situations rather than a CSV or an HTML file because a
+DBF file can carry field type information. More over, XBase
+format is like an Open-standard; it is understood by almost all spreadsheet
+programms.
+
+<h2>2. Getting and Installing</h2>
+Obtain the latest version of JavaDBF from <a
+href="http://sarovar.org/projects/javadbf/">http://sarovar.org/projects/javadbf/</a>. Create a folder in a convenient location and run:
+<pre>
+	tar xvfz javadbf-x.x.x-tar.gz 
+	cd javadbf-x.x.x
+</pre>
+
+In this folder you will find <tt>javadbf.jar</tt> which contains the library.
+Include this jar file in your <tt>$CLASSPATH</tt> variable. You are ready to go.
+<h2>3. Overview of the Library</h2>
+
+JavaDBF has a simple API of its own and it does not implement the JDBC API. It
+is designed this way because JavaDBF is not indedned to support full-blown
+RDBMS-style database interaction. And you are not supposed to use it like a
+back-end; it just doesn't work that way. Also, JavaDBF is not designed to be thread-safe; keep that in mind when you design threaded applications.
+
+<p>
+JavaDBF comes in the package <tt>com.linuxense.javadbf</tt>. Import that package in your Java code. Following examples will familiarise you with its APIs.
+
+</p>
+<h3>3.1. Data  Type Mapping</h3>
+In version 0.3.2, JavaDBF supports almost all XBase data types except Memo field. While reading, those types are interpretted as appropriate Java types. Following table shows the mapping scheme.
+<table summary="type mapping" border="1">
+	<tr>
+	<th>XBase Type</th><th>XBase Symbol</th><th>Java Type used in JavaDBF</th>
+	</tr>
+
+	<tr><td>Character</td><td align="center">C</td><td>java.lang.String</td></tr>
+	<tr><td>Numeric</td><td align="center">N</td><td>java.lang.Double</td></tr>
+	<tr><td>Double</td><td align="center">F</td><td>lava.lang.Double</td></tr>
+	<tr><td>Logical</td><td align="center">L</td><td>java.lang.Boolean</td></tr>
+	<tr><td>Date</td><td align="center">D</td><td>java.util.Date</td></tr>
+
+</table>
+
+<h2>4. Reading a DBF File</h2>
+
+To read a DBF file, JavaDBF provides a DBFReader class. Following is a ready-to-compile, self-explanatory program describing almost all feature of the <code>DBFReader</code> class. Copy/paste this listing and compile it. Keep a <code>.dbf</code> file handy to pass to this program as its argument.
+
+<div class="border">
+<div class="listing">
+<pre>
+import java.io.*;
+<strong>import com.linuxense.javadbf.*;</strong>
+
+public class JavaDBFReaderTest {
+
+  public static void main( String args[]) {
+
+    try {
+
+      // create a DBFReader object
+      //
+      InputStream inputStream  = new FileInputStream( args[ 0]); // take dbf file as program argument
+      <strong>DBFReader reader = new DBFReader( inputStream); </strong>
+
+      // get the field count if you want for some reasons like the following
+      //
+      int numberOfFields = reader.<strong>getFieldCount();</strong>
+
+      // use this count to fetch all field information
+      // if required
+      //
+      for( int i=0; i&lt;numberOfFields; i++) {
+
+        DBFField field = reader.<strong>getField( i);</strong>
+
+        // do something with it if you want
+        // refer the JavaDoc API reference for more details
+        //
+        System.out.println( field.getName());
+      }
+
+      // Now, lets us start reading the rows
+      //
+      Object []rowObjects;
+
+      while( (rowObjects = reader.<strong>nextRecord()</strong>) != null) {
+
+        for( int i=0; i&lt;rowObjects.length; i++) {
+
+          System.out.println( rowObjects[i]);
+        }
+      }
+
+      // By now, we have itereated through all of the rows
+      
+      inputStream.close();
+    }
+    catch( <strong>DBFException</strong> e) {
+
+      System.out.println( e.getMessage());
+    }
+    catch( IOException e) {
+
+      System.out.println( e.getMessage());
+    }
+  }  
+}  
+</pre>
+</div>
+</div>
+
+<h2>5. Writing a DBF File</h2>
+
+The class complementary to <code>DBFReader</code> is the <code>DBFWriter</code>.While creating a <code>.dbf</code> data file you will have to deal with two aspects: 1. define the fields and 2. populate data. As mentioned above a dbf field is represented by the class <code>DBFField</code>. First, let us familiarise this class. 
+
+<h3>5.1. Defining Fields</h3>
+Create an object of <code>DBFField</code> class:
+
+<div class="border">
+<div class="listing">
+<pre>
+  DBFField field = new DBFField();
+  field.setFieldName( "emp_name"); // give a name to the field
+  field.setDataType( DBFField.FIELD_TYPE_C); // and set its type
+  field.setFieldLength( 25); // and length of the field
+</pre>
+</div>
+</div>
+This is, now, a complete <code>DBFField</code> Object ready to use. We have to create as many <code>DBFField</code> Objects as we want to be in the <code>.dbf</code> file. The <code>DBFWriter</code> class accept <code>DBFField</code> in an array. Now, let's move on to the next step of populating data.
+
+<h3>5.2. Preparing <code>DBFWriter</code> Object.</h3>
+A <code>DBFWriter</code> is used for creating a <code>.dbf</code> file. First lets create a <code>DBFWriter</code> object by calling its constructor and then set the fields created (as explained above) by calling the <code>setFields</code> method.
+
+<div class="border">
+<div class="listing">
+<pre>
+DBFWriter writer = new DBFWriter();
+writer.setFields( fields); // fields is a non-empty array of DBFField objects
+</pre>
+</div>
+</div>
+<p>
+Now, the <code>DBFWriter</code> Object is ready to be populated.
+The method for adding data to the <code>DBFWriter</code> is <code>addRecord</code> and it takes an Object array as its argument. This Object array is supposed contain values for the fields added with one-to-one correspondence with the fields set.
+</p>
+<p>
+Following is a complete program explaining all the steps described above:
+</p>
+
+<div class="border">
+<div class="listing">
+<pre>
+<strong>import com.linuxense.javadbf.*;</strong>
+import java.io.*;
+
+public class DBFWriterTest {
+
+  public static void main( String args[])
+  throws DBFException, IOException {
+
+    // let us create field definitions first
+    // we will go for 3 fields
+    //
+    <strong>DBFField fields[] = new DBFField[ 3]</strong>;
+
+    fields[0] = new DBFField();
+    fields[0].<strong>setFieldName( "emp_code")</strong>;
+    fields[0].<strong>setDataType( DBFField.FIELD_TYPE_C)</strong>;
+    fields[0].<strong>setFieldLength( 10)</strong>;
+
+    fields[1] = new DBFField();
+    fields[1].setFieldName( "emp_name");
+    fields[1].setDataType( DBFField.FIELD_TYPE_C);
+    fields[1].setFieldLength( 20);
+
+    fields[2] = new DBFField();
+    fields[2].setFieldName( "salary");
+    fields[2].setDataType( DBFField.FIELD_TYPE_N);
+    fields[2].setFieldLength( 12);
+    fields[2].<strong>setDecimalCount( 2)</strong>;
+
+    DBFWriter writer = new DBFWriter();
+    writer.<strong>setFields( fields)</strong>;
+
+    // now populate DBFWriter
+    //
+
+    Object rowData[] = new Object[3];
+    rowData[0] = "1000";
+    rowData[0] = "John";
+    rowData[0] = new Double( 5000.00);
+
+    writer.<strong>addRecord( rowData)</strong>;
+
+    rowData = new Object[3];
+    rowData[0] = "1001";
+    rowData[1] = "Lalit";
+    rowData[2] = new Double( 3400.00);
+
+    writer.addRecord( rowData);
+
+    rowData = new Object[3];
+    rowData[0] = "1002";
+    rowData[1] = "Rohit";
+    rowData[2] = new Double( 7350.00);
+
+    writer.addRecord( rowData);
+
+    FileOutputStream fos = new FileOutputStream( args[0]);
+    writer.<strong>write( fos)</strong>;
+    fos.close();
+  }
+}
+</pre>
+</div>
+</div>
+
+<p>
+Keep in mind that till the <code>write</code> method is called, all the added data will be kept in memory. So, if you are planning to write huge amount of data make sure that it will be safely held in memory till it is written to disk and the <code>DBFWriter</code> object is garbage-collected. Read the ``<a href="#sync_mod">Sync Mode</a>'' section to know how JavaDBF to use a special feature of JavaDBF to overcome this.
+</p>
+
+<h3><a name="sync_mod">5.3. ``Sync Mode'' --Writing Records to File as They are Added</a></h3>
+<p>
+This is useful when JavaDBF is used to create a DBF with very large number of records. In this mode, instead of keeping records in memory for writing them once for all, records are written to file as <code>addRecord()</code> is called. Here is how to write in <em>Sync Mode</em>:
+</p>
+
+<p>
+	Create DBFWriter instance by passing a <code>File</code> object which represents a new/non-existent or empty file. And you are done! But, as in the normal mode, remember to call <code>write()</code> when have added all the records. This will help JavaDBF to write the meta data with correct values. Here is a sample code:
+</p>
+
+<div class="border">
+<div class="listing">
+<pre>
+import com.linuxense.javadbf.*;
+import java.io.*;
+
+public class DBFWriterTest {
+
+  public static void main( String args[])
+  throws DBFException, IOException {
+
+    // ...
+
+    <strong>DBFWriter writer = new DBFWriter( new File( "/path/to/a/new/file"));</strong> /* this DBFWriter object is now in <em>Syc Mode</em> */
+    // ...
+  }
+}	
+</pre>
+</div>
+</div>
+<h2><a name="appending">7. Appending Records</a></h2>
+<p>
+From version 0.4.0 onwards JavaDBF supports appending of records to an existing DBF file. Use the same constructor used in <a href="#sync_mod"><em>Sync Mode</em></a> to achieve this. But here the <code>File</code> object passed to the construction should represent the DBF file to which records are to be appended. 
+</p>
+<p>
+It is illegal to call <code>setFields</code> in DBFWriter object created for appending. Here also it is required to call the <code>write()</code> method after adding all the records.
+</p>
+<h2><a name="planned_features">6. Planned Features</a></h2>
+<ol>
+<li>Support for memo fields.
+</ol>
+<hr>
+&copy; 2003, 2004 Anil Kumar Krishnan Nair, Linuxense
+</body>
+</html>
