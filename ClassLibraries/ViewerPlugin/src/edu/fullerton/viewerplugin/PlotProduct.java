@@ -20,7 +20,6 @@ import edu.fullerton.viewerplugin.ChanDataBuffer;
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageItem;
-import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvtables.ViewUser;
 import java.util.ArrayList;
@@ -103,4 +102,11 @@ public interface PlotProduct
      * @param parameterMap - all parameters
      */
     public void setParameters(Map<String, String[]> parameterMap);
+    
+    /**
+     * Some products run in the background and do not return a list of images to display.
+     * 
+     * @return true if caller should expect a non-empty list of images.
+     */
+    public boolean hasImages();
 }

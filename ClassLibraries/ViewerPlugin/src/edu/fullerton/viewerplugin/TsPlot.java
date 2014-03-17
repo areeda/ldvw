@@ -49,7 +49,8 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 /**
- *
+ * Plot a simple time series
+ * 
  * @author Joseph Areeda <joe@areeda.com>
  */
 public class TsPlot extends PluginSupport implements PlotProduct
@@ -458,5 +459,11 @@ public class TsPlot extends PluginSupport implements PlotProduct
             XYSeries linTs = LinFit(xys);
             xyds.addSeries(linTs);
         }
+    }
+
+    @Override
+    public boolean hasImages()
+    {
+        return true;
     }
 }

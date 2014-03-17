@@ -48,10 +48,12 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 /**
- *
+ * Generate a spectrum from a time series
+ * 
  * @author Joseph Areeda <joe@areeda.com>
  */
-public class SpectrumPlot extends PluginSupport implements PlotProduct
+public 
+        class SpectrumPlot extends PluginSupport implements PlotProduct
 {
 
     private boolean wantStacked = false;
@@ -668,6 +670,12 @@ public class SpectrumPlot extends PluginSupport implements PlotProduct
 
     @Override
     public boolean needsImageDescriptor()
+    {
+        return true;
+    }
+
+    @Override
+    public boolean hasImages()
     {
         return true;
     }
