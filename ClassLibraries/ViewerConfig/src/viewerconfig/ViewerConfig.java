@@ -49,6 +49,7 @@ public class ViewerConfig
     
     private File configFile;
     private final Properties appProperties;
+    private String configFileName=null;
 
     /**
      * default constructor initializes parameter Map
@@ -66,7 +67,11 @@ public class ViewerConfig
      */
     public void readConfig() throws FileNotFoundException, IOException
     {
-        readConfig(configDir + defFile);
+        if (configFileName == null)
+        {
+            configFileName = configDir + defFile;
+        }
+        readConfig(configFileName);
         readProps(configDir + get("PropertyFile"));
     }
     
@@ -226,5 +231,8 @@ public class ViewerConfig
         }
         return ret;
     }
-
+    public void setConfigFileName(String configFileName)
+    {
+        this.configFileName = configFileName;
+    }
 }
