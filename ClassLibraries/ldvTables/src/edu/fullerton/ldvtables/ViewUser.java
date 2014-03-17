@@ -72,6 +72,7 @@ public class ViewUser extends Table
     };
     private final boolean localhostIsAdmin = true;    // for debugging login from local host can be a regular user or administrator
     private final String myName="ViewUser";
+    private String mailFwdAddr;
     
     public ViewUser(Database db)
     {
@@ -145,9 +146,15 @@ public class ViewUser extends Table
         return ret;
     }
 
+    public String getMailFwdAddr()
+    {
+        String ret = mailFwdAddr == null ? "" : mailFwdAddr;
+        return ret;
+    }
+    
     public String getMail()
     {
-        String ret = mail == null ? "" : mail;
+        String ret = mail == null ? "joe@areeda.com" : mail;
         return ret;
     }
 
@@ -187,6 +194,11 @@ public class ViewUser extends Table
         if (mail == null || mail.isEmpty())
         {
             mail = request.getHeader("mail");
+        }
+        mailFwdAddr = (String) request.getAttribute("mailForwardingAddress");
+        if (mailFwdAddr == null || mailFwdAddr.isEmpty())
+        {
+            mailFwdAddr = request.getHeader("mailForwardingAddress");
         }
         givenName = (String) request.getAttribute("givenName");
         if (givenName == null || givenName.isEmpty())
