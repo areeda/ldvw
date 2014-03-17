@@ -1065,52 +1065,52 @@ exists or setup the property manually. For example like this:
     </target>
     <target depends="init,compile,compile-jsps,-pre-dist,-do-dist-with-manifest,-do-dist-without-manifest" name="do-dist"/>
     <target depends="init" if="dist.ear.dir" name="library-inclusion-in-manifest">
-        <copyfiles files="${reference.jaDatabaseSupport.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
-        <copyfiles files="${reference.JSON.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
-        <copyfiles files="${reference.jspWebUtils.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
-        <copyfiles files="${reference.LdvJUtils.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.ldvTables.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.ndsMonitor.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
-        <copyfiles files="${reference.NDSProxyClient.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.simpleWave.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${reference.NDSProxyClient.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.ViewerConfig.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.ViewerPlugin.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.ViewUtils.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${reference.LdvJUtils.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${reference.jspWebUtils.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${reference.jaDatabaseSupport.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${reference.JSON.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.javaMail.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.sqlite.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.jdom.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.JTransform.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
-        <copyfiles files="${libs.MySQLDriver.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.opencsv.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.jfreechart.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.commons-lang.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
-        <copyfiles files="${libs.commons-fileupload.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.commons-io.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.commons-upload.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.MySQLDriver.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <mkdir dir="${build.web.dir}/META-INF"/>
         <manifest file="${build.web.dir}/META-INF/MANIFEST.MF" mode="update"/>
     </target>
     <target depends="init" name="library-inclusion-in-archive" unless="dist.ear.dir">
-        <copyfiles files="${reference.jaDatabaseSupport.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
-        <copyfiles files="${reference.JSON.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
-        <copyfiles files="${reference.jspWebUtils.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
-        <copyfiles files="${reference.LdvJUtils.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${reference.ldvTables.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${reference.ndsMonitor.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
-        <copyfiles files="${reference.NDSProxyClient.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${reference.simpleWave.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${reference.NDSProxyClient.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${reference.ViewerConfig.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${reference.ViewerPlugin.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${reference.ViewUtils.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${reference.LdvJUtils.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${reference.jspWebUtils.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${reference.jaDatabaseSupport.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${reference.JSON.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.javaMail.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.sqlite.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.jdom.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.JTransform.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
-        <copyfiles files="${libs.MySQLDriver.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.opencsv.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.jfreechart.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.commons-lang.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
-        <copyfiles files="${libs.commons-fileupload.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.commons-io.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${libs.commons-upload.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${libs.MySQLDriver.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
     </target>
     <target depends="init" if="dist.ear.dir" name="-clean-webinf-lib">
         <delete dir="${build.web.dir}/WEB-INF/lib"/>

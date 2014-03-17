@@ -513,7 +513,7 @@ public class LdvDispatcher extends GUISupport
     {
         vpage.setTitle("Stats");
         SiteStats ss = new SiteStats(request, db);
-        String imgHistBaseUrl=request.getContextPath() + "?act=ImageHistory&amp;size=med&amp;usrSel=";
+        String imgHistBaseUrl=getServletPath() + "?act=ImageHistory&amp;size=med&amp;usrSel=";
         vpage.add(ss.getStats( imgHistBaseUrl ));
     }
 

@@ -16,7 +16,6 @@
  */
 package edu.fullerton.ldvplugin;
 
-import edu.fullerton.viewerplugin.ChanDataBuffer;
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageItemString;
@@ -26,6 +25,7 @@ import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ImageCoordinateTbl;
 import edu.fullerton.ldvtables.ImageTable;
 import edu.fullerton.ldvtables.ViewUser;
+import edu.fullerton.viewerplugin.ChanDataBuffer;
 import edu.fullerton.viewerplugin.ExternalProgramManager;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -43,9 +43,11 @@ import java.io.StringReader;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  * A base class for plot generators that are external programs
@@ -172,6 +174,35 @@ public class ExternalPlotManager extends ExternalProgramManager
         }
 
         return imgId;
+    }
+    public ArrayList<File> getAllImgFiles(File dir) throws WebUtilException
+    {
+        HashSet<String> extensions;
+        extensions=new HashSet<>();
+        extensions.add("png");
+        extensions.add("jpg");
+        extensions.add("gif");
+        
+        ArrayList<File> ret = new ArrayList<>();
+        if (!dir.isDirectory() || ! dir.canRead())
+        {
+            throw new WebUtilException("Can't access output directory: " + dir.getAbsolutePath());
+        }
+        File[] listFiles = dir.listFiles();
+        for(File file : listFiles)
+        {
+            String ext = FilenameUtils.getExtension(file.getAbsolutePath()).toLowerCase();
+            if (extensions.contains(ext))
+            {
+                // acceptable type
+                ret.add(file);
+            }
+            else
+            {
+                file.delete();
+            }
+        }
+        return ret;
     }
     /**
      * Create and write data from a ChanDataBuffer to a CSV file for use by the external program as input
@@ -359,5 +390,40 @@ public class ExternalPlotManager extends ExternalProgramManager
             imgCoord = null;
         }
         return ret;
+    }
+    public int importImage(File img, String mime) throws WebUtilException 
+    {
+        return importImage(img,mime,"");
+    }
+    public int importImage(File img, String mime, String description) throws WebUtilException
+    {
+        int imgId = 0;
+
+        try
+        {
+            ImageTable itbl = new ImageTable(db);
+
+            // read in the output image
+            long len = img.length();
+            if (len > 1000)
+            {
+                byte[] imgBytes = new byte[(int) len];
+
+                FileInputStream fis = new FileInputStream(img);
+                int rlen = fis.read(imgBytes);
+
+                ByteArrayInputStream bis = new ByteArrayInputStream(imgBytes);
+                imgId = itbl.addImg(vuser.getCn(), bis, mime);
+                if (!description.isEmpty())
+                {
+                    itbl.addDescription(imgId, description);
+                }
+            }
+        }
+        catch(SQLException | IOException | NoSuchAlgorithmException ex)
+        {
+            throw new WebUtilException("Importing image to database", ex);
+        }
+        return imgId;
     }
 }

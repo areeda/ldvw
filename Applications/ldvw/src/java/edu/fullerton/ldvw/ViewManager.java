@@ -161,7 +161,7 @@ public class ViewManager
      * @throws WebUtilException - probably a bug in generating html
      * @throws LdvTableException - some database problem
      */
-    private void mainLoop() throws WebUtilException, LdvTableException
+    private void mainLoop() throws WebUtilException, LdvTableException, ServletException
     {
         try
         {

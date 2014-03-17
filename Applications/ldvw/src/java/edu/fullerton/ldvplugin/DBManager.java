@@ -84,12 +84,15 @@ public class DBManager
             
             ResultSet stats = db.getISStats();
             boolean odd = true;
+            int nTables=0;
+            long tblSize=0;
+            long idxSize=0;
             
             while(stats.next())
             {
                 PageTableRow tblRow = new PageTableRow();
                 PageTableColumn c;
-                
+                nTables ++;
                 for (String[] colSpec : columns)
                 {
                     String fmt = colSpec[2].toLowerCase();
@@ -111,6 +114,15 @@ public class DBManager
                             c = new PageTableColumn(WebUtils.hrInteger(nit)+"B");
                             c.setAlign(PageItem.Alignment.RIGHT);
                             tblRow.add(c);
+                            switch(colSpec[0])
+                            {
+                                case "data_length":
+                                    tblSize += nit;
+                                    break;
+                                case "index_length":
+                                    idxSize += nit;
+                                    break;
+                            }
                             break;
                         case "time":
                             Timestamp tit = stats.getTimestamp(colSpec[0]);
@@ -136,6 +148,35 @@ public class DBManager
                 statTable.addRow(tblRow);
             }
             vpage.add(statTable);
+            vpage.addBlankLines(2);
+            vpage.add("Summary:");
+            vpage.addBlankLines(1);
+            PageTable summary = new PageTable();
+            PageTableRow srow = new PageTableRow();
+            PageTableColumn c;
+            
+            srow.add("# tables", false);
+            c = new PageTableColumn(String.format("%1$,d", nTables));
+            c.setAlign(PageItem.Alignment.RIGHT);
+            srow.add(c);
+            summary.addRow(srow);
+            
+            srow = new PageTableRow();
+            srow.add("total size of tables", false);
+            c = new PageTableColumn(WebUtils.hrInteger(tblSize)+"B");
+            c.setAlign(PageItem.Alignment.RIGHT);
+            srow.add(c);
+            summary.addRow(srow);
+            
+            srow = new PageTableRow();
+            srow.add("total size of indexes", false);
+            c = new PageTableColumn(WebUtils.hrInteger(idxSize) + "B");
+            c.setAlign(PageItem.Alignment.RIGHT);
+            srow.add(c);
+            summary.addRow(srow);
+
+            vpage.add(summary);
+            
         }
         catch (Exception ex)
         {

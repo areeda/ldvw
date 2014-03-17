@@ -28,9 +28,6 @@ import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -109,8 +106,8 @@ public class ServletSupport
             }
             catch (SQLException ex)
             {
-                String ermsg = "Unable to start an ldvw session: " + ex.getClass().getSimpleName() +
-                               ex.getLocalizedMessage();
+                String ermsg = "Unable to start an ldvw session: " + ex.getClass().getSimpleName()
+                               + ex.getLocalizedMessage();
                 throw new ServletException(ermsg);
             }
         }

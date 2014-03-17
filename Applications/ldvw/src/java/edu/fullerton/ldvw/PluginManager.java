@@ -28,6 +28,8 @@ import edu.fullerton.viewerplugin.GUISupport;
 import edu.fullerton.ldvplugin.OdcPlotManager;
 import edu.fullerton.viewerplugin.PlotProduct;
 import edu.fullerton.ldvplugin.SpectrogramManager;
+import edu.fullerton.ldvplugin.TrendPlotManager;
+import edu.fullerton.ldvplugin.WplotManager;
 import edu.fullerton.viewerplugin.SpectrumPlot;
 import edu.fullerton.viewerplugin.TsPlot;
 import edu.fullerton.ldvtables.ChannelTable;
@@ -206,6 +208,18 @@ public class PluginManager extends GUISupport
         chmPil.setUseDiv(false);
         pfDiv.add(chmPil);
         
+        // add Omega scan
+        WplotManager wpm = new WplotManager(db, vpage, vuser);
+        PageItemList wpmPil = getSelectorContent(wpm, "doWplot", nSel, multDisp);
+        wpmPil.setUseDiv(false);
+        pfDiv.add(wpmPil);
+        
+        // add Long term trend plots
+        TrendPlotManager tpm = new TrendPlotManager(db, vpage, vuser);
+        PageItemList tpmPil = getSelectorContent(tpm, "trndplt", nSel, multDisp);
+        tpmPil.setUseDiv(false);
+        pfDiv.add(tpmPil);
+        
         //========= put new products above this line=========
         
         // add the products and set them up as a closed accordion
@@ -253,7 +267,7 @@ public class PluginManager extends GUISupport
             //===========what do they want to do?  ie. which products============
             String[] allProducts =
             {
-                "doTimeSeries", "doSpectrum", "doSpectrogram", "doCoherence"
+                "doTimeSeries", "doSpectrum", "doSpectrogram", "doCoherence","doWplot", "trndplt"
             };
             ArrayList<PlotProduct> selectedProducts = new ArrayList< >();
 
@@ -570,24 +584,29 @@ public class PluginManager extends GUISupport
                 break;
             case "doSpectrum":
                 ret = new SpectrumPlot();
-                dispFormats = paramMap.get("spdispFormat");
                 break;
             case "doSpectrogram":
                 ret = new SpectrogramManager(db, vpage, vuser);
                 ret.setParameters(paramMap);
-                dispFormats = paramMap.get("spgdispFormat");
                 break;
             case "doCoherence":
                 ret = new CoherenceManager(db, vpage, vuser);
                 ret.setParameters(paramMap);
-                dispFormats = paramMap.get("cohdispFormat");
+                break;
+            case "doWplot":
+                ret = new WplotManager(db, vpage, vuser);
+                ret.setParameters(paramMap);
+                break;
+            case "trndplt":
+                ret = new TrendPlotManager(db, vpage, vuser);
+                ret.setParameters(paramMap);
                 break;
             default:
                 throw new WebUtilException("Unknown display product requested: " + p);
         }
         ret.setup(db, vpage, vuser);
         
-        dispFormat = dispFormats == null ? "" : dispFormats.length > 0 ? dispFormats[0] : "";
+        dispFormat = "";
         ret.setDispFormat(dispFormat);
 
         return ret;
@@ -742,7 +761,7 @@ public class PluginManager extends GUISupport
         product.setParameters(paramMap);
 
         ArrayList<Integer> imgIds = product.makePlot(bufList, compact);
-        if (imgIds.isEmpty())
+        if (imgIds.isEmpty() && product.hasImages())
         {
             vpage.add("Error generating or saving image.");
             vpage.addBlankLines(1);
@@ -768,7 +787,7 @@ public class PluginManager extends GUISupport
                     vpage.add(descStr);
                 }
                 String url = String.format("%1$s?act=getImg&imgId=%2$d", servletPath ,imgId);
-                PageItemImage piImg = new PageItemImage(url, "time series plot", "");
+                PageItemImage piImg = new PageItemImage(url, "result image", "");
                 ImageCoordinateTbl ict = new ImageCoordinateTbl(db);
                 ImageCoordinate imgCord = ict.getCoordinate(imgId);
                 if (imgCord != null)
@@ -788,6 +807,7 @@ public class PluginManager extends GUISupport
                 else
                 {
                     vpage.add(piImg);
+                    vpage.addBlankLines(1);
                 }
             }
         }
@@ -1131,7 +1151,6 @@ public class PluginManager extends GUISupport
         spPI.setClassName("plotSelector");
 
         ret.add(new PageItemHeader(prod.getProductName() + ":", 3));
-        
         
         ret.add(spPI);
         

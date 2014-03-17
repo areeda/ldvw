@@ -1,11 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="5">
+        <file>
+            <url>src/java/edu/fullerton/ldvplugin/WplotManager.java</url>
+            <bookmark id="3">
+                <name/>
+                <line>113</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>src/java/edu/fullerton/plugindefn/PluginController.java</url>
+            <bookmark id="5">
+                <name/>
+                <line>325</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>src/java/edu/fullerton/ldvw/PluginManager.java</url>
+            <bookmark id="4">
+                <name/>
+                <line>217</line>
+                <key/>
+            </bookmark>
+            <bookmark id="1">
+                <name/>
+                <line>289</line>
+                <key/>
+            </bookmark>
+            <bookmark id="2">
+                <name/>
+                <line>343</line>
+                <key/>
+            </bookmark>
+        </file>
+    </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group name="LDVW Applications">
             <file>file:/home/joe/NetBeans8Projects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/CoherenceManager.java</file>
             <file>file:/home/joe/NetBeans8Projects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/ViewManager.java</file>
         </group>
         <group name="LDVW libraries"/>
+        <group name="ldvw">
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/View.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/ExternalPlotManager.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/WplotDefinition.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/LdvDispatcher.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/SpectrogramManager.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/PluginAttribute.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/PluginParameter.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/WplotManager.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/PluginController.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/PluginManager.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
+        </group>
+        <group/>
     </open-files>
 </project-private>

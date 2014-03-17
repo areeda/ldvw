@@ -45,7 +45,8 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- *
+ * Calculate and plot the coherence of 2 time series
+ * 
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
 public class CoherenceManager extends ExternalPlotManager implements PlotProduct
@@ -515,5 +516,11 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
                 res[i][1] = newmax;
             }
         }
+    }
+
+    @Override
+    public boolean hasImages()
+    {
+        return true;
     }
 }

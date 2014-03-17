@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Export a list of ChanDataBuffer objects for import into LigoDV
+ * 
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
 class DataExporter

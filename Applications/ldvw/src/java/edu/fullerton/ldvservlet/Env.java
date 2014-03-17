@@ -112,8 +112,10 @@ public class Env extends HttpServlet
         add1Hdr("AJP_isMemberOf", request, shibData);
         add1Attribute("AJP_isMemberOf", request, shibData);
         add1Attribute("Shib-Identity-Provider", request, shibData);
+        add1Attribute("mail", request, shibData);
+        add1Attribute("mailForwardingAddress", request, shibData);
 
-        tblTitle("Environment variables:", vpage);
+        tblTitle("Shibboleth variables:", vpage);
 
         addTable(shibData, vpage);    
     }

@@ -183,7 +183,9 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
         cmd.append("java -Xmx3g -jar /usr/local/ldvw/Spectrogram/Spectrogram.jar ");
         if (dbuf.size() != 1)
         {
-            throw new WebUtilException("Spectrogram: only one channel/time passed to makePlot.  Bug!");
+            String ermsg = "Spectrogram: one and only one channel/time can be passed to makePlot. ";
+            ermsg += "We received " + Integer.toString(dbuf.size());
+            throw new WebUtilException(ermsg);
         }
         ChanDataBuffer cdb = dbuf.get(0);
         ChanInfo ci = cdb.getChanInfo();
@@ -346,6 +348,12 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
 
     @Override
     public boolean needsImageDescriptor()
+    {
+        return true;
+    }
+
+    @Override
+    public boolean hasImages()
     {
         return true;
     }
