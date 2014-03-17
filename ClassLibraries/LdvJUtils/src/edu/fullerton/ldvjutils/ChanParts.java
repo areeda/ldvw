@@ -49,6 +49,7 @@ public class ChanParts
     {
         "nds.ligo.caltech.edu", "nds.ligo-wa.caltech.edu", "nds.ligo-la.caltech.edu",
         //"ldas-pcdev4.ligo.caltech.edu",
+        "nds2.ligo-la.caltech.edu",
         "nds40.ligo.caltech.edu"
     };
 
