@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.activation.MimetypesFileTypeMap;
@@ -35,13 +36,14 @@ import viewerconfig.ViewConfigException;
 import viewerconfig.ViewerConfig;
 
 /**
- *
+ * utility to add an existing image to ldvw's database
+ * 
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
 public class Addimg2db
 {
     String progName = "addimg2db";
-    String version = "0.0.1";
+    String version = "0.0.2";
     
     private Database db;
     
@@ -73,7 +75,7 @@ public class Addimg2db
         {
             try
             {
-                ret = me.doit();
+                ret = me.doit().isEmpty() ? 1 : 0;
             }
             catch (Exception ex)
             {
@@ -82,6 +84,12 @@ public class Addimg2db
             }
         }
         System.exit(ret);
+    }
+    private String configFileName = null;
+
+    public void setConfigFileName(String configFileName)
+    {
+        this.configFileName = configFileName;
     }
 
     private int setup(String[] args)
@@ -103,8 +111,10 @@ public class Addimg2db
         fileSearchPat = Pattern.compile("-(\\d+)-(\\d+)([smhdSMHD])\\..{3,4}$");
         return ret;
     }
-    private int doit() throws LdvTableException, SQLException, ViewConfigException
+    public ArrayList<Integer> doit() throws LdvTableException, SQLException, ViewConfigException
     {
+        ArrayList<Integer> retList = new ArrayList<>();
+        
         ermsg = "";
         getDbTables();
         
@@ -118,9 +128,13 @@ public class Addimg2db
                 {
                     String desc=description + descAddon;
                     int imgId = imgTbl.addImg(user, instream, mime, "", desc, 0);
-                    imgGrpTbl.addToGroup(user, group, imgId);
-                    System.out.println(String.format("%1$s added, user: %2$s group: %3$s, desc: %4$s%n",
+                    if (imgId > 0)
+                    {
+                        imgGrpTbl.addToGroup(user, group, imgId);
+                        System.out.println(String.format("%1$s added, user: %2$s group: %3$s, desc: %4$s%n",
                                                      filename,user,group,desc));
+                        retList.add(imgId);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -133,7 +147,7 @@ public class Addimg2db
         {
             System.err.println("Problems found: \n" + ermsg);
         }
-        return ermsg.isEmpty() ? 0 : 1;
+        return retList;
     }
 
     private boolean checkFile(String filename)
@@ -236,6 +250,10 @@ public class Addimg2db
         if (db == null)
         {
             ViewerConfig vc = new ViewerConfig();
+            if (configFileName != null)
+            {
+                vc.setConfigFileName(configFileName);
+            }
             db = vc.getDb();
             if (db == null)
             {
@@ -263,4 +281,31 @@ public class Addimg2db
         }
         ByteArrayInputStream ret = new ByteArrayInputStream(buf.toByteArray());
         return ret;
-    }}
+    }
+
+    public void setAuto(boolean auto)
+    {
+        this.auto = auto;
+    }
+
+    public void setFiles(String[] files)
+    {
+        this.files = files;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+    public void setGroup(String group)
+    {
+        this.group = group;
+    }
+
+    public void setUser(String user)
+    {
+        this.user = user;
+    }
+
+}
