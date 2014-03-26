@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="5">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="7">
+        <file>
+            <url>src/java/edu/fullerton/ldvw/BaseChannelSelector.java</url>
+            <bookmark id="7">
+                <name/>
+                <line>291</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>src/java/edu/fullerton/ldvw/TimeAndPlotSelector.java</url>
+            <bookmark id="6">
+                <name/>
+                <line>133</line>
+                <key/>
+            </bookmark>
+        </file>
         <file>
             <url>src/java/edu/fullerton/ldvplugin/WplotManager.java</url>
             <bookmark id="3">
@@ -55,6 +71,9 @@
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/PluginManager.java</file>
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
         </group>
-        <group/>
+        <group>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/CoherenceManager.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/CrossSpectrumManager.java</file>
+        </group>
     </open-files>
 </project-private>

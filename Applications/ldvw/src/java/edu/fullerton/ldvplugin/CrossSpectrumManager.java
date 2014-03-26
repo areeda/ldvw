@@ -24,58 +24,64 @@ import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvtables.ViewUser;
-import edu.fullerton.plugindefn.TrendPlotDefinition;
-import edu.fullerton.plugindefn.WplotDefinition;
+import edu.fullerton.plugindefn.CrossSpectrumDefinition;
 import edu.fullerton.viewerplugin.ChanDataBuffer;
 import edu.fullerton.viewerplugin.PlotProduct;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-import org.apache.commons.io.FilenameUtils;
 
 /**
- * Control the external TrendPlot program
- * 
+ *
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
-public class TrendPlotManager extends ExternalPlotManager implements PlotProduct
+public class CrossSpectrumManager extends ExternalPlotManager implements PlotProduct
 {
     private int width;
     private int height;
-    
-    public TrendPlotManager(Database db, Page vpage, ViewUser vuser)
+    private File tempFile;
+    private CrossSpectrumDefinition csd;
+
+    public CrossSpectrumManager(Database db, Page vpage, ViewUser vuser)
     {
         super(db, vpage, vuser);
+        width = height = 0;
+        csd = new CrossSpectrumDefinition();
+        csd.init();
     }
 
     @Override
     public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbuf, boolean compact) throws WebUtilException
     {
-        TrendPlotDefinition tpd = new TrendPlotDefinition();
-        tpd.init();
-        tpd.setFormParameters(paramMap);
-        tpd.setVuser(vuser);
-
-        String cmd = tpd.getCommandLine(dbuf, paramMap);
+        if (width > 200 && height > 100)
+        {
+            String[] geom = {String.format("%1$dx%2$d", width, height)};
+            paramMap.put("geom", geom);
+        }
+        csd.setFormParameters(paramMap);
+        String cmd = csd.getCommandLine(dbuf, paramMap);
         vpage.add(cmd);
         vpage.addBlankLines(2);
         ArrayList<Integer> ret = new ArrayList<>();
         if (runExternalProgram(cmd))
         {
-            String hdr = String.format("Your %1$s is being queued for processing, and email will be "
-                    + "sent to %2$s with a link to the results when finished.<br>", 
-                                       getProductName(), vuser.getMail());
-            vpage.add(new PageItemString(hdr, false));
-            hdr = "Please be patient, currently there is only one batch queue processing these plots.<br>"
-            + "Processing time depends on how much data you requested and what else is running.";
-            vpage.add(new PageItemString(hdr, false));
             String txtOutput = String.format("%1$s Output:<br>%2$s", getProductName(), getStdout());
             vpage.add(new PageItemString(txtOutput, false));
             vpage.addBlankLines(1);
-            txtOutput = String.format("%1$s Stderr: <br>%2$s", getProductName(), getStderr());
+            txtOutput = String.format("%1$s <br>Stderr: %2$s", getProductName(), getStderr());
             vpage.add(new PageItemString(txtOutput, false));
             vpage.addBlankLines(1);
+            tempFile = csd.getTempFile();
+            if (tempFile != null && tempFile.canRead())
+            {
+                String desc = "";
+                int imgId = importImage(tempFile, "image/png", desc);
+                if (imgId > 0)
+                {
+                    ret.add(imgId);
+                }
+            }
         }
         else
         {
@@ -94,13 +100,13 @@ public class TrendPlotManager extends ExternalPlotManager implements PlotProduct
     @Override
     public boolean isStackable()
     {
-        return false;
+        return csd.getBoolAttribute("isStackable", true);
     }
 
     @Override
     public boolean needsImageDescriptor()
     {
-        return false;
+        return true;
     }
 
     @Override
@@ -113,15 +119,14 @@ public class TrendPlotManager extends ExternalPlotManager implements PlotProduct
     @Override
     public String getProductName()
     {
-        return "Trend plot";
+        return "Cross Spectrum";
     }
 
     @Override
     public PageItem getSelector(String enableKey, int nSel, String[] multDisp) throws WebUtilException
     {
-        TrendPlotDefinition tpd = new TrendPlotDefinition();
-
-        PageItemList ret = tpd.getSelector(enableKey, nSel);
+        PageItemList ret = csd.getSelector(enableKey, nSel);
+        tempFile = csd.getTempFile();
         return ret;
     }
 
@@ -134,7 +139,7 @@ public class TrendPlotManager extends ExternalPlotManager implements PlotProduct
     @Override
     public void setDispFormat(String dispFormat)
     {
-        // ignore it we don't control it
+        // ignore it 
     }
 
     @Override
@@ -147,7 +152,7 @@ public class TrendPlotManager extends ExternalPlotManager implements PlotProduct
     @Override
     public boolean hasImages()
     {
-        return false;
+        return true;
     }
     
 }

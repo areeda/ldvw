@@ -131,7 +131,7 @@ public class TimeAndPlotSelector extends GUISupport
             selClrBar.addRow(selClrRow);
             pf.add(selClrBar);
             
-            pf.add(getPageTable(selections));
+            pf.add(getChannelSelectTable(selections));
             
             if (selections.size() > 10)
             {
@@ -525,7 +525,7 @@ public class TimeAndPlotSelector extends GUISupport
     {
         this.vpage = vpage;
     }
-    public PageTable getPageTable(Set<Integer> selections) throws SQLException, WebUtilException
+    public PageTable getChannelSelectTable(Set<Integer> selections) throws SQLException, WebUtilException
     {
         PageTable t = new PageTable();
         Set<ChanInfo> cList = ct.getAsSet(selections);

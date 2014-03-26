@@ -690,6 +690,7 @@ public class LdvDispatcher extends GUISupport
         }
         else if (submitAct.toLowerCase().contains("retrieve"))
         {
+            vpage.setTitle("LigoDV-web Select Base Channels");
             bsc.processFilterRequest();
         }
         else if (submitAct.toLowerCase().contains("continue"))

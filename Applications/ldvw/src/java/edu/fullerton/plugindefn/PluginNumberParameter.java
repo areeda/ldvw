@@ -58,6 +58,7 @@ class PluginNumberParameter extends PluginParameter
         return ptr;
     }
     
+    @Override
     public PluginParameter setStringVal(String sval)
     {
         if (sval.matches(fpRegex))

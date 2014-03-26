@@ -28,9 +28,7 @@ import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.ChanInfo;
-import edu.fullerton.ldvtables.ImageTable;
 import edu.fullerton.ldvtables.ViewUser;
-import edu.fullerton.ldvw.ViewerException;
 import edu.fullerton.viewerplugin.GUISupport;
 import edu.fullerton.viewerplugin.XYPlotter;
 import java.io.File;
@@ -42,7 +40,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Calculate and plot the coherence of 2 time series

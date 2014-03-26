@@ -21,6 +21,7 @@ import com.areeda.jaDatabaseSupport.Database;
 import com.areeda.jaDatabaseSupport.Table;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.UseLog;
 import edu.fullerton.ldvtables.ViewUser;
 import java.io.IOException;
@@ -28,6 +29,8 @@ import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -85,7 +88,11 @@ public class ServletSupport
         String protoWarn = viewerConfig.get("protoWarn");
         isPrototype = protoWarn != null && protoWarn.equalsIgnoreCase("yes");
         isNewSession = session.isNew();
-        
+        if (! isNewSession)
+        {
+            long sessionAge = System.currentTimeMillis() - session.getLastAccessedTime();
+            isNewSession = sessionAge > 30 * 60 * 1000;
+        }
         vuser = new ViewUser(request, db);
         try
         {
@@ -104,7 +111,7 @@ public class ServletSupport
             {
                 vuser.sessionStart();
             }
-            catch (SQLException ex)
+            catch (SQLException | LdvTableException ex)
             {
                 String ermsg = "Unable to start an ldvw session: " + ex.getClass().getSimpleName()
                                + ex.getLocalizedMessage();

@@ -69,6 +69,7 @@ public class View extends HttpServlet
             "edu.fullerton.ldvtables.NdsStatsTable",
             "edu.fullerton.ldvtables.PageItemCache",
             "edu.fullerton.ldvtables.ServerTable",
+            "edu.fullerton.ldvtables.SessionTable",
             "edu.fullerton.ldvtables.UseLog",
             "edu.fullerton.ldvtables.ViewUser"
         };

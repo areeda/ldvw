@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Defines a plugin in terms of its User Interface and execution properties
@@ -53,10 +55,12 @@ public abstract class PluginController
     boolean inited = false;
     private File tempDir;
     private boolean useEquals;
+    private boolean useQuotes;
     private int nDashes;
     private Map<String, String[]> paramMap;
     private PageItemString notes = null;
     private ViewUser vuser;
+    private File tempFile;
     
     PluginController()
     {
@@ -132,6 +136,7 @@ public abstract class PluginController
         cmd.append(prog);
         
         useEquals = getBoolAttribute("useEquals", false);
+        useQuotes = getBoolAttribute("useQuotes", true);
         nDashes = getIntAttribute("nDashes", 2);
         
         for (PluginParameter p : parameters)
@@ -257,7 +262,7 @@ public abstract class PluginController
         return ret;
     }
 
-    private boolean getBoolAttribute(String attributeName, boolean b)
+    public boolean getBoolAttribute(String attributeName, boolean b)
     {
         boolean ret = b;
         PluginAttribute attr = attributes.get(attributeName);
@@ -268,7 +273,7 @@ public abstract class PluginController
         return ret;
     }
 
-    private int getIntAttribute(String attributeName, int i)
+    public int getIntAttribute(String attributeName, int i)
     {
         int ret = i;
         PluginAttribute attr = attributes.get(attributeName);
@@ -313,10 +318,20 @@ public abstract class PluginController
                 {
                     ret += getCmdArg(p.getArgumentName(), buf.getChanInfo().getChanName());
                 }
-                break;   
+                break;
+                
+            case "duration":
+                for (ChanDataBuffer buf : dbuf)
+                {
+                    Long endGps = buf.getTimeInterval().getStopGps();
+                    Long startGps = buf.getTimeInterval().getStartGps();
+                    Long duration = endGps-startGps;
+                    ret += getCmdArg(p.getArgumentName(), duration.toString());
+                }
+                break;
            
             case "email":
-                String email = vuser.getMailFwdAddr();
+                String email = vuser.getMail();
                 if (email != null && ! email.isEmpty())
                 {
                     ret += getCmdArg(p.getArgumentName(), email);
@@ -329,6 +344,11 @@ public abstract class PluginController
                     Long endGps = buf.getTimeInterval().getStopGps();
                     ret += getCmdArg(p.getArgumentName(), endGps.toString());
                 }
+                break;
+                
+            case "geometry":
+                String[] geom = paramMap.get("geom");
+                ret += getCmdArg(p.getArgumentName(), geom[0]);
                 break;
                 
             case "userName":
@@ -363,8 +383,22 @@ public abstract class PluginController
                 }
                 break;
                 
-            default:
+            case "tempFile":
+                String extension = p.getFormName();
+                try
+                {
+                    tempFile = Files.createTempFile("ldvw", extension).toFile();
+                    ret = getCmdArg(p.getArgumentName(), tempFile.getAbsolutePath());
+                }
+                catch (IOException ex)
+                {
+                    throw new WebUtilException("Can't create a temproary file for :" + getName(), ex);
+                }
                 break;
+            default:
+                String ermsg = String.format("Parameter controller: Unknown standard parameter (%1$s)"
+                        + " for %2$s", pname, getName());
+                throw new WebUtilException(ermsg);
         }
         return ret;
     }
@@ -388,7 +422,14 @@ public abstract class PluginController
         if (value != null && !value.isEmpty())
         {
             ret += useEquals ? "=" : " ";
-            ret += "'" + value + "'";
+            if (useQuotes)
+            {
+                ret += "'" + value + "'";
+            }
+            else
+            {
+                ret += value;
+            }
             ret += " ";
         }
         return " " + ret + " ";
@@ -468,7 +509,7 @@ public abstract class PluginController
         String formName = getNamespace() + "_" + p.getFormName();
         String[] vals = paramMap.get(formName);
 
-        if (vals != null && vals.length==1)
+        if (vals != null && vals.length==1 && !vals[0].isEmpty())
         {
             p.setStringVal(vals[0]);
         }
@@ -484,6 +525,11 @@ public abstract class PluginController
     public void setVuser(ViewUser vuser)
     {
         this.vuser = vuser;
+    }
+
+    public File getTempFile()
+    {
+        return tempFile;
     }
     
 }

@@ -23,6 +23,7 @@ import edu.fullerton.ldvjutils.ImageCoordinate;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.viewerplugin.ChanDataBuffer;
 import edu.fullerton.ldvplugin.CoherenceManager;
+import edu.fullerton.ldvplugin.CrossSpectrumManager;
 import edu.fullerton.ldvplugin.LivePlotManager;
 import edu.fullerton.viewerplugin.GUISupport;
 import edu.fullerton.ldvplugin.OdcPlotManager;
@@ -220,6 +221,12 @@ public class PluginManager extends GUISupport
         tpmPil.setUseDiv(false);
         pfDiv.add(tpmPil);
         
+        // add Cross Spectral Analysis
+        CrossSpectrumManager csm = new CrossSpectrumManager(db, vpage, vuser);
+        PageItemList csmPil = getSelectorContent(csm, "csaplot", nSel, multDisp);
+        csmPil.setUseDiv(false);
+        pfDiv.add(csmPil);
+        
         //========= put new products above this line=========
         
         // add the products and set them up as a closed accordion
@@ -267,7 +274,8 @@ public class PluginManager extends GUISupport
             //===========what do they want to do?  ie. which products============
             String[] allProducts =
             {
-                "doTimeSeries", "doSpectrum", "doSpectrogram", "doCoherence","doWplot", "trndplt"
+                "doTimeSeries", "doSpectrum", "doSpectrogram", "doCoherence","doWplot", "trndplt",
+                "csaplot"
             };
             ArrayList<PlotProduct> selectedProducts = new ArrayList< >();
 
@@ -587,23 +595,23 @@ public class PluginManager extends GUISupport
                 break;
             case "doSpectrogram":
                 ret = new SpectrogramManager(db, vpage, vuser);
-                ret.setParameters(paramMap);
                 break;
             case "doCoherence":
                 ret = new CoherenceManager(db, vpage, vuser);
-                ret.setParameters(paramMap);
                 break;
             case "doWplot":
                 ret = new WplotManager(db, vpage, vuser);
-                ret.setParameters(paramMap);
                 break;
             case "trndplt":
                 ret = new TrendPlotManager(db, vpage, vuser);
-                ret.setParameters(paramMap);
+                break;
+            case "csaplot":
+                ret = new CrossSpectrumManager(db, vpage, vuser);
                 break;
             default:
                 throw new WebUtilException("Unknown display product requested: " + p);
         }
+        ret.setParameters(paramMap);
         ret.setup(db, vpage, vuser);
         
         dispFormat = "";

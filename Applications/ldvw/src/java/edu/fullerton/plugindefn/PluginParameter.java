@@ -38,7 +38,7 @@ public abstract class PluginParameter
     
     protected int nDecimals;
 
-    public final String fpRegex = "^[-+]?[0-9]*\\.?[0-9]+$";
+    public final String fpRegex = "^((\\d+\\.?\\d*)|(\\.\\d+))([Ee][+-]?\\d+)?$";
     
     
     public enum Type 
