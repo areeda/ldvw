@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="6">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="7">
         <file>
             <url>src/edu/fullerton/viewerplugin/SpectrumPlot.java</url>
+            <bookmark id="7">
+                <name/>
+                <line>131</line>
+                <key/>
+            </bookmark>
             <bookmark id="6">
                 <name/>
                 <line>145</line>
@@ -25,6 +30,10 @@
         <group name="ldvw">
             <file>file:/home/joe/NetBeansProjects/ldvw/ClassLibraries/ViewerPlugin/src/edu/fullerton/viewerplugin/PlotProduct.java</file>
         </group>
-        <group/>
+        <group>
+            <file>file:/home/joe/NetBeansProjects/ldvw/ClassLibraries/ViewerPlugin/src/edu/fullerton/viewerplugin/SpectrumPlot.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/ClassLibraries/ViewerPlugin/src/edu/fullerton/viewerplugin/PluginSupport.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/ClassLibraries/ViewerPlugin/src/edu/fullerton/viewerplugin/SpectrumCalc.java</file>
+        </group>
     </open-files>
 </project-private>
