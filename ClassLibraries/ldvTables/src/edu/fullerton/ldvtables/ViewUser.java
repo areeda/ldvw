@@ -28,6 +28,7 @@ import edu.fullerton.jspWebUtils.PageItemTextLink;
 import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.LdvTableException;
 import java.sql.*;
 import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
@@ -71,21 +72,19 @@ public class ViewUser extends Table
         new Column("nVisits",   CType.INTEGER,  Integer.SIZE,   Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
     };
     private final boolean localhostIsAdmin = true;    // for debugging login from local host can be a regular user or administrator
-    private final String myName="ViewUser";
     private String mailFwdAddr;
+    private String userAgent;
     
     public ViewUser(Database db)
     {
-        this.db = db;
-        setName("ViewUser");
+        super(db,"ViewUser");
         setCols(myCols);
     }
     public ViewUser(HttpServletRequest request, Database db)
     {
-        getRequestInfo(request);
-        this.db = db;
-        setName("ViewUser");
+        super(db,"ViewUser");
         setCols(myCols);
+        getRequestInfo(request);
     }
     public void logTransfer(long bytes, long ms)
     {
@@ -211,6 +210,7 @@ public class ViewUser extends Table
             isMemberOf = request.getHeader("AJP_isMemberOf");
         }
         remoteIP = request.getRemoteAddr();
+        userAgent = request.getHeader("user-agent");
     }
 
     /**
@@ -251,7 +251,7 @@ public class ViewUser extends Table
     /**
      * A fresh user session has just been started, log it, load preferences
      */
-    public void sessionStart() throws SQLException
+    public void sessionStart() throws LdvTableException, SQLException
     {
         String q = String.format("SELECT * FROM %1$s where eduPersonPrincipalName = '%2$s'", getName(),eduPersonPrincipalName);
         ResultSet rs = db.executeQuery(q);
@@ -286,7 +286,13 @@ public class ViewUser extends Table
             ps.setString(5, eduPersonPrincipalName);
             db.executeUpdate(ps);
         }
-       
+        SessionDto sdto;
+        sdto = new SessionDto();
+        sdto.setEduPersonPrincipalName(eduPersonPrincipalName);
+        sdto.setRemAddr(remoteIP);
+        sdto.setUserAgent(userAgent);
+        SessionTable st = new SessionTable(db);
+        st.add(sdto);
     }
     /**
      * return a summary of user activity
