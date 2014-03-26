@@ -245,6 +245,7 @@ public class TrendPlot
         options.addOption(OptionBuilder.withArgName("group").hasArg().withDescription("Image group ").create("group"));
         options.addOption(OptionBuilder.withArgName("config").hasArg().withDescription("Viewer config ").create("config"));
         options.addOption(OptionBuilder.withArgName("qtime").hasArg().withDescription("System time in ms of condor_submit ").create("qtime"));
+        options.addOption(OptionBuilder.withArgName("geom").hasArg().withDescription("Plot dimensions XxY").create("geom"));
         
         CommandLineParser parser = new GnuParser();
 
@@ -624,6 +625,12 @@ public class TrendPlot
         for(String cName : chanNames)
         {
             String datFile = datDir.getAbsolutePath() + "/" + cName + ".dat"; 
+            File dfile = new File(datFile);
+            if (dfile.length() < 100)
+            {
+                errPrintWriter.format("%1$s does not have enough data to plot.\n", cName);
+                continue;
+            }
             scaleData(datFile);
             File outFile = File.createTempFile(cName, ".png", datDir);
 
