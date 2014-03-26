@@ -66,9 +66,9 @@ class SpectrumCommandLine
     private boolean ret;
     private CommandLine line;
     private String ermsg = "";
-    private String intpat = "^\\d+$";
-    //@todo get a better regex for floats
-    private String fltpat = "^[\\d\\.]+$";
+    private final String intpat = "^\\d+$";
+
+    private final String fltpat = "^[-+]?[0-9]*\\.?[0-9]+$";;
     
     
     boolean parseCommand(String[] args, String programName, String version)

@@ -49,9 +49,9 @@ public class SpectrumApp
     private ChannelTable chanTbl;
     private ChanInfo chanInfo;
     // program spec
-    private String version = "0.0.0";
-    private String programName = "SpectrumApp.jar";
-    private int debugLevel = 1;
+    private final String version = "0.0.0";
+    private final String programName = "SpectrumApp.jar";
+    private final int debugLevel = 1;
 
     // command line parameters
     private boolean logFreq;
@@ -212,7 +212,7 @@ public class SpectrumApp
 
     private HashSet<Integer> getSelections() throws SQLException, LdvTableException, ViewConfigException
     {
-        HashSet<Integer> ret = new HashSet<Integer>();
+        HashSet<Integer> ret = new HashSet<>();
         long strt = System.currentTimeMillis();
         getDbTables();
         
@@ -267,7 +267,7 @@ public class SpectrumApp
     {
         
         TimeInterval ti = new TimeInterval(startGPS,startGPS+duration);
-        ArrayList<TimeInterval> ret = new ArrayList<TimeInterval>();
+        ArrayList<TimeInterval> ret = new ArrayList<>();
         ret.add(ti);
         return ret;
     }
