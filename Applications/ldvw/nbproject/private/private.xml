@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="7">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="11">
+        <file>
+            <url>src/java/edu/fullerton/ldvplugin/CrossSpectrumManager.java</url>
+            <bookmark id="9">
+                <name/>
+                <line>56</line>
+                <key/>
+            </bookmark>
+        </file>
         <file>
             <url>src/java/edu/fullerton/ldvw/BaseChannelSelector.java</url>
             <bookmark id="7">
@@ -29,7 +37,12 @@
             <url>src/java/edu/fullerton/plugindefn/PluginController.java</url>
             <bookmark id="5">
                 <name/>
-                <line>325</line>
+                <line>340</line>
+                <key/>
+            </bookmark>
+            <bookmark id="11">
+                <name/>
+                <line>426</line>
                 <key/>
             </bookmark>
         </file>
@@ -37,17 +50,22 @@
             <url>src/java/edu/fullerton/ldvw/PluginManager.java</url>
             <bookmark id="4">
                 <name/>
-                <line>217</line>
+                <line>218</line>
+                <key/>
+            </bookmark>
+            <bookmark id="8">
+                <name/>
+                <line>276</line>
                 <key/>
             </bookmark>
             <bookmark id="1">
                 <name/>
-                <line>289</line>
+                <line>297</line>
                 <key/>
             </bookmark>
             <bookmark id="2">
                 <name/>
-                <line>343</line>
+                <line>351</line>
                 <key/>
             </bookmark>
         </file>
@@ -71,9 +89,6 @@
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/PluginManager.java</file>
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
         </group>
-        <group>
-            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/CoherenceManager.java</file>
-            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/CrossSpectrumManager.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>
