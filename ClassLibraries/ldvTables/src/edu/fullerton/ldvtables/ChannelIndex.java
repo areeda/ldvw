@@ -146,7 +146,22 @@ public class ChannelIndex extends Table
         String query = "SELECT * from " + getName();
         allStream = myStmt.executeQuery(query);
     }
-
+    /**
+     * Open a streaming result set of all Channels whose name matches the parameter.
+     *
+     * Note that no other operations can be performed on this connection until the stream is closed.
+     *
+     * @param namePat  an SQL "like" string wild cards ? and % can be used.  Not case sensitive
+     * @see #streamNext()
+     * @see #streamClose()
+     * @throws SQLException
+     */
+    public void streamByName(String namePat) throws SQLException
+    {
+        Statement myStmt = db.createStatement(1);
+        String query = "SELECT * from " + getName() + " WHERE name like '" + namePat + "'";
+        allStream = myStmt.executeQuery(query);
+    }
     /**
      * Get the next channel information object from the open stream
      *
