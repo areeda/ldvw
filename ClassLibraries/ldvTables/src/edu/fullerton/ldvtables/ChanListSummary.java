@@ -17,6 +17,7 @@
 package edu.fullerton.ldvtables;
 
 import com.areeda.jaDatabaseSupport.Utils;
+import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvjutils.LdvTableException;
 import java.io.BufferedReader;
@@ -45,6 +46,7 @@ public class ChanListSummary
     private String cType;
     private int count;
     private String md5;
+    private String crc;
     private File cListFile;
     private String dir="/tmp";
     private boolean needsUpd;
@@ -60,6 +62,48 @@ public class ChanListSummary
         this.server = server;
         this.cType = cType;
         this.count = count;
+        setDir();
+    }
+
+    public final void setDir()
+    {
+        String condorTmp = System.getenv("_CONDOR_SCRATCH_DIR");
+         dir = "/tmp";
+        if ( condorTmp != null && !condorTmp.isEmpty())
+        {
+            File tmp = new File(condorTmp);
+            if (tmp.exists() && tmp.isDirectory() && tmp.canWrite())
+            {
+                dir = tmp.getAbsolutePath();
+                if (!dir.endsWith("/"))
+                {
+                    dir += "/";
+                }
+            }
+        }
+    }
+    /**
+     * set the output directory for saving the list
+     * 
+     * @param dir path to a directory
+     * @throws edu.fullerton.jspWebUtils.WebUtilException
+     */
+    public void setDir(String dir) throws WebUtilException
+    {
+        File dirf = new File(dir);
+        if (!dirf.exists())
+        {
+            throw new WebUtilException("ChanListSummary: setDir: directory does not exist");
+        }
+        if (!dirf.isDirectory())
+        {
+            throw new WebUtilException("ChanListSummary: setDir: but path is not a directory");
+        }
+        if (!dirf.canWrite())
+        {
+            throw new WebUtilException("ChanListSummary: setDir: Directory not writable");
+        }
+        this.dir = dir;
     }
 
     public String getServer()
@@ -116,7 +160,17 @@ public class ChanListSummary
     
     public void printSummary() throws IOException
     {
-        System.out.format("Server: %1$s, type: %2$s, count: %3$,d,  needs update: %4$b%n",
+        System.out.println(toString());
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public String toString()
+    {
+        return String.format("Server: %1$s, type: %2$s, count: %3$,d,  needs update: %4$b%n",
                           getServer(), getcType(), getCount(), needsUpd);
     }
     /**
@@ -133,17 +187,18 @@ public class ChanListSummary
         {
             cListFile.delete();
         }
-        BufferedWriter bw = new BufferedWriter(new FileWriter(cListFile));
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        
-        for(ChanInfo ci : channelList)
+        MessageDigest md;
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(cListFile)))
         {
-            String line = ci.getCSV() + "\n";
-            byte[] data = line.getBytes();
-            md.update(data, 0, data.length);
-            bw.write(line);
+            md = MessageDigest.getInstance("MD5");
+            for(ChanInfo ci : channelList)
+            {
+                String line = ci.getCSV() + "\n";
+                byte[] data = line.getBytes();
+                md.update(data, 0, data.length);
+                bw.write(line);
+            }
         }
-        bw.close();
         md5 = Utils.getMd5String(md);
     }
 
@@ -183,7 +238,15 @@ public class ChanListSummary
         return ret;
     }
 
-    
+    public String getCrc()
+    {
+        return crc;
+    }
 
-    
+    public void setCrc(String crc)
+    {
+        this.crc = crc;
+    }
+
+   
 }
