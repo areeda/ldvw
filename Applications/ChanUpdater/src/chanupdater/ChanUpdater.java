@@ -19,9 +19,9 @@ package chanupdater;
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.ChanInfo;
+import edu.fullerton.ldvjutils.ChanParts;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ChanListSummary;
-import edu.fullerton.ldvjutils.ChanParts;
 import edu.fullerton.ldvtables.ChanUpdateTable;
 import edu.fullerton.ldvtables.ChannelTable;
 import edu.fullerton.ldvtables.PageItemCache;
@@ -39,6 +39,14 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import viewerconfig.ViewConfigException;
 import viewerconfig.ViewerConfig;
 
@@ -49,23 +57,24 @@ import viewerconfig.ViewerConfig;
  */
 public class ChanUpdater
 {
-    private String[] servers;
-    private String[] cTypes;
+    private final String[] servers;
+    private final String[] cTypes;
     
-    private ArrayList<ChanListSummary> cLists;
+    private final ArrayList<ChanListSummary> cLists;
     private NDSProxyClient nds;
 
     private Database db = null;         // Connection to ligodv data base
     private ChannelTable chnTbl;        // The real Channels table
     private ChanUpdateTable chUpdTbl;   // Records raw chan lists, with md5 hash
     
-    private static int verbose = 3;
+    private static final int verbose = 2;
 
     // what we're supposed to do
-    private boolean doGetFileList = true;
-    private boolean doPendingUpds = true;
-    private boolean doDeletes = true;
-    private boolean doCleanup = true;
+    private final boolean doGetFileList = true;
+    
+    private final boolean doPendingUpds = true;
+    private final boolean doDeletes = true;
+    private final boolean doCleanup = true;
 
     /**
      * @param args the command line arguments
@@ -75,33 +84,44 @@ public class ChanUpdater
         try
         {
             ChanUpdater me = new ChanUpdater();
-            me.doit();
+            me.doit(args);
         }
         catch (Exception ex)
         {
             Logger.getLogger(ChanUpdater.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    private int totalAdds;
-    private int totalDels;
-    private void doit()
+    private int totalAdds=0;
+    private int totalDels=0;
+    private int countErrors=0;
+    private int dbCount=0;
+    private int total=0;
+    private final String programName="ChanUpdater";
+    private String configFile = "";
+    private final String version="0.1.0";
+    
+    private void doit(String[] args)
     {
         try
         {
-            getCounts();
-            //@todo add command line argument processor
-            if (doGetFileList)
+            if (processArgs(args))
             {
-                getChanListFiles();
-            }
-            
-            if (doPendingUpds)
-            {
-                doUpdates();
-            }
-            if (doCleanup && (totalAdds + totalDels) == 0)
-            {
-                cleanUp();
+                setup();
+                getCounts();
+                //@todo add command line argument processor
+                if (doGetFileList)
+                {
+                    getChanListFiles();
+                }
+
+                if (doPendingUpds)
+                {
+                    doUpdates();
+                }
+                if (doCleanup && (totalAdds + totalDels) != 0)
+                {
+                    cleanUp();
+                }
             }
         }
         catch (Exception ex)
@@ -111,7 +131,18 @@ public class ChanUpdater
         if (verbose > 0)
         {
             long elap = System.currentTimeMillis() - startTime;
-            System.out.format("Elapsed time: %1$,.2f\n", elap/1000.);
+            System.out.format("Errors getting counts from servers: %1$d%n", countErrors);
+            System.out.format("Total channels reported by nds servers: %1$,d, in our DB %2$,d%n", total, dbCount);
+            if (totalAdds + totalDels > 0)
+            {
+                System.out.format("Total additions: %1$,d, total removals: %2$,d\n", totalAdds, totalDels);
+            }
+            else
+            {
+                System.out.println("No changes to channel tables.");
+            }
+
+            System.out.format("Elapsed time: %1$,.1fs\n", elap/1000.);
         }
     }
     //=================================
@@ -120,12 +151,11 @@ public class ChanUpdater
 
     public ChanUpdater() throws SQLException, ClassNotFoundException, ViewConfigException
     {
-        cLists = new ArrayList<ChanListSummary>();
+        cLists = new ArrayList<>();
         servers = ChanParts.getServers();
         cTypes = ChanParts.getChanTypes();
         startTime = System.currentTimeMillis();
         lastTime = startTime;
-        setup();
     }
     
     /**
@@ -160,6 +190,11 @@ public class ChanUpdater
             db.close();
         }
         ViewerConfig vc = new ViewerConfig();
+        if (!configFile.isEmpty())
+        {
+            vc.setConfigFileName(configFile);
+        }
+
         db = vc.getDb();
         if (verbose > 1)
         {
@@ -167,18 +202,31 @@ public class ChanUpdater
             System.out.println(vc.getLog());
         }
         chnTbl = new ChannelTable(db);
+        if (! chnTbl.exists(true))
+        {
+            chnTbl.createTable();
+        }
+        
         chUpdTbl = new ChanUpdateTable(db);
+        if (! chUpdTbl.exists(true))
+        {
+            chUpdTbl.createTable();
+        }
     }
 
+    /**
+     * Request counts and channel list hash from each server, channel type to determine which will
+     * need to transfer the full channel list.
+     */
     private void getCounts()
     {
-        int total=0;
+        total=0;
         for(String srv : servers)
         {
             try
             {
                 nds = new NDSProxyClient(srv);
-                nds.connect();
+                nds.connect(120000);
                 
                 for(String ctyp : cTypes)
                 {
@@ -186,22 +234,40 @@ public class ChanUpdater
                     {
                         int n;
                         n = nds.getChanCount(ctyp);
-                        total += n;
-                        ChanListSummary cls = new ChanListSummary(srv, ctyp.toString(), n);
-                        cLists.add(cls);
-                        if (verbose > 1 && n > 0)
+                        String crc="";
+                        boolean needsUpdate = false;
+                        if (n > 0)
                         {
-                            System.out.format("Server: %1$s, type: %2$s, count: %3$,d\n",
-                                          srv,ctyp.toString(),n);
+                            crc = nds.getChanHash(ctyp);
+                            total += n;
+                            ChanListSummary cls = new ChanListSummary(srv, ctyp, n);
+                            cls.setCrc(crc);
+                            needsUpdate = chUpdTbl.checkAdd(cls);
+                            int dbcnt = chnTbl.getCount(srv, ctyp);
+                            needsUpdate |= n == dbcnt;
+                            cls.setNeedsUpd(needsUpdate);
+                            if (needsUpdate)
+                            {
+                                cLists.add(cls);
+                            }
+                        }
+                        chUpdTbl.setUpdateFlag(srv, ctyp, needsUpdate);
+                        if (verbose > 1)
+                        {
+                            System.out.format("Server: %1$-24s, type: %2$-12s, count: %3$,9d,"
+                                    + " crc: %4$-9s, needs Update: %5$b\n",
+                                          srv,ctyp.toString(),n, crc, needsUpdate);
                         }
                     }
                 }
             }
-            catch (NDSException ex)
+            catch (WebUtilException | LdvTableException | NDSException | IOException ex)
             {
-                System.out.format("Server: %1$s.  Failed to connect or get counts: %2$s%n",
+                countErrors++;
+                System.err.format("Server: %1$s.  Failed to connect or get counts: %2$s%n",
                                   srv,ex.getLocalizedMessage());
             }
+
             try
             {
                 if (nds != null)
@@ -215,7 +281,7 @@ public class ChanUpdater
                                   srv,ex.getLocalizedMessage());
             }
         }
-        int dbCount = chnTbl.getCount("", "");
+        dbCount = chnTbl.getCount("", "");
         System.out.format("Total channels reported by nds servers: %1$,d, in our DB %2$,d%n",total, dbCount);
     }
 
@@ -237,7 +303,7 @@ public class ChanUpdater
                         System.out.format("Get channel list from %1$s for type: %2$s%n", srv,ctypStr);
                     }
                     nds = new NDSProxyClient(srv);
-                    nds.connect(300000);
+                    nds.connect(600000);
                     ArrayList<ChanInfo> channelList = nds.getChanList(ctypStr);
                     cls.dumpFile(channelList);
                 }
@@ -258,32 +324,33 @@ public class ChanUpdater
                     System.out.format("Server: %1$s, error on disconnect: %2$s%n",
                                       srv, ex.getLocalizedMessage());
                 }
-                boolean needsUpd = chUpdTbl.checkAdd(cls);
-                cls.setNeedsUpd(needsUpd);
                 cls.printSummary();
-               
             }
         }
     }
 
     private void doUpdates() throws SQLException, IOException, FileNotFoundException, LdvTableException
     {
+        if (verbose > 1)
+        {
+            System.out.println("Starting update process.");
+        }
         ArrayList<ChanListSummary> chanLists;
-        chanLists = chUpdTbl.getPendingUpdates();
-        HashSet<ChanInfo> del = new HashSet<ChanInfo>();
+        
+        HashSet<ChanInfo> del = new HashSet<>();
         totalAdds = 0;
         totalDels = 0;
         
-        for(ChanListSummary cls : chanLists)
+        for(ChanListSummary cls : cLists)
         {
             
             cls.printSummary();
             String server = cls.getServer();
             String cTyp = cls.getcType();
             
-            if (verbose > 1)
+            if (verbose > 2)
             {
-                System.out.format("Check %1$s for type:%2$s",server,cTyp);
+                System.out.format("Check %1$s for type:%2$s ",server,cTyp);
             }
             
             TreeMap<String, HashSet<ChanInfo>> chanSets = cls.getChanSets();
@@ -292,7 +359,7 @@ public class ChanUpdater
                 del.clear();
                 HashSet<ChanInfo> newChans = ent.getValue();
                 String ifo = ent.getKey();
-                if (verbose > 2)
+                if (verbose > 1)
                 {
                     System.out.format("Server: %1$s, cType: %2$s, IFO: %3$s, count: %4$,d\n", 
                                   cls.getServer(),cls.getcType(),ifo,newChans.size());
@@ -352,7 +419,7 @@ public class ChanUpdater
                         }
                     }
                 }
-                else if (verbose > 2)
+                else if (verbose > 1)
                 {
                     System.out.println("    no updates.");
                 }
@@ -360,11 +427,12 @@ public class ChanUpdater
             }
             if (verbose > 0 && totalAdds + totalDels > 0)
             {
-                System.out.format("Total additions: %1$,d, total removals: %2$,d\n", totalAdds,totalDels);
+                System.out.format("Total additions: %1$,d, total removals: %2$,d, "
+                        + "Server: %3$s, type: %4$s%n", totalAdds,totalDels,cls.getServer(), cls.getcType());
             }
             else if (verbose > 1 && totalAdds + totalDels == 0)
             {
-                System.out.println("No changes to channel table.");
+                System.out.println("No changes to channel table. %n");
             }
         }
     }
@@ -378,20 +446,25 @@ public class ChanUpdater
             String cmd = "DELETE FROM " + pic.getName() + 
                          " WHERE name='ChannelStats'";
             db.execute(cmd);
-/*
-            String chstatUrl = "http://localhost/viewer/?act=ChannelStats";
-            URL url = new URL(chstatUrl);
-            InputStream is = url.openConnection().getInputStream();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-
-            String line = null;
-            while ((line = reader.readLine()) != null)
-            {
-               
-            }
-            reader.close();
-*/
+            
+//            // get a kerberos ticket
+//            String home = System.getenv("HOME");
+//            String keytab = home + "/secure/joseph.areeda.keytab";
+//            String user = "joseph.areeda@LIGO.ORG";
+//            ExternalProgramManager.getTGT(keytab, user);
+//
+//            String chstatUrl = "http://localhost/viewer/?act=ChannelStats";
+//            URL url = new URL(chstatUrl);
+//            InputStream is = url.openConnection().getInputStream();
+//
+//            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is)))
+//            {
+//                String line = null;               
+//                while ((line = reader.readLine()) != null)
+//                {
+//                    
+//                }
+//            }
         }
         catch (SQLException ex)
         {
@@ -399,6 +472,54 @@ public class ChanUpdater
             ermsg += " - " + ex.getLocalizedMessage();
             throw new WebUtilException(ermsg);
         }
+    }
+    private boolean processArgs(String[] args)
+    {
+        boolean ret = true;
+        Options options = new Options();
+
+        options.addOption(new Option("help", "print this message"));
+        options.addOption(new Option("version", "print the version information and exit"));
+
+        options.addOption(OptionBuilder.withArgName("config").hasArg().withDescription("ldvw configuration path").create("config"));
+
+        CommandLineParser parser = new GnuParser();
+
+        boolean wantHelp = false;
+        CommandLine line;
+        try
+        {
+            // parse the command line arguments
+
+            line = parser.parse(options, args);
+        }
+        catch (ParseException exp)
+        {
+            // oops, something went wrong
+            System.err.println("Command parsing failed.  Reason: " + exp.getMessage());
+            wantHelp = true;
+            line = null;
+        }
+        if (line != null)
+        {
+            if (line.hasOption("version"))
+            {
+                System.out.println(programName + " - version " + version);
+            }
+
+            wantHelp = line.hasOption("help");
+            if (line.hasOption("config"))
+            {
+                configFile = line.getOptionValue("config");
+            }
+        }
+        if (wantHelp)
+        {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp(programName, options);
+            ret = false;
+        }
+        return ret;
     }
 }
 
