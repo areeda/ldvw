@@ -66,10 +66,6 @@ public class TrendPlotDefinition extends PluginController
             p.setArgumentName("geometry");
             addParameter(p);
 
-            p = ParameterFactory.buildParam(PluginParameter.Type.STANDARD, "tempdir", null, null);
-            p.setArgumentName("datdir");
-            addParameter(p);
-            
             p = ParameterFactory.buildParam(PluginParameter.Type.STANDARD, "email", null, null);
             p.setArgumentName("email");
             addParameter(p);
