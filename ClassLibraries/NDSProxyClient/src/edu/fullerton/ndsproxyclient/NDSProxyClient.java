@@ -384,6 +384,41 @@ public class NDSProxyClient
         }
         return ret;
     }
+    public String getChanHash() throws NDSException
+    {
+        return getChanHash("unknown");
+    }
+    public String getChanHash(String cType) throws NDSException
+    {
+        String ret="error";
+        
+        String cmd = "CHSH";
+        if (cType != null && cType.length() > 0)
+        {
+            cmd += "," + cType;
+        }
+        sendCmd(cmd);
+        String nextLine;
+        boolean gotMore = true;
+
+        nextLine = readLine();
+        if (nextLine == null || nextLine.isEmpty())
+        {
+            updateTiming();
+            throw new NDSException("failed to read chls results.");
+        }
+        else if (nextLine.toLowerCase().startsWith("error"))
+        {
+            updateTiming();
+            throw new NDSException(nextLine);
+        }
+        else
+        {
+            ret = readLine();
+            nextLine=readLine();
+        }
+        return ret;
+    }
     /**
      * Get a list of all channels of the specified type
      * 
@@ -561,7 +596,7 @@ public class NDSProxyClient
             {
                 try
                 {
-                    sendCmd("ATIM," + cmd);
+                    sendCmd("SRCD," + cmd);
                 }
                 catch(NDSException ex)
                 {
