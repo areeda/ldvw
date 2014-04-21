@@ -48,12 +48,16 @@ public class ExternalProgramManager
      */
     public static void getTGT() throws WebUtilException
     {
-        File keyTab = new File("/usr/local/ldvw/keytab/ldvw.keytab");
+        ExternalProgramManager.getTGT("/usr/local/ldvw/keytab/ldvw.keytab", "ligodv-test-areeda@LIGO.ORG");
+    }
+    public static void getTGT(String filename, String username) throws WebUtilException
+    {
+        File keyTab = new File(filename);
         if (keyTab.exists())
         {
             try
             {
-                String cmd = String.format("kinit ligodv-test-areeda@LIGO.ORG -k -t %1$s", keyTab.getCanonicalPath());
+                String cmd = String.format("kinit " + username +" -k -t %1$s", keyTab.getCanonicalPath());
                 Process p = Runtime.getRuntime().exec(cmd);
                 p.waitFor();
             }
