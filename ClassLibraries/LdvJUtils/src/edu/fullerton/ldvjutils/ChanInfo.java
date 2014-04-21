@@ -150,6 +150,7 @@ public class ChanInfo implements Comparable
     /**
      * Bytes per sample describes the raw data returned from the server
      * Currently the only values in the database are 2, 4 and 8
+     * 
      * @return number of bytes in a sample transferred from the server
      */
     public int getBytesPerSample()
@@ -171,6 +172,7 @@ public class ChanInfo implements Comparable
     /**
      * Get the Channel type eg raw, online, minute-trend
      * see NDS package for the authoritative list of channel types
+     * 
      * @return name of the type
      */
     public String getcType()
@@ -542,6 +544,7 @@ public class ChanInfo implements Comparable
             same = same && server.equals(ci.server);
             same = same && cType.equals(ci.cType);
             same = same && rate.equals(ci.rate);
+            same = same && dType.equals(ci.dType);
         }
         else
         {
@@ -743,6 +746,15 @@ public class ChanInfo implements Comparable
         this.availId = availId;
     }
     
-    
+    public String getBaseName()
+    {
+        String basename = chanName;
+        if (getcType().toLowerCase().contains("trend"))
+        {
+            int dotPos = basename.lastIndexOf(".");
+            basename = basename.substring(0, dotPos);
+        }
+        return basename;
+    }
 }
         
