@@ -259,49 +259,40 @@ public class ChannelTable extends Table
     }
     public TreeSet<ChanInfo> getAsSet(String server,String nameMatchString, String cType, int size) throws SQLException
     {
-        TreeSet<ChanInfo> ret = new TreeSet<ChanInfo>();
+        TreeSet<ChanInfo> ret = new TreeSet<>();
         Statement st = db.createStatement(1000);
         String q = "SELECT * from " + getName();
-        String w = "";
+        String w = " available = 1 ";
         if (server != null && !server.isEmpty())
         {
-            w =  "server='" + server + "'";
+            w +=  " AND server='" + server + "'";
         }
         if (nameMatchString != null && !nameMatchString.isEmpty())
         {
-            if (!w.isEmpty())
-            {
-                w += " AND ";
-            }
-            w += " name like '" + nameMatchString + "'";
+            w += " AND name like '" + nameMatchString + "'";
         }
         if (cType != null && !cType.isEmpty())
         {
-            if (!w.isEmpty())
-            {
-                w += " AND ";
-            }
-            w += " cType = '" + cType + "'";
+            w += " AND  cType = '" + cType + "'";
         }
-        if (!w.isEmpty())
+        q = q + " WHERE " + w;
+
+        try (ResultSet rs = st.executeQuery(q))
         {
-            q = q + " WHERE + " + w;
-        }
-        ResultSet rs = st.executeQuery(q);
-        while (rs.next())
-        {
-            ChanInfo ci = new ChanInfo();
-            ci.fill(rs);
-            if (ci.getChanName() == null)
+            while (rs.next())
             {
-                System.err.println("null chanel name for id=" + rs.getInt("myId"));
-            }
-            else
-            {
-                ret.add(ci);
+                ChanInfo ci = new ChanInfo();
+                ci.fill(rs);
+                if (ci.getChanName() == null)
+                {
+                    System.err.println("null chanel name for id=" + rs.getInt("myId"));
+                }
+                else
+                {
+                    ret.add(ci);
+                }
             }
         }
-        rs.close();
         return ret;
     }
 
@@ -1043,6 +1034,23 @@ public class ChannelTable extends Table
     {
         Statement myStmt = db.createStatement(1);
         String query="SELECT * from " + getName();
+        allStream = myStmt.executeQuery(query);
+    }
+    /**
+     * Open a streaming result set of all Channels whose name matches the parameter.
+     * 
+     *
+     * Note that no other operations can be performed on this connection until the stream is closed.
+     *
+     * @param chanNameMatchStr an SQL "like" string wild cards ? and % can be used.  Not case sensitive
+     * @see #streamNext()
+     * @see #streamClose()
+     * @throws SQLException
+     */
+    public void streamByName(String chanNameMatchStr) throws SQLException
+    {
+        Statement myStmt = db.createStatement(1);
+        String query = "SELECT * from " + getName() + " WHERE name like '" + chanNameMatchStr + "'";
         allStream = myStmt.executeQuery(query);
     }
     /**
