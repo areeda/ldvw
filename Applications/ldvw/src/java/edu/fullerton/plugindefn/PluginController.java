@@ -32,8 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Defines a plugin in terms of its User Interface and execution properties
@@ -348,7 +346,10 @@ public abstract class PluginController
                 
             case "geometry":
                 String[] geom = paramMap.get("geom");
-                ret += getCmdArg(p.getArgumentName(), geom[0]);
+                if (geom != null)
+                {
+                    ret += getCmdArg(p.getArgumentName(), geom[0]);
+                }
                 break;
                 
             case "userName":
