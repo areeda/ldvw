@@ -24,17 +24,26 @@ import edu.fullerton.ldvtables.ChanPointerTable;
 import edu.fullerton.ldvtables.ChannelIndex;
 import edu.fullerton.ldvtables.ChannelTable;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import viewerconfig.ViewConfigException;
 import viewerconfig.ViewerConfig;
 
@@ -52,11 +61,7 @@ public class CheckDb
         try
         {
             CheckDb me = new CheckDb();
-            me.buildChanStats();
-            me.doReport();
-            me.saveNames("chanNames.txt");
-            me.makeChannelIndexTable();
-            me.makeChanPointerTable();
+            me.doAll(args);
         }
         catch (SQLException | ClassNotFoundException | ViewConfigException ex)
         {
@@ -64,22 +69,145 @@ public class CheckDb
         }
     }
     private int verbose = 2;
-    private long startTime;
+    private String configFile="";
+    private final long startTime;
     private long lastTime;
     private ChannelTable chnTbl;
     private Database db;
-    TreeMap<String,TreeMap<String, ChanStat>> chanstats;
+    private TreeMap<String,TreeMap<String, ChanStat>> chanstats;
+    private Set<String> ifoSubsysSet;
     private int count;
-    private boolean showMultiRates = true;
-
-    private void buildChanStats()
+    private final boolean showMultiRates = verbose > 2;
+    private BufferedWriter out=null;
+    private ChannelIndex cidx;
+    private ChanPointerTable cpt;
+    private String programName = "CheckDb";
+    private String version = "0.1.0";
+    
+    private void doAll(String[] args)
     {
         try
         {
+            if (processArgs(args))
+            {
+                setup();
+                chnTbl = new ChannelTable(db);
+                buildIfoSubsysSet();
+                chanstats = new TreeMap<>();
+
+                cidx = new ChannelIndex(db);
+                cidx.recreate();
+
+                cpt = new ChanPointerTable(db);
+                cpt.recreate();
+
+                chnTbl = new ChannelTable(db);
+                
+                long chanCount = chnTbl.getRecordCount();
+                long pntrCount = cpt.getRecordCount();
+                
+                if (chanCount != pntrCount)
+                {
+                    out = new BufferedWriter(new FileWriter("/tmp/chanNames.txt"));
+                    int nifoSubsys = ifoSubsysSet.size();
+                    int cur = 0;
+                    for(String ifoSubsys : ifoSubsysSet)
+                    {
+                        cur++;
+                        buildChanStats(ifoSubsys);
+                        doReport(ifoSubsys);
+                        saveNames();
+                        try
+                        {
+                            makeChannelIndexTable();
+                            makeChanPointerTable(ifoSubsys);
+                            String msg = String.format("Processed: %1$d of %2$d, %3$s", cur, nifoSubsys, ifoSubsys);
+                            logTime(msg, 2);
+                        }
+                        catch (SQLException ex)
+                        {
+                            Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }
+                else
+                {
+                    System.out.println("Channel table and pointer table are same size, so we did not check");
+                }
+            }
+        }
+        catch (ClassNotFoundException | ViewConfigException | SQLException | IOException ex)
+        {
+            Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally
+        {
+            if (out != null)
+            {
+                try
+                {
+                    out.close();
+                }
+                catch (IOException ex)
+                {
+                    Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+    /**
+     * Search the entire Channel table and build a set of unique IFO:Subsystem strings
+     */
+    private void buildIfoSubsysSet() 
+    {
+        try
+        {
+            ifoSubsysSet = new HashSet<>();
+            chnTbl.streamAll();
             
-            chanstats = new TreeMap<>();
+            ChanInfo ci;
+            Pattern ifoSubsysPat = Pattern.compile("\\s*(.+:.+?[-_])");
+            while ((ci = chnTbl.streamNext()) != null)
+            {
+                String basename = ci.getBaseName();
+                Matcher m = ifoSubsysPat.matcher(basename);
+                if (m.find())
+                {
+                    String ifoSubsys = m.group(1);
+                    ifoSubsysSet.add(ifoSubsys);
+                }
+            }
+        }
+        catch (SQLException ex)
+        {
+            Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally
+        {
+            try
+            {
+                chnTbl.streamClose();
+            }
+            catch (SQLException ex)
+            {
+                Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        String logStr = String.format("There are %1$,d ifo-subsys.", ifoSubsysSet.size());
+        logTime(logStr, 1);
+    }
+    /**
+     * Build a map of all channels that are derived from each base name for a single IFO:Subsystem
+     * @param ifoSubsys String of the form IFO:Subsystem[-_] 
+     */
+    private void buildChanStats(String ifoSubsys)
+    {
+        try
+        {
+            chanstats.clear();
             
-            chnTbl.streamAll();            
+            
+            chnTbl.streamByName(ifoSubsys + "%");
             ChanInfo ci;
             count=0;
             while ((ci = chnTbl.streamNext()) != null)
@@ -91,12 +219,7 @@ public class CheckDb
                     System.out.flush();
                 }
                 String name = ci.getChanName();
-                String basename=name;
-                if (ci.getcType().toLowerCase().contains("trend"))
-                {
-                    int dotPos = name.lastIndexOf(".");
-                    basename=name.substring(0, dotPos);
-                }
+                String basename=ci.getBaseName();
                 String serv = ci.getServer();
                 serv = serv.replace(".caltech.edu", "");
                 String key = basename;
@@ -122,7 +245,7 @@ public class CheckDb
                 
                 chanstats.put(key, chanstatLst);
             }
-            chnTbl.streamClose();
+            
         }
         catch (SQLException ex)
         {
@@ -136,6 +259,17 @@ public class CheckDb
                 Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex1);
             }
         }
+        finally
+        {
+            try
+            {
+                chnTbl.streamClose();
+            }
+            catch (SQLException ex)
+            {
+                Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
     
     //=================================
@@ -145,7 +279,7 @@ public class CheckDb
     {
         startTime = System.currentTimeMillis();
         lastTime = startTime;
-        setup();
+        
     }
 
     /**
@@ -159,9 +293,11 @@ public class CheckDb
         long curTime = System.currentTimeMillis();
         float elap = (curTime - startTime) / 1000.f;
         float opTime = (curTime - lastTime) / 1000.f;
+        float memUsed = Runtime.getRuntime().totalMemory()/1e6f;
         if (verbose >= verbosity)
         {
-            System.out.println(String.format("%1$s op: %2$.2fs, elap: %3$.2fs", opName, opTime, elap));
+            System.out.println(String.format("%1$s op: %2$.2fs, elap: %3$.2fs, mem: %4$,.0f MB", 
+                                             opName, opTime, elap, memUsed));
         }
         lastTime = curTime;
 
@@ -179,18 +315,22 @@ public class CheckDb
         {
             db.close();
         }
-        ViewerConfig vc = new ViewerConfig();
+        ViewerConfig vc;
+        vc = new ViewerConfig();
+        if (!configFile.isEmpty())
+        {
+            vc.setConfigFileName(configFile);
+        }
         db = vc.getDb();
         if (verbose > 1)
         {
             System.out.print("Connected to: ");
             System.out.println(vc.getLog());
         }
-        chnTbl = new ChannelTable(db);
-
+        
     }
 
-    private void doReport()
+    private void doReport(String ifoSubsys)
     {
         int errCount=0;
         int multiRateRawCount = 0;
@@ -258,35 +398,37 @@ public class CheckDb
             }
         }
 
-        System.out.format("Table rows: %1$,d, Unique channel count: %2$,d, errors: %3$,d%n", 
-                          count, chanstats.size(), errCount);
-        System.out.format("Multiple rate count - raw: %1$,d, rds: %2$,d %n", 
-                          multiRateRawCount, multiRateRdsCount);
-        System.out.format("Maximum number of sample rates - raw: %1$d, rds: %2$d%n",
-                          maxRawRates, maxRdsRates);
-        System.out.println("Channels with multiple servers:");
-        
-        for(int i=0; i < srvCnts.length; i++)
+        if (verbose > 1)
         {
-            System.out.format("    %1$d.  %2$,d%n", i, srvCnts[i]);
+            System.out.format("%4$s: table rows: %1$,d, Unique channel count: %2$,d, errors: %3$,d%n", 
+                              count, chanstats.size(), errCount, ifoSubsys);
+        }
+        if (verbose > 2)
+        {
+            System.out.format("Multiple rate count - raw: %1$,d, rds: %2$,d %n", 
+                              multiRateRawCount, multiRateRdsCount);
+            System.out.format("Maximum number of sample rates - raw: %1$d, rds: %2$d%n",
+                              maxRawRates, maxRdsRates);
+            System.out.println("Channels with multiple servers:");
+
+            for(int i=0; i < srvCnts.length; i++)
+            {
+                System.out.format("    %1$d.  %2$,d%n", i, srvCnts[i]);
+            }
         }
     }
 
-    private void saveNames(String chanNamestxt)
+    private void saveNames()
     {
         try
         {
-            BufferedWriter out = new BufferedWriter(new FileWriter(chanNamestxt));
+            
             for(String name : chanstats.keySet())
             {
                 out.write(name);
                 out.newLine();
             }
-            out.close();
-        }
-        catch (FileNotFoundException ex)
-        {
-            Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex);
+            
         }
         catch (IOException ex)
         {
@@ -296,10 +438,6 @@ public class CheckDb
 
     private void makeChannelIndexTable() throws SQLException
     {
-        ChannelIndex cidx = new ChannelIndex(db);
-        cidx.recreate();
-        
-       
         Pattern ifoSubsysPat = Pattern.compile("(^.+):((.+?)[_-])?");
         
         for (Entry<String, TreeMap<String, ChanStat>> csl : chanstats.entrySet())
@@ -386,10 +524,9 @@ public class CheckDb
         cidx.insertNewBulk(null);   // flush any remaining
     }
 
-    private void makeChanPointerTable() throws SQLException
+    private void makeChanPointerTable(String ifoSubsys) throws SQLException
     {
-        ChannelIndex cidx = new ChannelIndex(db);
-        cidx.streamAll();
+        cidx.streamByName(ifoSubsys + "%");
         
         ChanIndexInfo cii;
         // one pass through the ChannelIndex table to set the Index ID in our in memory Map
@@ -411,8 +548,6 @@ public class CheckDb
             }
         }
         // another pass through the in memory Map to write out the pointer
-        ChanPointerTable cpt = new ChanPointerTable(db);
-        cpt.recreate();
         
         for (Entry<String, TreeMap<String, ChanStat>> csl : chanstats.entrySet())
         {
@@ -433,4 +568,53 @@ public class CheckDb
         cpt.insertNewBulk(null);
     }
 
+    private boolean processArgs(String[] args)
+    {
+        boolean ret = true;
+        Options options = new Options();
+
+        options.addOption(new Option("help", "print this message"));
+        options.addOption(new Option("version", "print the version information and exit"));
+
+        options.addOption(OptionBuilder.withArgName("config").hasArg().withDescription("ldvw configuration path").create("config"));
+
+        CommandLineParser parser = new GnuParser();
+
+        boolean wantHelp = false;
+        CommandLine line;
+        try
+        {
+            // parse the command line arguments
+            
+            line = parser.parse(options, args);
+        }
+        catch (ParseException exp)
+        {
+            // oops, something went wrong
+            System.err.println("Command parsing failed.  Reason: " + exp.getMessage());
+            wantHelp = true;
+            line = null;
+        }
+        if (line != null)
+        {
+            if (line.hasOption("version"))
+            {
+                System.out.println(programName + " - version " + version);
+            }
+
+            wantHelp = line.hasOption("help");
+            if (line.hasOption("config"))
+            {
+                configFile = line.getOptionValue("config");
+            }
+        }
+        if (wantHelp)
+        {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp(programName, options);
+            ret = false;
+        }
+        return ret;
+    }
+    
 }
