@@ -97,7 +97,7 @@ public class TrendPlot
     
     private TreeSet<String> chanNames;
     private String server;
-    private boolean useRaw = false;
+    private final boolean useRaw = false;
     private long startGps;
     private int duration;
     private ArrayList<String> flist;
