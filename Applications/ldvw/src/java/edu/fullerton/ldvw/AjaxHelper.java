@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.JSONArray;
+
 
 /**
  *
@@ -38,44 +38,44 @@ class AjaxHelper
 
         String mime = "application/json";
         String want = request.getParameter("data").toLowerCase();
-        JSONArray results = new JSONArray();
-        
-        if (want.equalsIgnoreCase("test"))
-        {
-            results.put("One thing");
-            results.put("Another");
-            results.put("Still another");
-            results.put("OK one more");
-        }
-        if (results.length() > 0 && ermsg.isEmpty())
-        {
-            ServletOutputStream outstrm = null;
-            try
-            {
-                response.setContentType(mime);
-                String outStr = results.toString();
-                response.setContentLength(outStr.length());
-                outstrm = response.getOutputStream();
-                
-                outstrm.print(outStr);
-            }
-            catch (IOException ex)
-            {
-                ermsg = ex.getClass().getSimpleName() + ": " + ex.getLocalizedMessage();
-            }
-            finally
-            {
-                try
-                {
-                    outstrm.close();
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(AjaxHelper.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            
-        }
+//        JSONArray results = new JSONArray();
+//        
+//        if (want.equalsIgnoreCase("test"))
+//        {
+//            results.put("One thing");
+//            results.put("Another");
+//            results.put("Still another");
+//            results.put("OK one more");
+//        }
+//        if (results.length() > 0 && ermsg.isEmpty())
+//        {
+//            ServletOutputStream outstrm = null;
+//            try
+//            {
+//                response.setContentType(mime);
+//                String outStr = results.toString();
+//                response.setContentLength(outStr.length());
+//                outstrm = response.getOutputStream();
+//                
+//                outstrm.print(outStr);
+//            }
+//            catch (IOException ex)
+//            {
+//                ermsg = ex.getClass().getSimpleName() + ": " + ex.getLocalizedMessage();
+//            }
+//            finally
+//            {
+//                try
+//                {
+//                    outstrm.close();
+//                }
+//                catch (IOException ex)
+//                {
+//                    Logger.getLogger(AjaxHelper.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//            
+//        }
         return ermsg;
     }
     
