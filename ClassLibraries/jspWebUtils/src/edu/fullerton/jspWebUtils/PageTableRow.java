@@ -121,10 +121,16 @@ public class PageTableRow extends PageItem
         cols.add(t);
     }
 
+    /**
+     * Set row type to Header
+     */
     public void setHeader()
     {
         rowType=RowType.HEAD;
     }
+    /**
+     * Set row type to Footer
+     */
     public void setFooter()
     {
         rowType=RowType.FOOT;
