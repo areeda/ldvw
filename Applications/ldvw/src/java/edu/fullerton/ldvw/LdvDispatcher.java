@@ -19,10 +19,12 @@ package edu.fullerton.ldvw;
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.*;
 import edu.fullerton.ldvjutils.ChanInfo;
+
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.TimeAndDate;
 import edu.fullerton.ldvplugin.DBManager;
 import edu.fullerton.ldvplugin.HelpManager;
+import edu.fullerton.ldvservlet.ServletSupport;
 import edu.fullerton.ldvtables.ChannelTable;
 import edu.fullerton.ldvtables.ImageTable;
 import edu.fullerton.ldvtables.ViewUser;
@@ -39,7 +41,8 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 /**
  *
  * @author Joseph Areeda<joseph.areeda@ligo.org>
- */
+
+*/
 public class LdvDispatcher extends GUISupport
 {
     private final long startTime;
@@ -48,6 +51,7 @@ public class LdvDispatcher extends GUISupport
     private HelpManager helpManager;
     private final HttpServletRequest request;
     private final HttpServletResponse response;
+    private ServletSupport servletSupport;
 
     public LdvDispatcher(HttpServletRequest request, HttpServletResponse response, Database db, Page vpage, ViewUser vuser)
     {
@@ -57,7 +61,10 @@ public class LdvDispatcher extends GUISupport
         this.request = request;
         this.response = response;
     }
-
+    public void setServletSupport(ServletSupport servletSupport)
+    {
+        this.servletSupport = servletSupport;
+    }
     /**
      * Calls the appropriate module to handle the action requested by the user.
      * Note: most actions build the output in the vpage variable passed to pretty much everybody 
@@ -192,67 +199,9 @@ public class LdvDispatcher extends GUISupport
      */
     private void addNavBar() throws WebUtilException
     {
-        // Top row commands 2 element rows "Text", "get parameters" or "http*://"
-        String[][] commands =
-        {
-            { "Home",           "main"         },
-            { "Saved Plots",    "ImageHistory&amp;size=med" },
-            { "Chan Stats",     "ChannelStats" },
-            { "NDS Status",     "ndsStatus"    },
-            { "Upload",         "upload"       },
-            { "Help",           mainHelpUrl    },
-            { "Contact Us",     "contactUs"    }
-        };
-        // Commands only available to admin group
-        String[][] adminCommands =
-        {
-            { "User Stats",     "Stats"         },
-            { "Edit Help",      "EditHelp"      },
-            { "DB stats",       "dbstats"       },
-            { "New Chan sel",   "baseChan"      },
-            { "Servers",        "serverManager" }
-        };
-
-        PageItem navBar;
-
-        PageItemBSNavBar bsnav = new PageItemBSNavBar();
-        String baseUrl = servletPath + "?act=";
-        String cmdUrl;
-
-        for (String[] command : commands)
-        {
-            if (!command[0].isEmpty() && !command[1].isEmpty())
-            {
-                if (command[1].matches("^http.?://.*"))
-                {
-                    bsnav.addLink(command[1], command[0], "_blank");
-                }
-                else
-                {
-                    cmdUrl = baseUrl + command[1];
-                    bsnav.addLink(cmdUrl, command[0]);
-                }
-            }
-        }
-
-        if (vuser.isAdmin())
-        {
-            bsnav.createNewSubmenu("Admin");
-
-            for (String[] command : adminCommands)
-            {
-                cmdUrl = baseUrl + command[1];
-                bsnav.addSubmenuLink(cmdUrl, command[0]);
-            }
-            bsnav.addCurSubmenu();
-        }
-
-        navBar = bsnav;
-
         if (paramMap.get("embed") == null)
         {
-            vpage.add(navBar);
-            vpage.addBlankLines(2);
+            servletSupport.addNavBar();
         }
     }
 
@@ -758,4 +707,6 @@ public class LdvDispatcher extends GUISupport
             sm.procForm();
         }
     }
+
+    
 }
