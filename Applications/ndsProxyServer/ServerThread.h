@@ -35,7 +35,7 @@ private:
     int fd;
     
     enum Command {UNKNOWN, ATIM, CHCOUNT, CHHASH, CHLIST, CONNECT, DATA, DISCONNECT, 
-                  EMPTY, HELP, NEXT, SOURCEDATA, VERSION, BYE};
+                  EMPTY, HELP, NEXT, SOURCEDATA, SOURCELIST, VERSION, BYE};
     map<string, Command> cmdList;
     
     NDSConnection *conn;
@@ -59,6 +59,7 @@ private:
     // the commands
     void getAvailableTimes(vector<string> args);    ///< find when these channels have data
     void getSourceData( vector<string> args );      ///< return times from source frames
+    void getSourceList( vector<string> args );  ///< get source list
     void connect(vector<string> args);              ///< establish connect to the server
     void disconnect(vector<string> args);           ///< close connection to server but not client
     void nextBuf(vector<string> args);              ///< send next buffer of data previously requested

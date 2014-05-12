@@ -68,7 +68,8 @@ ServerThread::ServerThread()
     cmdList["exit"] = BYE;          // close connection to server and client
     cmdList["help"] = HELP;         // send silly command list
     cmdList["next"] = NEXT;         // get next data buffer
-    cmdList["srcd"] = SOURCEDATA;   // Get available frame times
+    cmdList["srcd"] = SOURCEDATA;   // Get detailed list of available frame times
+    cmdList["srcl"] = SOURCELIST;   // get source frame list
     cmdList["quit"] = BYE;          // close connection to server and client
     cmdList["ver"] = VERSION;       // send back server version
 }
@@ -266,6 +267,15 @@ void ServerThread::dispatcher(void* id)
                             if ( checkConn( ) )
                             {
                                 getSourceData(args);
+                                sendStr( "OK\n" );
+                            }
+                            break;
+                            
+                        case SOURCELIST:
+                            if ( checkConn())
+                            {
+                                getSourceList(args);
+                                sendStr( "OK\n" );
                             }
                             break;
                             
@@ -600,6 +610,104 @@ void ServerThread::getSourceData( vector<string> args )
         chan->setConn( conn );
         
         daq_channel_t daq_chan[n];
+        for(i=0;i<n;i++)
+        {
+            memset( &( daq_chan[i] ), 0, sizeof (daq_channel_t ) );
+        }
+        int ochan=0;
+        
+        int rc = 0;
+        i = 1;
+        while ( i < args.size( ) && rc == 0 )
+        {
+            if ( args[i].length( ) < 64 )
+            {
+                chantype_t ctype = cUnknown;
+                string cname = args[i];
+                
+                if ( i < args.size() - 1 )
+                {
+                    if (chan->str2chantype(args[i+1].c_str(), &ctype))
+                    {
+                        i++;
+                    }
+                }
+                i++;
+                daq_init_channel( &( daq_chan[ochan] ), cname.c_str( ), ctype , 0.0, _undefined );
+                rc = daq_request_channel_from_chanlist( conn->getDaqd( ), &( daq_chan[ochan] ) );
+                if ( rc != 0 )
+                {
+                    string ermsg = string( "daq_request_channel_from_chanlist:" ) + string( daq_strerror( rc ) );
+                    cmdErr( ermsg.c_str( ) );
+                }
+                ochan++;
+            }
+        }
+        if ( rc == 0 )
+        {
+            char* list = (char *) calloc( 1, (size_t) MAX_SOURCE_LIST );
+            long src_len;
+            time_t gps = 0;
+            rc = daq_recv_source_data( conn->getDaqd( ), list, (size_t) MAX_SOURCE_LIST, gps,
+                                       &src_len );
+            if ( rc )
+            {
+                cmdErr( daq_strerror( rc ) );
+            }
+            else
+            {
+                long inx;
+                sendSuccess( );
+                for ( inx = 0; inx < src_len; inx++ )
+                {
+                    if ( list[inx] == ' ' ) continue;
+                    char* cbrace = strchr( list + inx, '}' ) ;
+                    if (cbrace != NULL)
+                    {
+                        cbrace ++;
+                        *cbrace = 0;
+                        string ans = string( list + inx ) + string( "\n" );
+                        sendStr( ans.c_str( ) );
+                        inx = cbrace - list;
+                    }
+                    else
+                    {
+                        sendStr("\n");
+                    }
+                }
+                daq_clear_channel_list( conn->getDaqd( ) );
+            }
+            free( list );
+        }
+
+    }
+    else
+    {
+        cmdErr( "No channel names specified." );
+    }
+}
+
+/**
+ * Get the source list from the server for more detailed than available times
+ * 
+ * Channel types are optional and their presence is determined by matching against the list
+ * @param args list of channel names, [<channel type>]
+ * @see ServerThread::getSourceData
+ * @see Channels::str2chantype
+ */
+void ServerThread::getSourceList( vector<string> args )
+{
+    unsigned int i;
+    unsigned int n = args.size( );
+    if ( n > 1 )
+    {
+        if ( chan == NULL )
+        {
+            chan = new Channels( );
+        }
+        chan->setConn( conn );
+
+        daq_channel_t daq_chan[n];
         int rc = 0;
         i = 1;
         while ( i < args.size( ) && rc == 0 )
@@ -609,15 +717,15 @@ void ServerThread::getSourceData( vector<string> args )
                 chantype_t ctype = cUnknown;
                 string cname = args[i];
                 memset( &( daq_chan[i - 1] ), 0, sizeof (daq_channel_t ) );
-                if ( i < args.size() - 1 )
+                if ( i < args.size( ) - 1 )
                 {
-                    if (chan->str2chantype(args[i+1].c_str(), &ctype))
+                    if ( chan->str2chantype( args[i + 1].c_str( ), &ctype ) )
                     {
                         i++;
                     }
                 }
                 i++;
-                daq_init_channel( &( daq_chan[i - 1] ), cname.c_str( ), ctype , 0.0, _undefined );
+                daq_init_channel( &( daq_chan[i - 1] ), cname.c_str( ), ctype, 0.0, _undefined );
                 rc = daq_request_channel_from_chanlist( conn->getDaqd( ), &( daq_chan[i - 1] ) );
                 if ( rc != 0 )
                 {
@@ -892,7 +1000,8 @@ void ServerThread::sendHelp()
     helpMsg += "DATA, <channel name>, <channel type>, <gps start time>, <gps end time> [,<buffer size>[,<rate>]] \n";
     helpMsg += "      - REQUEST data to be transferred, use NEXT to get the data\n";
     helpMsg += "DCON -  disconnect from NDS server but leave this connection open\n";
-    helpMsg += "SRCD, <channel name>, [<channel type>] [,<channel name>, [<channel type>] ... ] - get times of frames\n" ;
+    helpMsg += "SRCD, <channel name>, [<channel type>] [,<channel name>, [<channel type>] ... ] - detailed source data of frames\n" ;
+    helpMsg += "SRCL, <channel name>, [<channel type>] [,<channel name>, [<channel type>] ... ] - source list of frames\n" ;
     helpMsg += "NEXT, [ALPHA|BINARY] - get next buffer, default is alpha. Only one channel can be specified.\n";
 
     helpMsg += "\n";
