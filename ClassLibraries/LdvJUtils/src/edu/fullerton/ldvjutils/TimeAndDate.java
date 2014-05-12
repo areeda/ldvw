@@ -56,15 +56,26 @@ public class TimeAndDate
     private static final long epoch = 315964800;      // gps epoc in unix time 315964800
 
     /**
-     * Convert UTC seconds to UTC seconds
+     * Convert GPS seconds to UTC seconds
      * 
-     * @param gps GPS times
+     * @param gps GPS time
      * @return  UTC seconds from Unix epoch
      */
     public static long gps2utc(long gps)
     {
         long utc = gps + epoch - countLeapSeconds(gps);
         return utc;
+    }
+    /**
+     * Convert gps seconds to a Java Date object
+     * @param gps GPS time
+     * @return corresponding Date object
+     */
+    public static Date gps2date(long gps)
+    {
+        long utcms = TimeAndDate.gps2utc(gps) * 1000;
+        Date ret = new Date(utcms);
+        return ret;
     }
 
     /**
@@ -401,7 +412,7 @@ public class TimeAndDate
         String ret;
         if (days > 0)
         {
-            ret = String.format("%2$02d:%3$02d:%4$02d+%1$dd", days, hours, minutes, seconds);
+            ret = String.format("%1$dd %2$02d:%3$02d:%4$02d", days, hours, minutes, seconds);
         }
         else if (hours > 0)
         {
