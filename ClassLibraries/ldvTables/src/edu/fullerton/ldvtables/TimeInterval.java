@@ -16,6 +16,7 @@
  */
 package edu.fullerton.ldvtables;
 
+import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.TimeAndDate;
 
 /**
@@ -23,7 +24,7 @@ import edu.fullerton.ldvjutils.TimeAndDate;
  * 
  * @author Joseph Areeda <joe@areeda.com>
  */
-public class TimeInterval
+public class TimeInterval implements Comparable<TimeInterval>
 {
     private long startGps;
     private long stopGps;
@@ -37,8 +38,8 @@ public class TimeInterval
      */
     public TimeInterval(long start, long stop)
     {
-        startGps = start;
-        stopGps = stop;
+        startGps = Math.min(start, stop);
+        stopGps = Math.max(start, stop);
         cacheId = 0;
         dataLength = 0;
     }
@@ -52,8 +53,8 @@ public class TimeInterval
      */
     public TimeInterval(long start, long stop, int cacheId, long dataLength)
     {
-        startGps = start;
-        stopGps = stop;
+        startGps = Math.min(start, stop);
+        stopGps = Math.max(start, stop);
         this.cacheId = cacheId;
         this.dataLength = dataLength;
     }
@@ -66,6 +67,7 @@ public class TimeInterval
     {
         startGps = ti.getStartGps();
         stopGps = ti.getStopGps();
+        checkTimes();
         cacheId = ti.getCacheId();
         dataLength = ti.getDataLength();
     }
@@ -85,6 +87,7 @@ public class TimeInterval
     public void setStartGps(long startGps)
     {
         this.startGps = startGps;
+        checkTimes();
     }
 
     /**
@@ -103,6 +106,7 @@ public class TimeInterval
     public void setStopGps(long stopGps)
     {
         this.stopGps = stopGps;
+        checkTimes();
     }
 
     /**
@@ -169,5 +173,73 @@ public class TimeInterval
 
         ret += String.format("(%1$s)", TimeAndDate.hrTime(stop - strt));
         return ret;
+    }
+
+    @Override
+    public int compareTo(TimeInterval t)
+    {
+        int ret = 0;
+        if (getStartGps() < t.getStartGps())
+        {
+            ret = -1;
+        }
+        else if (getStartGps() > t.getStartGps())
+        {
+            ret = 1;
+        }
+        else
+        {
+            if (getStopGps() < t.getStopGps())
+            {
+                ret = -1;
+            }
+            else if (getStopGps() > t.getStopGps())
+            {
+                ret = 1;
+            }
+        }
+        return ret;
+    }
+    /**
+     * test if 2 time interval overlap
+     * @param ti the other time interval
+     * @return true if they overlap
+     */
+    public boolean overlaps(TimeInterval ti)
+    {
+        boolean ret = false;
+        long ostrt = ti.getStartGps();
+        long ostop = ti.getStopGps();
+        ret |= startGps >= ostrt && startGps <= ostop;
+        ret |= stopGps >= ostrt && stopGps <= ostop;
+        ret |= startGps <= ostrt && stopGps >= ostop;
+        return ret;
+    }
+    /**
+     * Merge two overlapping time intervals
+     * @param ti the other time interval
+     * @return the combined interval
+     * @throws LdvTableException if they do not overlap
+     */
+    public TimeInterval mergeIntervals(TimeInterval ti) throws LdvTableException
+    {
+        if (!overlaps(ti))
+        {
+            throw new LdvTableException("Time intervals cannot be merged because they do not overlap");
+        }
+        long start = Math.min(startGps, ti.getStartGps());
+        long stop = Math.max(stopGps, ti.getStopGps());
+        TimeInterval ret = new TimeInterval(start, stop);
+        return ret;
+    }
+
+    private void checkTimes()
+    {
+        if (startGps > stopGps)
+        {
+            long t=startGps;
+            startGps = stopGps;
+            stopGps = t;
+        }
     }
 }
