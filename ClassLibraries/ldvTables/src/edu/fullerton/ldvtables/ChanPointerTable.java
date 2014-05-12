@@ -105,9 +105,9 @@ public class ChanPointerTable extends Table
 
     /**
      * get a list of all entries in the Channel table for this base channel and type
-     * @param indexID
-     * @param cType
-     * @return 
+     * @param indexID id of the base channel
+     * @param cType channel type (raw, rds, minute-trend ...
+     * @return list of ids in Channels table
      * @throws edu.fullerton.ldvjutils.LdvTableException 
      */
     public List<Integer> getChanList(Integer indexID, String cType) throws LdvTableException
@@ -131,6 +131,14 @@ public class ChanPointerTable extends Table
         return ret;
     }
 
+    /**
+     * Get list of entries that belong to this base channel and the appropriate trend
+     * @param indexID id of the base channel
+     * @param trType (minute-trend or second-trend)
+     * @param trendList )min, max, mean...)
+     * @return list of ids in the Channels table
+     * @throws LdvTableException 
+     */
     public List<Integer> getChanList(Integer indexID, String trType, String[] trendList) throws LdvTableException
     {
         String q = String.format("SELECT * FROM %1$s WHERE indexID = %2$s and cType='%3$s'",
