@@ -27,9 +27,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- *
+ * The base channel look up tables
+ * 
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
 public class ChannelIndex extends Table
@@ -320,6 +323,37 @@ public class ChannelIndex extends Table
             throw new LdvTableException(ex);
         }
         
+        return ret;
+    }
+    public ChanIndexInfo getInfo(int id) throws LdvTableException, SQLException
+    {
+        ChanIndexInfo ret=null;
+        String q = String.format("Select * from %1$s where indexID=%2$d", getName(), id);
+        ResultSet rs = null;
+        try
+        {
+            rs = db.executeQuery(q);
+            if (rs.next())
+            {
+                ret = new ChanIndexInfo();
+                ret.fill(rs);
+            }
+        }
+        
+        finally
+        {
+            if (rs != null)
+            {
+                try
+                {
+                    rs.close();
+                }
+                catch (SQLException ex)
+                {
+                    
+                }
+            }
+        }
         return ret;
     }
     private boolean needRegex(String pat)
