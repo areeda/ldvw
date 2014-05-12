@@ -85,6 +85,9 @@ public class BaseChannelSelector extends GUISupport
     private PageItemImage pemIcon = null;
     private final String basePemUrl = "http://pem.ligo.org/channelinfo/index.php?channelname=";
     
+    private PageItemImage srcIcon=null;
+    private final String baseSrcUrl;
+    
     private PageTableRow selRow;
     private PageTableRow selRow2;
     private PageTableColumn cTypeCol;
@@ -97,10 +100,14 @@ public class BaseChannelSelector extends GUISupport
         setParamMap(request.getParameterMap());
         setContextPath(request.getContextPath());
         this.request = request;
-        infoIconDescUrl = request.getContextPath() + "/infoicon3.png";
-        infoIconNoDescUrl = request.getContextPath() + "/infoicon4.png";
-        pemIcon = new PageItemImage(request.getContextPath() + "/pemIcon.png", "pem icon", "pem");
+        infoIconDescUrl = getContextPath() + "/infoicon3.png";
+        infoIconNoDescUrl = getContextPath() + "/infoicon4.png";
+        pemIcon = new PageItemImage(getContextPath() + "/pemIcon.png", "pem icon", "PEM diagram containing channel");
         pemIcon.setDim(24, 24);
+        
+        srcIcon = new PageItemImage(getContextPath() + "/clockIcon.png", "src icon", "Get channel source data");
+        srcIcon.setDim(24, 24);
+        baseSrcUrl = getContextPath() + "/SrcList";
     }
     
     /**
@@ -190,6 +197,9 @@ public class BaseChannelSelector extends GUISupport
     }
     /**
      * Process the filter parameters entered and create a list of indexID's
+     * @throws java.sql.SQLException
+     * @throws edu.fullerton.ldvjutils.LdvTableException
+     * @throws edu.fullerton.jspWebUtils.WebUtilException
      */
     public void processFilterRequest() throws SQLException, LdvTableException, WebUtilException
     {
@@ -255,6 +265,7 @@ public class BaseChannelSelector extends GUISupport
             vpage.add(String.format("%1$,d channels match query.", nMatch));
             vpage.includeJS("setChkBoxByClass.js");
 
+
             if (nMatch > 0)
             {
                 vpage.add(String.format("  Displaying channels %1$,d through %2$,d, ", strt + 1, last + 1));
@@ -276,10 +287,12 @@ public class BaseChannelSelector extends GUISupport
 
             for (String var : partsVariables)
             {
+            
                 String val = request.getParameter(var);
                 if (val != null && !val.isEmpty())
                 {
                     pf.addHidden(var, val);
+                
                 }
             }
             pf.setNoSubmit(true);
@@ -479,9 +492,9 @@ public class BaseChannelSelector extends GUISupport
     private PageTable getSelectTable( ArrayList<ChanIndexInfo> matches, String cType) 
             throws WebUtilException
     {
-        String[] hdrAll=     { "Name", "Raw rate(s)", "Rds rate(s)", "CIS"};
-        String[] hdrRawRds = { "Sel", "Name","Type", "Rate(s)", "CIS" };
-        String[] hdrTrend =  { "Name","Type", "Trends", "CIS" };
+        String[] hdrAll=     { "Name", "Raw rate(s)", "RDS rate(s)", "Info links"};
+        String[] hdrRawRds = { "Sel", "Name","Type", "Rate(s)", "Info links" };
+        String[] hdrTrend =  { "Name","Type", "Trends", "Info links" };
         
         PageTable selTbl = new PageTable();
         PageTableRow hdr;
@@ -610,18 +623,18 @@ public class BaseChannelSelector extends GUISupport
             cisInfo = new PageItemString("&nbsp;",false);
         }
         PageItem pemInfo = getPemLink(cii);
+        PageItem csrcInfo = getSrcInfoLink(cii);
+        
+        PageItemList infoLinks = new PageItemList();
+        infoLinks.add(cisInfo);
+        infoLinks.add(new PageItemString("&nbsp;",false));
+        infoLinks.add(csrcInfo);
+        infoLinks.add(new PageItemString("&nbsp;",false));
         if (pemInfo != null)
         {
-            PageItemList infoLinks = new PageItemList();
-            infoLinks.add(cisInfo);
-            infoLinks.add(new PageItemString("&nbsp;",false));
             infoLinks.add(pemInfo);
-            infoLink = new PageTableColumn(infoLinks);
         }
-        else
-        {
-            infoLink = new PageTableColumn(cisInfo);
-        }
+        infoLink = new PageTableColumn(infoLinks);
 
         PageItemList typSelList = new PageItemList();
         for(String type : cii.getTypeList())
@@ -753,12 +766,12 @@ public class BaseChannelSelector extends GUISupport
     {
         if (infoDescIcon == null)
         {
-            infoDescIcon = new PageItemImage(infoIconDescUrl, "chan info", "CIS");
+            infoDescIcon = new PageItemImage(infoIconDescUrl, "chan info", "CIS for channel");
             infoDescIcon.setDim(24, 24);
         }
         if (infoNoDescIcon == null)
         {
-            infoNoDescIcon = new PageItemImage(infoIconNoDescUrl, "chan info", "CIS");
+            infoNoDescIcon = new PageItemImage(infoIconNoDescUrl, "chan info", "CIS for channel");
             infoNoDescIcon.setDim(24, 24);
         }
 
@@ -847,6 +860,14 @@ public class BaseChannelSelector extends GUISupport
             PageItemImageLink link;
             ret = new PageItemImageLink(pemUrl, pemIcon, "_blank");
         }
+        return ret;
+    }
+
+    private PageItem getSrcInfoLink(ChanIndexInfo cii)
+    {
+        PageItem ret;
+        String url = String.format("%1$s?baseid=%2$d", baseSrcUrl, cii.getIndexID());
+        ret = new PageItemImageLink(url, srcIcon, "_blank");
         return ret;
     }
     
