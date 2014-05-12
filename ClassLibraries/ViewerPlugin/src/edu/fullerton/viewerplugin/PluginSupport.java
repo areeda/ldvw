@@ -17,30 +17,55 @@
 package edu.fullerton.viewerplugin;
 
 import com.areeda.jaDatabaseSupport.Database;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.DefaultFontMapper;
+import com.itextpdf.text.pdf.FontMapper;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfTemplate;
+import com.itextpdf.text.pdf.PdfWriter;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.TimeAndDate;
 import edu.fullerton.ldvtables.ImageTable;
 import edu.fullerton.ldvtables.ViewUser;
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.SimpleTimeZone;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.batik.dom.svg.SVGDOMImplementation;
+import org.apache.batik.svggen.SVGGraphics2D;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.RegularTimePeriod;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.time.TimeSeriesDataItem;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+
 
 /**
  *
@@ -54,6 +79,7 @@ public class PluginSupport
     protected int width=640;
     protected int height=480;
     protected Map<String, String[]> parameterMap; // all request parameters for a plot request
+    private String xAxisLabel;
 
     
     public PluginSupport()
@@ -130,6 +156,14 @@ public class PluginSupport
         }
         return ret;
     }
+    /**
+     * Create an image from the Chart Panel and add it the database
+     * @param cp input plot
+     * @return image ID of newly added row
+     * @throws IOException
+     * @throws SQLException
+     * @throws NoSuchAlgorithmException 
+     */
     public int saveImageAsPNG(ChartPanel cp) throws IOException, SQLException, NoSuchAlgorithmException
     {
         JFreeChart chart = cp.getChart();
@@ -174,6 +208,77 @@ public class PluginSupport
         }
 
     }
+    /**
+     * Create a Scalable Vector Graphics (SVG) file from a JFree Chart
+     * @param chart the plot ready for saving
+     * @param filename the output filename
+     * @throws WebUtilException 
+     */
+    public void saveImageAsSvgFile(JFreeChart chart, String filename) throws WebUtilException
+    {
+        // THE FOLLOWING CODE BASED ON THE EXAMPLE IN THE BATIK DOCUMENTATION...
+        // Get a DOMImplementation
+        DOMImplementation domImpl = SVGDOMImplementation.getDOMImplementation();
+        
+        // Create an instance of org.w3c.dom.Document
+        Document document = domImpl.createDocument(null, "svg", null);
+        // Create an instance of the SVG Generator
+        SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+        // set the precision to avoid a null pointer exception in Batik 1.5
+        svgGenerator.getGeneratorContext().setPrecision(6);
+        // Ask the chart to render into the SVG Graphics2D implementation
+        chart.draw(svgGenerator, new Rectangle2D.Double(0, 0, width, height), null);
+        // Finally, stream out SVG to a file using UTF-8 character to
+        // byte encoding
+        boolean useCSS = true;
+        Writer out;
+        try
+        {
+            out = new OutputStreamWriter(
+                    new FileOutputStream(new File(filename)), "UTF-8");
+            svgGenerator.stream(out, useCSS);
+            out.close();
+        }
+        catch (IOException  ex)
+        {
+            throw new WebUtilException("Writing SVG image", ex);
+        }
+    }
+    public void saveImageAsPdfFile(JFreeChart chart, String filename) throws WebUtilException
+    {
+        try
+        {
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(filename));
+            Rectangle pagesize = new Rectangle(width, height);
+            com.itextpdf.text.Document document;
+            document = new com.itextpdf.text.Document(pagesize, 50, 50, 50, 50);
+            try
+            {
+                PdfWriter writer = PdfWriter.getInstance(document, out);
+                FontMapper mapper = new DefaultFontMapper();
+                document.addAuthor("JFreeChart");
+                document.addSubject("Demonstration");
+                document.open();
+                PdfContentByte cb = writer.getDirectContent();
+                PdfTemplate tp = cb.createTemplate(width, height);
+                Graphics2D g2 = tp.createGraphics(width, height, mapper);
+                Rectangle2D r2D = new Rectangle2D.Double(0, 0, width, height);
+                chart.draw(g2, r2D);
+                g2.dispose();
+                cb.addTemplate(tp, 0, 0);
+            }
+            catch (DocumentException de)
+            {
+                throw new WebUtilException("Saving as pdf", de);
+            }
+            document.close();
+        }
+        catch (FileNotFoundException ex)
+        {
+            throw new WebUtilException("Saving plot as pdf: ", ex);
+        }
+
+    }
     public void setSize(int width, int height)
     {
         this.width = width;
@@ -212,11 +317,11 @@ public class PluginSupport
         rng[2] = maxx;
         rng[3] = maxy;
     }
-    static void getRangeLimits(XYSeriesCollection mtds, Double[] rng, int skip)
+    public static void getRangeLimits(XYSeriesCollection mtds, Double[] rng, int skip)
     {
         getRangeLimits(mtds,rng,skip,-Float.MAX_VALUE, Float.MAX_VALUE);
     }
-    static void getRangeLimits(XYSeriesCollection mtds, Double[] rng, int skip, float xmin, float xmax)
+    public static void getRangeLimits(XYSeriesCollection mtds, Double[] rng, int skip, float xmin, float xmax)
     {
         Double minx, miny, maxx, maxy;
 
@@ -246,7 +351,7 @@ public class PluginSupport
         rng[2] = maxx;
         rng[3] = maxy;  
     }
-    static int scaleRange(TimeSeriesCollection mtds, Double miny, Double maxy)
+    public static int scaleRange(TimeSeriesCollection mtds, Double miny, Double maxy)
     {
         int exp = PluginSupport.getExp(miny, maxy);
         double scale = Math.pow(10,exp);
@@ -292,7 +397,7 @@ public class PluginSupport
         }
         return exp;
     }
-    static int scaleRange(XYSeriesCollection mtds, Double miny, Double maxy)
+    public static int scaleRange(XYSeriesCollection mtds, Double miny, Double maxy)
     {
         int exp = PluginSupport.getExp(miny, maxy);
         if (exp > 0 && exp < 100)
@@ -337,4 +442,120 @@ public class PluginSupport
     {
         return true;
     }
+    /**
+     * Generate a JFreeChart TimeSeries object from a ChanDataBuffer
+     * Note:  the time axis is in UTC.  For GPS or delta T use XY series.
+     * @param dbuf - ldvw data buffer
+     * @param legend - plot legend for this series
+     * @return JFreeChart time series for adding to a plot
+     */
+    public TimeSeries getTimeSeries(ChanDataBuffer dbuf, String legend, int sum)
+    {
+        sum = sum < 1 ? 1 : sum;
+        TimeSeries ts;
+        ts = new TimeSeries(legend, Millisecond.class);
+        SimpleTimeZone utctz = new SimpleTimeZone(0, "UTC");
+
+        float rate = dbuf.getChanInfo().getRate();
+        double msPerSample = 1000 / rate;
+        long startMs = TimeAndDate.gps2utc(dbuf.getTimeInterval().getStartGps()) * 1000;
+        float[] data = dbuf.getData();
+        for (int i = 0; i < dbuf.getDataLength(); i+=sum)
+        {
+            float td = 0.f;
+            int nsum = 0;
+            for(int j=0;j<sum && i+j < dbuf.getDataLength(); j++)
+            {
+                td += data[i+j];
+                nsum++;
+            }
+            td /= nsum;
+            
+            long curMs = Math.round(msPerSample * i + startMs);
+            Date t = new Date(curMs);
+            ts.addOrUpdate(new Millisecond(t, utctz), td);
+            if (msPerSample >= 1000)
+            {
+                // this plots trend data as stair steps
+                long endMs = Math.round(curMs + msPerSample - 1);
+                Date t1 = new Date(endMs);
+                ts.addOrUpdate(new Millisecond(t1, utctz), td);
+            }
+        }
+        return ts;
+    }
+
+    /**
+     * Convert a ldvw data buffer to JFreeChart XY-series
+     * 
+     * @param dbuf - ldvw data buf
+     * @param legend - String to identify series
+     * @param dt if true X axis is 0-t in [hopefully] intelligent units else it's gps time
+     * @param sum
+     * @param xAxisLabel this argument is returned set to a label for the X-axis
+     * @return A series to be added to a JFreeChart plot
+     */
+    public XYSeries addXySeries(ChanDataBuffer dbuf, String legend, boolean dt, int sum)
+    {
+        sum = sum < 1 ? 1 : sum;
+        XYSeries xys = new XYSeries(legend, false);
+
+        float rate = dbuf.getChanInfo().getRate();
+
+        long startSec = dbuf.getTimeInterval().getStartGps();
+        long durSec = dbuf.getTimeInterval().getStopGps() - dbuf.getTimeInterval().getStartGps();
+        double scale = 1;
+        double t0 = startSec;
+        xAxisLabel = "GPS time";
+        String units;
+        if (dt)
+        {
+            t0 = 0;
+            // put dt plots into reasonable units
+            if (durSec < 1800)
+            {
+                scale = 1.;
+                units = "sec";
+            }
+            else if (durSec < 3 * 3600)
+            {
+                scale = 1 / 60.;
+                units = "min";
+            }
+            else if (durSec < 48 * 3600)
+            {
+                scale = 1 / 3600.;
+                units = "hrs";
+            }
+            else
+            {
+                scale = 1.0 / (24 * 3600);
+                units = "days";
+            }
+            xAxisLabel = String.format("dt from %1$,d (%2$s)", startSec, units);
+        }
+        
+        float[] data = dbuf.getData();
+        for (int i = 0; i < dbuf.getDataLength(); i += sum)
+        {
+            double x = (i / rate + t0) * scale; // handle gps vs dt and dt units
+            double y = 0;
+            int nsum=0;
+            for(int j=0; j<sum && i+j < dbuf.getDataLength(); j++)
+            {
+                y += data[i+j];
+                nsum++;
+            }
+            y /= nsum;
+            xys.add(x, y);
+        }
+
+        return xys;
+    }
+
+    public String getxAxisLabel()
+    {
+        return xAxisLabel;
+    }
+    
 }
