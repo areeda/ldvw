@@ -71,6 +71,7 @@ public class ViewManager
     private String contextPath;
     private boolean embeded = false;        // when embedded we send much less stuff
 
+
     private final String servletName = "ldvw";
     private String version;
     private String helpUrl;
@@ -92,6 +93,7 @@ public class ViewManager
         startTime = System.currentTimeMillis();
         embeded = request.getParameter("embed") != null;
         
+    
         servletSupport = new ServletSupport();
         servletSupport.init(request, viewerConfig,embeded);
         
@@ -113,6 +115,7 @@ public class ViewManager
             mainLoop();
         }
         catch (WebUtilException | LdvTableException ex)
+        
         {
             try
             {
@@ -134,6 +137,7 @@ public class ViewManager
                 catch (WebUtilException ex2)
                 {
                     Page errPage = new Page();
+        
                     errPage.setTitle("Error generating html occurred");
                     errPage.add(myermsg);
                     pageHtml = errPage.getHTML();
@@ -156,6 +160,7 @@ public class ViewManager
         }
     }
     /**
+     * 
      * All pages go through here with the act parameters specifying what we're to do
      *
      * @throws WebUtilException - probably a bug in generating html
@@ -176,6 +181,7 @@ public class ViewManager
                                + "We will try to help but we don't control that community.<br>"
                                + "User: " + vuser.getCn() + "<br>";
                 vpage.add(new PageItemString(erMsg, false));
+       
                 vpage.setTitle("Not Authorized");
                 if (out == null)
                 {
@@ -196,63 +202,12 @@ public class ViewManager
             boolean showHdr = (noHdr == null || noHdr.isEmpty()) && !embeded;
             if (showHdr)
             {
-                PageTable hdrTbl = new PageTable();
-                hdrTbl.setClassName("hdrTable");
-                PageTableRow hdrRow = new PageTableRow();
-                PageItemImage h1 = new PageItemImage(contextPath + "/LIGO_logo50a.png", "LigoDV-Web", "LigoDV-Web");
-
-                h1.setDim(70, 50);
-                PageTableColumn h1Col = new PageTableColumn(h1);
-                h1Col.setId("hdrImg");
-                hdrRow.add(h1Col);
-
-                PageItemList l2 = new PageItemList();
-                PageItemString h2 = new PageItemString(String.format("LigoDV-Web &mdash; <i>v%1$s</i><br>",
-                                                                     version), false);
-                h2.setClassName("title");
-                l2.add(h2);
-
-                String name = vuser.getCn();
-                if (vuser.isAdmin())
-                {
-                    name += " (admin)";
-                }
-                PageItemString u = new PageItemString("Welcome " + name, false);
-                l2.add(u);
-
-                PageTableColumn h2Col = new PageTableColumn(l2);
-                h2Col.setId("hdrTxt");
-                hdrRow.add(h2Col);
-
-                hdrTbl.addRow(hdrRow);
-                vpage.add(hdrTbl);
-
-                if (isPrototype && isNewSession && showHdr)
-                {
-                    PageItemList protoWarnMsg = new PageItemList();
-                    protoWarnMsg.setId("warnDiv");
-                    protoWarnMsg.addEvent("onclick", "jQuery('#warnDiv').hide();");
-
-                    PageItemString warn = new PageItemString("WARNING");
-                    warn.setId("warnTitle");
-                    protoWarnMsg.add(warn);
-                    protoWarnMsg.addLine("Click in the pannel to hide this warning message.<br>");
-
-                    String warnMsg = "This LigoDV-Web server is the prototyping system used to test new and "
-                                     + "experimental software.  You are more than welcome to use the site but be forewarned "
-                                     + "that the level of bugs and other strange behavior is likely to be higher here "
-                                     + "than on the production server.  Also this server is subject to unannounced "
-                                     + "brief outages as we load the next version.  Here's a link to the production server ";
-                    protoWarnMsg.add(warnMsg);
-                    PageItemTextLink realServer = new PageItemTextLink("https://ldvw.ligo.caltech.edu/viewer", "ldvw.ligo.caltech.edu");
-                    protoWarnMsg.add(realServer);
-
-                    vpage.add(protoWarnMsg);
-                }
+                servletSupport.addStandardHeader(version);
             }
             LdvDispatcher dispatcher = new LdvDispatcher(request, response, db, vpage, vuser);
             dispatcher.setContextPath(contextPath);
             dispatcher.setServletPath(servletPath);
+            dispatcher.setServletSupport(servletSupport);
             
             helpUrl = helpUrl == null ? "" : helpUrl;
             dispatcher.setMainHelp(helpUrl);
