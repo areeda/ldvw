@@ -16,6 +16,10 @@
         <servlet-name>Upload</servlet-name>
         <servlet-class>edu.fullerton.ldvservlet.Upload</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>SrcList</servlet-name>
+        <servlet-class>edu.fullerton.ldvservlet.SrcList</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>Env</servlet-name>
         <url-pattern>/env</url-pattern>
@@ -27,6 +31,10 @@
     <servlet-mapping>
         <servlet-name>Upload</servlet-name>
         <url-pattern>/upload</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SrcList</servlet-name>
+        <url-pattern>/SrcList</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
