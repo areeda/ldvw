@@ -108,6 +108,7 @@ class ImageHistory extends GUISupport
         {
             PageItemList pil = new PageItemList();
             pil.add(getImageIdLine(id));
+            String mime = imgTbl.getMime(id);
             
             String url = String.format("%1$s?act=getImg&amp;imgId=%2$d", getServletPath(), id);
             String imgName = String.format("Image #%1$d", id);
@@ -116,6 +117,8 @@ class ImageHistory extends GUISupport
             if (width == 0)
             {   // full size just show them the image
                 piImg = new PageItemImage(url, imgName, null);
+                piImg.setClassName("embimg");
+                piImg.setMime(mime);
                 ImageCoordinateTbl ict = new ImageCoordinateTbl(db);
                 ImageCoordinate imgCord = ict.getCoordinate(id);
                 if (imgCord != null)
@@ -141,14 +144,22 @@ class ImageHistory extends GUISupport
             }
             else
             {
-                String thumbUrl = url + String.format("&amp;width=%1$d",width);
+                String thumbUrl = url;
+                if (!mime.contains("pdf"))
+                {
+                    thumbUrl += String.format("&amp;width=%1$d",width);
+                }
                 piImg = new PageItemImage(thumbUrl, imgName, null);
-                piImg.addStyle("width", "100%");
+                piImg.setClassName("embimg");
+                piImg.setMime(mime);
                 PageItemImageLink thumb = new PageItemImageLink(url, piImg, "_blank");
+                thumb.setClassName("embimg");
                 pil.add(thumb);
             }
             pil.addBlankLines(2);
-            imgRow.add(pil);
+            PageTableColumn imgCell = new PageTableColumn(pil);
+            imgCell.setClassName("imgtbl");
+            imgRow.add(imgCell);
             if (imgRow.getColumnCount() >= cols)
             {
                 table.addRow(imgRow);
