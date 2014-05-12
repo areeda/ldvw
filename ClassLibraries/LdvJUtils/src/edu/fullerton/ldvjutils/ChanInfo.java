@@ -147,6 +147,7 @@ public class ChanInfo implements Comparable
         return line;
     }
 
+    
     /**
      * Bytes per sample describes the raw data returned from the server
      * Currently the only values in the database are 2, 4 and 8
@@ -601,6 +602,10 @@ public class ChanInfo implements Comparable
         return ret;
     }
 
+    /**
+     * get generic info on this channel
+     * @return name, chan type, data type, sample rate and server
+     */
     @Override
     public String toString()
     {
@@ -625,7 +630,8 @@ public class ChanInfo implements Comparable
     }
 
     /**
-     * Compare two Channel info objects
+     * Compare two Channel info objects based on:
+     * name, server, chan type, rate, and data type (in that order)
      * @param o the other
      * @return -1 if this < other 0 if equal 1 if this > other
      */
@@ -643,13 +649,17 @@ public class ChanInfo implements Comparable
             {
                 ret = server.compareTo(ci.server);
             }
-            if (ret == 0)
+            else if (ret == 0)
             {
                 ret = cType.compareTo(ci.cType);
             }
-            if (ret == 0)
+            else if (ret == 0)
             {
                 ret = rate.compareTo(ci.rate);
+            }
+            else
+            {
+                ret = dType.compareTo(ci.dType);
             }
         }
         else
