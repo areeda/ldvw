@@ -853,9 +853,6 @@ exists or setup the property manually. For example like this:
                 COMPILATION SECTION
             -->
     <target depends="init" if="no.dist.ear.dir" name="deps-module-jar" unless="no.deps">
-        <ant antfile="${project.JSON}/build.xml" inheritall="false" target="jar">
-            <property name="deploy.on.save" value="false"/>
-        </ant>
         <ant antfile="${project.LdvJUtils}/build.xml" inheritall="false" target="jar">
             <property name="deploy.on.save" value="false"/>
         </ant>
@@ -888,9 +885,6 @@ exists or setup the property manually. For example like this:
         </ant>
     </target>
     <target depends="init" if="dist.ear.dir" name="deps-ear-jar" unless="no.deps">
-        <ant antfile="${project.JSON}/build.xml" inheritall="false" target="jar">
-            <property name="deploy.on.save" value="false"/>
-        </ant>
         <ant antfile="${project.LdvJUtils}/build.xml" inheritall="false" target="jar">
             <property name="deploy.on.save" value="false"/>
         </ant>
@@ -1075,13 +1069,14 @@ exists or setup the property manually. For example like this:
         <copyfiles files="${reference.LdvJUtils.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.jspWebUtils.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.jaDatabaseSupport.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
-        <copyfiles files="${reference.JSON.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.javaMail.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.sqlite.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.jdom.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.JTransform.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.opencsv.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.jfreechart.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.itext.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.batik.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.commons-lang.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.commons-io.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.commons-upload.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
@@ -1100,13 +1095,14 @@ exists or setup the property manually. For example like this:
         <copyfiles files="${reference.LdvJUtils.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${reference.jspWebUtils.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${reference.jaDatabaseSupport.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
-        <copyfiles files="${reference.JSON.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.javaMail.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.sqlite.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.jdom.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.JTransform.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.opencsv.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.jfreechart.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${libs.itext.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${libs.batik.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.commons-lang.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.commons-io.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.commons-upload.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
@@ -1524,7 +1520,6 @@ exists or setup the property manually. For example like this:
                 CLEANUP SECTION
             -->
     <target depends="init" name="deps-clean" unless="no.deps">
-        <ant antfile="${project.JSON}/build.xml" inheritall="false" target="clean"/>
         <ant antfile="${project.LdvJUtils}/build.xml" inheritall="false" target="clean"/>
         <ant antfile="${project.NDSProxyClient}/build.xml" inheritall="false" target="clean"/>
         <ant antfile="${project.ViewUtils}/build.xml" inheritall="false" target="clean"/>
