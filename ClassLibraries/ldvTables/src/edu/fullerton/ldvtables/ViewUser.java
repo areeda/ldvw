@@ -241,11 +241,21 @@ public class ViewUser extends Table
     public boolean isAdmin()
     {
         boolean ret = isLocalHost() && localhostIsAdmin;
-        boolean admin = getIsMemberOf().contains("LSCVirgoLIGOGroupMembers")
-                && getIsMemberOf().contains("ldvwAdmin");
+        boolean admin = isValid() && getIsMemberOf().contains("ldvwAdmin");
         
         
         ret |= admin;
+        return ret;
+    }
+    /**
+     * The next highest privilege level allows access to experimental pages
+     * 
+     * @return true if they are members of an appropriate group
+     */
+    public boolean isTester()
+    {
+        boolean ret = isValid();
+        ret &= isAdmin() || getIsMemberOf().contains("ldvwTester");
         return ret;
     }
     /**
