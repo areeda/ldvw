@@ -17,7 +17,6 @@
 
 package edu.fullerton.ldvservlet;
 
-import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageItemImage;
 import edu.fullerton.jspWebUtils.PageItemList;
@@ -28,7 +27,6 @@ import edu.fullerton.ldvtables.ImageTable;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
