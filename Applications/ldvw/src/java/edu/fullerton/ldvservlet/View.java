@@ -26,7 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import viewerconfig.ViewerConfig;
 
 /**
- *
+ * Main LigoDV-web servlet
+ * 
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
 public class View extends HttpServlet
@@ -38,7 +39,7 @@ public class View extends HttpServlet
 
     public View()
     {
-        this.version = "0.2.03";
+        this.version = "0.2.07";
     }
 
     /**
@@ -46,6 +47,8 @@ public class View extends HttpServlet
      * 
      * Load our configuration file.
      * Make sure all the tables exist.
+     * Read configuration file
+     * (see code for a complete list)
      *
      * @throws javax.servlet.ServletException
      */
