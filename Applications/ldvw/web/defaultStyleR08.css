@@ -11,6 +11,9 @@ root {
     font-family: 'Times New Roman',Times,serif;
     font-size: 1em;
 }
+html,body {
+    height:100%;
+}
 th{
     text-align:center;
     font-family:arial;
@@ -292,7 +295,15 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
     cursor: pointer;
         
 }
-
+td.imgtbl
+{
+    height: 100%;
+}
+.embimg
+{
+    width: 100%;
+    height: 100%;
+}
 
 .helpDlg{
     color: darkblue;
@@ -300,6 +311,11 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
     background-color: lightyellow;
 }
 .helpTxt{
+    display: none;
+}
+/* element for show hide */
+.showHide
+{
     display: none;
 }
 /* tool bar and menus */
