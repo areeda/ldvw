@@ -458,4 +458,28 @@ public class ImageTable extends Table
             throw new LdvTableException("Getting all image id's", ex);
         }
     }
+
+    /**
+     * look up the mime type of a stored image
+     * @param id image id (record key)
+     * @return the mime type stored for the image
+     */
+    public String getMime(Integer id) throws LdvTableException
+    {
+        String ret = "";
+        try
+        {
+            String q = "Select mime from " + getName() + " Where myId=" + id.toString();
+            ResultSet rs = db.executeQuery(q);
+            if (rs.next())
+            {
+                ret = rs.getString("mime");
+            }
+        }
+        catch (SQLException ex)
+        {
+            throw new LdvTableException("getting a mime type", ex);
+        }
+        return ret;
+    }
 }
