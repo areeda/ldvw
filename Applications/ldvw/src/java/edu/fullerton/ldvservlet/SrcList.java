@@ -59,13 +59,10 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.LogAxis;
-import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYAreaRenderer;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -463,11 +460,17 @@ public class SrcList extends HttpServlet
             
 
             BasicStroke str = new BasicStroke(2);
+            int colorIdx = plotNum % colors.length;
+            Color color = colors[colorIdx];
             LogAxis yAxis = new LogAxis("% Avail");
+            renderer.setBaseFillPaint(color);
+            renderer.setSeriesFillPaint(0, Color.WHITE);
+            renderer.setBaseStroke(str);
+            renderer.setUseFillPaint(true);
             XYPlot subplot = new XYPlot(mtds, null, yAxis, renderer);
             plot.add(subplot);
             
-
+            plotNum++;
         }
         ChartPanel cpnl;
         JFreeChart chart;
@@ -477,7 +480,6 @@ public class SrcList extends HttpServlet
 
         chart = new JFreeChart(gtitle, JFreeChart.DEFAULT_TITLE_FONT, plot, true);
         cpnl = new ChartPanel(chart, false, false, false, false, false);
-        cpnl.setPreferredSize(new Dimension(720, 720));
         
         PluginSupport psupport = new PluginSupport();
         psupport.setup(db, vpage, vuser);
@@ -485,6 +487,7 @@ public class SrcList extends HttpServlet
         PageItemImage img = null;
         try
         {
+            psupport.setSize(800, 600);
             imgId = psupport.saveImageAsPNG(cpnl);
             String url = String.format("%1$s/view?act=getImg&amp;imgId=%2$d", contextPath, imgId);
             
