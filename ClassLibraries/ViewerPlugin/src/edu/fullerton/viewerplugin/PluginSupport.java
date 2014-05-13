@@ -49,8 +49,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SimpleTimeZone;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.jfree.chart.ChartPanel;
