@@ -28,6 +28,7 @@ import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.viewerplugin.SpectrumCalc.Scaling;
 import edu.fullerton.viewerplugin.WindowGen.Window;
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -228,7 +229,7 @@ public
             {
                 r.setSeriesStroke(i, str);
             }
-            
+            plot.setBackgroundPaint(Color.WHITE);
             if (compact)
             {
                 chart.removeLegend();
