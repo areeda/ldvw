@@ -25,6 +25,7 @@ import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.TimeAndDate;
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -166,11 +167,14 @@ public class TsPlot extends PluginSupport implements PlotProduct
             {
                 r.setSeriesStroke(i, str);
             }
-            
+            plot.setBackgroundPaint(Color.WHITE);
+            r.setBaseFillPaint(Color.WHITE);
             if (compact)
             {
                 chart.removeLegend();
             }
+            chart.setBackgroundPaint(Color.WHITE);
+
             cpnl = new ChartPanel(chart);
             imageId = saveImageAsPNG(cpnl);
 
