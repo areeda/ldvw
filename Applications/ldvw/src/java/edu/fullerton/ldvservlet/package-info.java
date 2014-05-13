@@ -16,7 +16,15 @@
  */
 
 /**
- * The user callable servlets that make up LigoDV-web
+ * The user callable servlets that make up LigoDV-web.  In version 0.1.* we used a single scriptlet
+ * demonstrating the author's lack of experience.  Moving to servlets increased performance and 
+ * encapsulation.
+ * 
+ * As a long term more commands are being moved from the dispatcher in the main servlet to individual
+ * servlets.  
+ * 
+ * If you write a servlet much of the global User Interface is implemented in the ServletSupport POJO
+ * Also remember a servlet must  be thread safe, so pretty much no non-final fields in the class.
  * @since 0.2.0
  */
 package edu.fullerton.ldvservlet;

@@ -1074,8 +1074,8 @@ exists or setup the property manually. For example like this:
         <copyfiles files="${libs.jdom.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.JTransform.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.opencsv.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
-        <copyfiles files="${libs.jfreechart.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.itext.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.jfreechart-1.0.17.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.batik.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.commons-lang.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.commons-io.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
@@ -1100,8 +1100,8 @@ exists or setup the property manually. For example like this:
         <copyfiles files="${libs.jdom.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.JTransform.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.opencsv.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
-        <copyfiles files="${libs.jfreechart.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.itext.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${libs.jfreechart-1.0.17.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.batik.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.commons-lang.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${libs.commons-io.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
