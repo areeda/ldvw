@@ -92,6 +92,7 @@ public class ChannelTable extends Table
     private final int insertNum=5000;
     // streaming retrieval
     private ResultSet allStream;
+    private int minChanId, maxChanId;
 
     public ChannelTable(Database db) throws SQLException
     {
@@ -99,6 +100,7 @@ public class ChannelTable extends Table
         setName("Channels");
         setCols(myCols);
         stmt = db.createStatement();
+        minChanId = maxChanId = 0;
     }
 
     public ChannelTable(Database db, String altName) throws SQLException
@@ -831,7 +833,7 @@ public class ChannelTable extends Table
         return ctypes.toArray(t);
     }
     /**
-     * get a partial list of channels in order by name
+     * get a partial list of ChanInfo objects in order by name
      * @param server match server
      * @param chanType match channel type
      * @param start start in the list
@@ -841,22 +843,91 @@ public class ChannelTable extends Table
      */
     public ArrayList<ChanInfo> getList(String server, String chanType, int start, int cnt) throws SQLException
     {
-        ArrayList<ChanInfo> ret = new ArrayList<ChanInfo>();
+        ArrayList<ChanInfo> ret = new ArrayList<>();
         String q = "SELECT * FROM " + getName() + " WHERE " 
         + " server = '" + server + "' and cType like '" + chanType + "' order by name ";
         q += String.format(" limit %1$d, %2$d", start, cnt);
-        ResultSet rs = db.executeQuery(q);
-       
-        while(rs.next())
+        ResultSet rs=null;
+        try 
         {
-            ChanInfo ci = new ChanInfo();
-            ci.fill(rs);
-            ret.add(ci);
+            rs = db.executeQuery(q);
+            while(rs.next())
+            {
+                ChanInfo ci = new ChanInfo();
+                ci.fill(rs);
+                ret.add(ci);
+            }
         }
-        rs.close();
+        finally
+        {
+            if (rs != null)
+            {
+                rs.close();
+            }
+        }
 
         return ret;
     }
+    /**
+     * get a partial list of Channel Id's in order by name
+     *
+     * @param server empty string for all, null not allowed
+     * @param chanType Channel Type, empty string for all, null not allowed
+     * @param start start in the list
+     * @param cnt number of channels to return
+     * @return a list of channel info objects specified
+     * @throws SQLException
+     */
+    public ArrayList<Integer> getIdList(String server, String chanType) throws SQLException
+    {
+        ArrayList<Integer> ret = new ArrayList<>();
+        String q = "SELECT * FROM " + getName();
+        String where = "";
+        if (! server.isEmpty())
+        {
+            where += " server = '" + server + "' ";
+        }
+        if ( ! chanType.isEmpty())
+        {
+            if (! where.isEmpty())
+            {
+                where += " and ";
+            }
+            where += "cType = '" + chanType + "' ";
+        }
+        if (chanType.toLowerCase().contains("trend"))
+        {
+            if (! where.isEmpty())
+            {
+                where += " and ";
+            }
+            where += " name like '%mean'";
+        }
+        if (! where.isEmpty())
+        {
+            q += " WHERE " + where;
+        }
+        ResultSet rs = null;
+        try
+        {
+            rs = db.executeQuery(q);
+            while (rs.next())
+            {
+                int id = rs.getInt("myId");
+                ret.add(id);
+            }
+        }
+        finally
+        {
+            if (rs != null)
+            {
+                rs.close();
+            }
+        }
+
+        return ret;
+    }
+
     public ResultSet findChannelByServerType(String server, String chanType, int offset, int count) throws SQLException
     {
         String q =  "SELECT * FROM " + getName() + " WHERE " 
@@ -1081,6 +1152,35 @@ public class ChannelTable extends Table
         {
             allStream.close();
             allStream = null;
+        }
+    }
+
+    public int getMinChanId() throws SQLException
+    {
+        if (maxChanId == 0)
+        {
+            getMinMaxId();
+        }
+        return minChanId;
+    }
+
+    public int getMaxChanId() throws SQLException
+    {
+        if (maxChanId == 0)
+        {
+            getMinMaxId();
+        }
+        return maxChanId;
+    }
+
+    private void getMinMaxId() throws SQLException
+    {
+        String q = "select min(myId) as min, max(myId) as max from Channels";
+        ResultSet rs = stmt.executeQuery(q);
+        if (rs!= null && rs.next())
+        {
+            minChanId = rs.getInt("min");
+            maxChanId = rs.getInt("max");
         }
     }
 }
