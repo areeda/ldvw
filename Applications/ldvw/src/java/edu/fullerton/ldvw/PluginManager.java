@@ -210,22 +210,31 @@ public class PluginManager extends GUISupport
         pfDiv.add(chmPil);
         
         // add Omega scan
-        WplotManager wpm = new WplotManager(db, vpage, vuser);
-        PageItemList wpmPil = getSelectorContent(wpm, "doWplot", nSel, multDisp);
-        wpmPil.setUseDiv(false);
-        pfDiv.add(wpmPil);
+        if (vuser.isTester())
+        {
+            WplotManager wpm = new WplotManager(db, vpage, vuser);
+            PageItemList wpmPil = getSelectorContent(wpm, "doWplot", nSel, multDisp);
+            wpmPil.setUseDiv(false);
+            pfDiv.add(wpmPil);
+        }
         
         // add Long term trend plots
-        TrendPlotManager tpm = new TrendPlotManager(db, vpage, vuser);
-        PageItemList tpmPil = getSelectorContent(tpm, "trndplt", nSel, multDisp);
-        tpmPil.setUseDiv(false);
-        pfDiv.add(tpmPil);
+        if (vuser.isTester())
+        {
+            TrendPlotManager tpm = new TrendPlotManager(db, vpage, vuser);
+            PageItemList tpmPil = getSelectorContent(tpm, "trndplt", nSel, multDisp);
+            tpmPil.setUseDiv(false);
+            pfDiv.add(tpmPil);
+        }
         
         // add Cross Spectral Analysis
-        CrossSpectrumManager csm = new CrossSpectrumManager(db, vpage, vuser);
-        PageItemList csmPil = getSelectorContent(csm, "csaplot", nSel, multDisp);
-        csmPil.setUseDiv(false);
-        pfDiv.add(csmPil);
+        if (vuser.isTester())
+        {
+            CrossSpectrumManager csm = new CrossSpectrumManager(db, vpage, vuser);
+            PageItemList csmPil = getSelectorContent(csm, "csaplot", nSel, multDisp);
+            csmPil.setUseDiv(false);
+            pfDiv.add(csmPil);
+        }
         
         //========= put new products above this line=========
         
