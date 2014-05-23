@@ -102,6 +102,13 @@ public class TimeAndDate
         }
         return ret;
     }
+    public static long nowAsGPS()
+    {
+        SimpleTimeZone utctz = new SimpleTimeZone(0, "UTC");
+        GregorianCalendar now = new GregorianCalendar(utctz);
+        long utcSec = now.getTimeInMillis()/1000;
+        return TimeAndDate.utc2gps(utcSec);
+    }
     public static String nowAsUtcString(long offsetms)
     {
         
