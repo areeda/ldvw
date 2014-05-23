@@ -63,6 +63,7 @@ public class ServletSupport
     private UseLog uLog;
     private ViewerConfig viewerConfig;
     private final long startTime;
+    private String servletPath;
 
     public ServletSupport()
     {
@@ -75,6 +76,7 @@ public class ServletSupport
         this.session = request.getSession();
         helpUrl = viewerConfig.get("mainhelp");
         contextPath = request.getContextPath();
+        servletPath = contextPath + request.getServletPath();
         
         vpage = new Page();
         if (!embeded)
@@ -445,6 +447,17 @@ public class ServletSupport
         return uLog;
     }
 
+    public String getServletPath()
+    {
+        return servletPath;
+    }
+
+    public long getStartTime()
+    {
+        return startTime;
+    }
+
+    
     void close()
     {
         if (db!= null)
