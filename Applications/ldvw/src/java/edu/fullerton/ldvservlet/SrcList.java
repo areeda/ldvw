@@ -19,7 +19,10 @@ package edu.fullerton.ldvservlet;
 
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
+import edu.fullerton.jspWebUtils.PageForm;
 import edu.fullerton.jspWebUtils.PageFormButton;
+import edu.fullerton.jspWebUtils.PageFormSelect;
+import edu.fullerton.jspWebUtils.PageFormText;
 import edu.fullerton.jspWebUtils.PageItem;
 import edu.fullerton.jspWebUtils.PageItemHeader;
 import edu.fullerton.jspWebUtils.PageItemImage;
@@ -38,17 +41,19 @@ import edu.fullerton.ldvtables.ChannelIndex;
 import edu.fullerton.ldvtables.ChannelTable;
 import edu.fullerton.ldvtables.TimeInterval;
 import edu.fullerton.ldvtables.ViewUser;
-import edu.fullerton.ldvw.ChanSourceData;
+import edu.fullerton.ndsproxyclient.ChanSourceData;
+import edu.fullerton.ldvw.Epochs;
 import edu.fullerton.viewerplugin.PluginSupport;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.SimpleTimeZone;
 import java.util.TreeSet;
 import javax.servlet.ServletException;
@@ -58,11 +63,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.axis.LogAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYAreaRenderer;
+import org.jfree.chart.title.TextTitle;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -139,6 +145,12 @@ public class SrcList extends HttpServlet
             String[] baseIds = request.getParameterValues("baseid");
             int tblNum = 1;
             PageItemList tables = new PageItemList();
+            boolean zoom = request.getParameter("replot") != null;
+            TimeInterval searchRange=new TimeInterval(0, 1800000000);
+            if (zoom)
+            {
+                searchRange=getSearchRange(request.getParameterMap());
+            }
             
             if (baseIds != null)
             {
@@ -174,11 +186,12 @@ public class SrcList extends HttpServlet
                         {
                             chanList.addAll( cptrs.getChanList(bid, "static"));
                         }
-                        tblNum = addChanSource(tables, chanList, ctbl, tblNum, csdList);
+                        tblNum = addChanSource(tables, chanList, ctbl, tblNum, csdList, searchRange);
                         PageItem plots = makePlots(csdList, cii.getName(), servletSupport.getDb(),
                                                    servletSupport.getVpage(), 
                                                    servletSupport.getVuser(), contextPath);
-                        vpage.add(plots);
+                        PageItem plotForm = getImgForm(servletSupport, plots, bid);
+                        vpage.add(plotForm);
                         vpage.add(tables);
 
                     }
@@ -265,7 +278,7 @@ public class SrcList extends HttpServlet
     
 
     private int addChanSource(PageItemList tables, List<Integer> chanList, ChannelTable chanTbl, 
-                              int tblNum, ArrayList<ChanSourceData> csdList
+                              int tblNum, ArrayList<ChanSourceData> csdList, TimeInterval timeRange
                                ) throws LdvTableException, WebUtilException
     {
         TreeSet<ChanInfo> channels = new TreeSet<>();
@@ -295,7 +308,7 @@ public class SrcList extends HttpServlet
             ChanSourceData csd = new ChanSourceData();
             csd.pullData(ci);
             
-            csd.mergeIntervals();
+            csd.mergeIntervals(timeRange);
             csd.calcGraphData();
             csdList.add(csd);
             PageItem table = makeTable(csd, tblNum);
@@ -338,7 +351,7 @@ public class SrcList extends HttpServlet
         PageTableRow row;
         boolean odd = true;
         
-        String[] colHdrs = { "Start Gps", "Start UTC", "Stop Gps", "Stop UTC", "len (s)", "HH:MM:SS d"};
+        String[] colHdrs = { "Start Gps", "Start UTC", "Stop Gps", "Stop UTC", "len (s)", "d HH:MM:SS"};
         PageTableRow hdr = new PageTableRow(colHdrs, true);
         hdr.setRowType(PageTableRow.RowType.HEAD);
         tbl.addRow(hdr);
@@ -414,7 +427,7 @@ public class SrcList extends HttpServlet
     }
 
     private PageItem makePlots(ArrayList<ChanSourceData> csdList, String name, Database db, 
-                               Page vpage, ViewUser vuser, String contextPath) throws WebUtilException
+                               Page vpage, ViewUser vuser, String contextPath) throws WebUtilException, LdvTableException
     {
         PageItemList ret = new PageItemList();
         CombinedDomainXYPlot plot = new CombinedDomainXYPlot(new DateAxis("Date/Time (UTC)"));
@@ -432,99 +445,240 @@ public class SrcList extends HttpServlet
             Color.DARK_GRAY,
             Color.GREEN                                                           
         };
-        
+        boolean gotData = false;
+        TimeInterval timeRange = null;
         for(ChanSourceData csd : csdList)
         {
-            baseName = csd.getChanInfo().getBaseName();
-            TimeSeriesCollection mtds = new TimeSeriesCollection();
-            String server = csd.getChanInfo().getServer().replace(".caltech.edu", "");
-            String legend = String.format("Type: %1$s at %2$s", csd.getChanInfo().getcType(), server);
-            TimeSeries ts;
-            double[][] data = csd.getGraphData();
-            if (data == null)
+            TimeInterval ti = csd.getTimeRange();
+            if (ti != null)
             {
-                data = new double[2][2];
-                data[0][0] = TimeAndDate.utc2gps(System.currentTimeMillis() / 1000) - 600;
-                data[1][0] = TimeAndDate.utc2gps(System.currentTimeMillis() / 1000) - 599;
-                data[0][1] = data[1][1] = 0;
-                errors.append("Error getting data for: ").append(legend).append("<br>");
+                if (timeRange == null)
+                {
+                    timeRange = ti;
+                }
+                else
+                {
+                    timeRange = timeRange.mergeIntervals(ti);
+                }
             }
-            for(double[] d : data)
+        }
+        if (timeRange != null)
+        {
+            for(ChanSourceData csd : csdList)
             {
-                d[1]= d[1] == 0 ? .1 : d[1];
+                baseName = csd.getChanInfo().getBaseName();
+                TimeSeriesCollection mtds = new TimeSeriesCollection();
+                String server = csd.getChanInfo().getServer().replace(".caltech.edu", "");
+                String legend = String.format("Type: %1$s at %2$s", csd.getChanInfo().getcType(), server);
+                TimeSeries ts;
+                double[][] data = csd.getGraphData();
+                if (data == null)
+                {
+                    data = new double[2][2];
+                    data[0][0] = timeRange.getStartGps();
+                    data[1][0] = timeRange.getStopGps();
+                    data[0][1] = data[1][1] = 0;
+                    errors.append("Error getting data for: ").append(legend).append("<br>");
+                }
+                else
+                {
+                    gotData = true;
+                }
+                for(double[] d : data)
+                {
+                    d[1]= d[1] <=1 ? 1 : d[1];
+                }
+                ts = getTimeSeries(data, legend);
+
+                mtds.addSeries(ts);
+                XYAreaRenderer renderer=  new XYAreaRenderer(XYAreaRenderer.AREA);
+
+
+                BasicStroke str = new BasicStroke(2);
+                int colorIdx = plotNum % colors.length;
+                Color color = colors[colorIdx];
+                NumberAxis yAxis = new NumberAxis("% Avail");
+                yAxis.setRange(0, 100);
+                renderer.setBaseFillPaint(color);
+                renderer.setSeriesFillPaint(0, Color.WHITE);
+                renderer.setBaseStroke(str);
+                renderer.setUseFillPaint(true);
+                XYPlot subplot = new XYPlot(mtds, null, yAxis, renderer);
+                plot.add(subplot);
+
+                plotNum++;
             }
-            ts = getTimeSeries(data, legend);
-            
-            mtds.addSeries(ts);
-            XYAreaRenderer renderer=  new XYAreaRenderer(XYAreaRenderer.AREA);
-            
-
-            BasicStroke str = new BasicStroke(2);
-            int colorIdx = plotNum % colors.length;
-            Color color = colors[colorIdx];
-            LogAxis yAxis = new LogAxis("% Avail");
-            renderer.setBaseFillPaint(color);
-            renderer.setSeriesFillPaint(0, Color.WHITE);
-            renderer.setBaseStroke(str);
-            renderer.setUseFillPaint(true);
-            XYPlot subplot = new XYPlot(mtds, null, yAxis, renderer);
-            plot.add(subplot);
-            
-            plotNum++;
-        }
-        ChartPanel cpnl;
-        JFreeChart chart;
-        String gtitle = String.format("Available data for %1$s ", baseName);
         
-        plot.setOrientation(PlotOrientation.VERTICAL);
+            ChartPanel cpnl;
+            JFreeChart chart;
+            String gtitle = String.format("Available data for %1$s ", baseName);
+            String subTitleTxt = String.format("From %1$s to %2$s", 
+                                            TimeAndDate.gpsAsUtcString(timeRange.getStartGps()),
+                                            TimeAndDate.gpsAsUtcString(timeRange.getStopGps()));
 
-        chart = new JFreeChart(gtitle, JFreeChart.DEFAULT_TITLE_FONT, plot, true);
-        cpnl = new ChartPanel(chart, false, false, false, false, false);
-        
-        PluginSupport psupport = new PluginSupport();
-        psupport.setup(db, vpage, vuser);
-        int imgId;
-        PageItemImage img = null;
-        try
-        {
-            psupport.setSize(800, 600);
-            imgId = psupport.saveImageAsPNG(cpnl);
-            String url = String.format("%1$s/view?act=getImg&amp;imgId=%2$d", contextPath, imgId);
-            
-            img = new PageItemImage(url, "availability", baseName);
+            plot.setOrientation(PlotOrientation.VERTICAL);
 
-        }
-        catch (SQLException | IOException | NoSuchAlgorithmException ex)
-        {
-            String ermsg = String.format("Error creating or saving image: %1$s - $2$s",
-                                         ex.getClass().getSimpleName(), ex.getLocalizedMessage());
-            errors.append(ermsg);
+            chart = new JFreeChart(gtitle, JFreeChart.DEFAULT_TITLE_FONT, plot, true);
             
+            
+            chart.addSubtitle(new TextTitle(subTitleTxt));
+            cpnl = new ChartPanel(chart, false, false, false, false, false);
+
+            PluginSupport psupport = new PluginSupport();
+            psupport.setup(db, vpage, vuser);
+            int imgId;
+            PageItemImage img = null;
+            try
+            {
+                psupport.setSize(800, 600);
+                imgId = psupport.saveImageAsPNG(cpnl);
+                String url = String.format("%1$s/view?act=getImg&amp;imgId=%2$d", contextPath, imgId);
+
+                img = new PageItemImage(url, "availability", baseName);
+
+            }
+            catch (SQLException | IOException | NoSuchAlgorithmException ex)
+            {
+                String ermsg = String.format("Error creating or saving image: %1$s - $2$s",
+                                             ex.getClass().getSimpleName(), ex.getLocalizedMessage());
+                errors.append(ermsg);
+
+            }
+            if (errors.length() > 0)
+            {
+                ret.add(errors.toString());
+            }
+            if (img != null)
+            {
+                ret.add(img);
+            }
         }
-        if (errors.length() > 0)
+        else
         {
-            ret.add(errors.toString());
-        }
-        if (img != null)
-        {
-            ret.add(img);
+            ret.add("No data to plot.");
         }
         return ret;
+    }
+    PageItem getImgForm(ServletSupport servletSupport, PageItem img, int bid) throws WebUtilException
+    {
+        PageItemList ret = new PageItemList();
+        PageForm form = new PageForm();
+        form.addHidden("replot", "true");
+        form.addHidden("baseid", Integer.toString(bid));
+        form.setAction(servletSupport.getServletPath());
+        form.setMethod("GET");
+        form.setNoSubmit(true);
+        
+        PageTable imgTbl = new PageTable();
+        PageTableRow imgRow = new PageTableRow();
+        imgRow.add(img);
+        PageItemList req=new PageItemList();
+        req.add(new PageItemHeader("Replot a specific time/date range", 3));
+
+        PageTable reqTbl = new PageTable();
+
+        addReqRow(reqTbl, "Time range:", getTimeRangeSelector(), "use list or specify start/end");
+        addReqRow(reqTbl, "Start time:",new PageFormText("start", ""), "leave blank for named range");
+        addReqRow(reqTbl, "End time:", new PageFormText("end", "now"), "applies to start or named range");
+        PageFormButton submit = new PageFormButton("submit", "Replot", "submit");
+        submit.setType("submit");
+        addReqRow(reqTbl, "", submit, "");
+        
+        reqTbl.setClassName("noborder");
+        req.add(reqTbl);
+        imgRow.add(req);
+        imgTbl.addRow(imgRow);
+        
+        form.add(imgTbl);
+        ret.add(form);
+        
+        return ret;
+    }
+    private void addReqRow(PageTable tbl, String label, PageItem it, String comment) throws WebUtilException
+    {
+        PageTableRow reqRow = new PageTableRow();
+        reqRow.add(label);
+        reqRow.add(it);
+        reqRow.add(comment);
+        reqRow.setClassAll("noborder");
+        tbl.addRow(reqRow);
+
     }
     private TimeSeries getTimeSeries(double[][] data, String legend)
     {
         TimeSeries ts;
-        ts = new TimeSeries(legend, Millisecond.class);
+        ts = new TimeSeries(legend);
         SimpleTimeZone utctz = new SimpleTimeZone(0, "UTC");
-        
         for (double[] data1 : data)
         {
             long gps = Math.round(data1[0]);
             long utcms = TimeAndDate.gps2utc(gps) * 1000;
             Date t = new Date(utcms);
-            ts.addOrUpdate(new Millisecond(t, utctz), data1[1]);
+            ts.addOrUpdate(new Millisecond(t, utctz, Locale.US), data1[1]);
         }
         return ts;
+    }
+
+    private PageFormSelect getTimeRangeSelector()
+    {
+        PageFormSelect ret = new PageFormSelect("timerange");
+        ret.add("day", "Previous 24 hrs.", Boolean.TRUE);
+        ret.add("week", "Previous week.", Boolean.FALSE);
+        ret.add("month", "Previous month.", Boolean.FALSE);
+        Epochs epochs = new Epochs();
+        ArrayList<String> epochNames = epochs.getEpochNames();
+        for(String enam : epochNames)
+        {
+            ret.add(enam, enam, Boolean.FALSE);
+        }
+        return ret;
+    }
+
+    private TimeInterval getSearchRange(Map<String, String[]> parameterMap)
+    {
+        String[] timrng=parameterMap.get("timerange");
+        long timeRange = 0;
+        TimeInterval ret = null;
+        
+        if (timrng != null)
+        {
+            switch (timrng[0])
+            {
+                case "day":
+                    timeRange = 24 * 3600;
+                    break;
+                case "week":
+                    timeRange = 7 * 24 *3600;
+                    break;
+                case "month":
+                    timeRange = 30 * 24 * 3600;
+                    break;
+                default:
+                    Epochs epochs = new Epochs();
+                    ret = epochs.getEpoch(timrng[0]);
+            }
+        }
+        if (ret == null)
+        {
+            long endTime = TimeAndDate.nowAsGPS();
+            String[] et = parameterMap.get("end");
+            if (et != null && ! et[0].trim().isEmpty() && !et[0].trim().equalsIgnoreCase("now"))
+            {
+                endTime = TimeAndDate.getGPS(et[0].trim());
+            }
+            long startTime;
+            String[] st = parameterMap.get("start");
+            if (st != null && !st[0].isEmpty())
+            {
+                startTime = TimeAndDate.getGPS(st[0].trim());
+            }
+            else
+            {
+                startTime = endTime - timeRange;
+            }
+            ret = new TimeInterval(startTime, endTime);
+        }
+        return ret;
     }
 
 }
