@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package edu.fullerton.ldvw;
+package edu.fullerton.ndsproxyclient;
 
 import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvjutils.LdvTableException;
@@ -46,8 +46,10 @@ public class ChanSourceData
     private TreeSet<TimeInterval> mergedIntervals;
     private final int maxBins;    // for plotting availability
     private int[] bins;
-    private TimeInterval fullRange;
+    private TimeInterval timeRange;
     private int binSize;
+    private long serverMin, serverMax;
+    private int nRawIntervals;
     
     public ChanSourceData()
 
@@ -56,12 +58,16 @@ public class ChanSourceData
         frmTypes = new TreeMap<>();
         errors = new StringBuilder();
         mergedIntervals = null;
+        timeRange=null;
     }
     
     public void pullData(ChanInfo ci)
     {
         this.chanInfo = ci;
         NDSProxyClient nds = null;
+        serverMax = serverMin = -1;
+        nRawIntervals = 0;
+        
         try
         {
             Pattern intervalPat = Pattern.compile("(.*):(\\d+)-(\\d+|all|inf)");
@@ -105,6 +111,18 @@ public class ChanSourceData
                             errors.append("\n");
                             continue;
                         }
+                        if (nRawIntervals == 0)
+                        {
+                            serverMax = stopGps;
+                            serverMin = strtGps;
+                        }
+                        else
+                        {
+                            serverMax = Math.max(stopGps, serverMax);
+                            serverMin = Math.min(strtGps, serverMin);
+                        }
+                        nRawIntervals++;
+                        
                         if (stopGps < strtGps)
                         {
                             errors.append(String.format("Interval stop < start %1$s", interval));
@@ -174,6 +192,11 @@ public class ChanSourceData
     }
     public void mergeIntervals() throws LdvTableException
     {
+        TimeInterval fullRange = new TimeInterval(0, 1800000000);
+        mergeIntervals(fullRange);
+    }
+    public void mergeIntervals(TimeInterval searchRange) throws LdvTableException
+    {
         if (mergedIntervals == null)
         {
             mergedIntervals = new TreeSet<>();
@@ -183,9 +206,26 @@ public class ChanSourceData
                 allIntervals.addAll(ent.getValue());
             }
             TimeInterval lastTi = null;
-            for(TimeInterval ti : allIntervals)
+            long srchStrt = searchRange.getStartGps();
+            long srchStop = searchRange.getStopGps();
+            long minGps = Long.MAX_VALUE;
+            long maxGps = Long.MIN_VALUE;
+            for(TimeInterval tti : allIntervals)
             {
-                if (lastTi != null)
+                TimeInterval ti = null;
+                long tstrt = tti.getStartGps();
+                long tstop = tti.getStopGps();
+                if (tstrt <= srchStop && tstop >= srchStrt)
+                {
+                    // interval overlaps range
+                    ti = new TimeInterval(Math.max(srchStrt, tstrt), Math.min(srchStop,tstop));
+                }
+                if (ti != null)
+                {
+                    minGps = Math.min(minGps, ti.getStartGps());
+                    maxGps = Math.max( maxGps, ti.getStopGps());
+                }
+                if (lastTi != null && ti != null)
                 {
                     if (!ti.overlaps(lastTi))
                     {
@@ -205,6 +245,14 @@ public class ChanSourceData
             if (lastTi != null)
             {
                 mergedIntervals.add(lastTi);
+            }
+            if (minGps <= searchRange.getStartGps() && maxGps >= searchRange.getStopGps())
+            {
+                timeRange = new TimeInterval(minGps, maxGps);
+            }
+            else
+            {
+                timeRange = null;
             }
         }
     }
@@ -254,7 +302,7 @@ public class ChanSourceData
             TimeInterval last = mergedIntervals.last();
             long startGps = first.getStartGps();
             long stopGps = last.getStopGps();
-            fullRange = new TimeInterval(startGps, stopGps);
+            timeRange = new TimeInterval(startGps, stopGps);
             long len = stopGps-startGps;
             int nbins = (int) (len < maxBins ? len : maxBins);
             binSize = (int) Math.ceil((float) len / nbins);
@@ -297,6 +345,7 @@ public class ChanSourceData
                     else
                     {   // otherwise the entire interval is in this bin
                         bins[binNum] += iStop - iStrt;
+                        iStrt = binStop;
                     }
                     binNum++;   // see if next bin is also affected by this interval
                     binNum = binNum < nbins ? binNum : nbins - 1;
@@ -315,7 +364,7 @@ public class ChanSourceData
             ret = new double[bins.length][2];
             for(int i=0; i< bins.length;i++)
             {
-                ret[i][0] = binSize * i +  fullRange.getStartGps();
+                ret[i][0] = binSize * i +  timeRange.getStartGps();
                 ret[i][1] = bins[i] *100. / binSize;
             }
         }
@@ -326,4 +375,25 @@ public class ChanSourceData
         return "";
         
     }
+
+    public TimeInterval getTimeRange()
+    {
+        return timeRange;
+    }
+
+    public long getServerMin()
+    {
+        return serverMin;
+    }
+
+    public long getServerMax()
+    {
+        return serverMax;
+    }
+
+    public int getnRawIntervals()
+    {
+        return nRawIntervals;
+    }
+    
 }
