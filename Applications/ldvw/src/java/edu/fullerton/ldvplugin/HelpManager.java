@@ -43,7 +43,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class HelpManager  extends GUISupport
 {
-    private HelpTextTable htt;
+    private final HelpTextTable htt;
     
     private String name;
     private String location;
@@ -177,7 +177,13 @@ public class HelpManager  extends GUISupport
     public PageItemList getHelpButton(String name) throws LdvTableException, WebUtilException
     {
         HelpInfo hi = htt.getHelpInfo(name);
-        PageItemString helpDiv = new PageItemString(hi.getHelpTxt(), false);
+        PageItemList helpDiv = new PageItemList();
+        helpDiv.add(new PageItemString(hi.getHelpTxt(), false));
+        PageFormButton closeBtn = new PageFormButton("close", "Close", "close");
+        closeBtn.addEvent("onclick", "jQuery('#" + hi.getName() + "').dialog('close')");
+        closeBtn.setClassName("closeButton");
+        helpDiv.addBlankLines(1);
+        helpDiv.add(closeBtn);
         helpDiv.setClassName("helpTxt");
         helpDiv.setId(hi.getName());
         PageFormButton btn = new PageFormButton("help_"+hi.getName(),"?","");
