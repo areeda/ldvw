@@ -197,6 +197,9 @@ public class BaseChannelSelector extends GUISupport
     }
     /**
      * Process the filter parameters entered and create a list of indexID's
+     * In other words, takes the parameters entered by the user on the form created by
+     * addSelector and build a list of ID from the Channels table.
+     * 
      * @throws java.sql.SQLException
      * @throws edu.fullerton.ldvjutils.LdvTableException
      * @throws edu.fullerton.jspWebUtils.WebUtilException
@@ -216,7 +219,7 @@ public class BaseChannelSelector extends GUISupport
         // no wild cards but have wild cards in the rest.
         
         Matcher ifoSubsysMat = ifoSubsysPat.matcher(chnamefilt);
-        if ( ( chnamefilt.contains("*") || chnamefilt.contains("?") ) && ifoSubsysMat.find())
+        if ( ( ChannelIndex.needRegex(chnamefilt)  ) && ifoSubsysMat.find())
         {
             String myIfo = ifoSubsysMat.group(1);
             String mySubsys = ifoSubsysMat.group(3);
@@ -792,7 +795,7 @@ public class BaseChannelSelector extends GUISupport
     }
 
     /**
-     * adjust start and last values if they did a prev, next ...
+     * adjust start and last values if they did a prev, next, go to page # ...
      */
     private void processPageControls()
     {
