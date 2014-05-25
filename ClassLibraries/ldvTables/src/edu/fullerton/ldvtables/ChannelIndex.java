@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * The base channel look up tables
@@ -57,7 +58,9 @@ public class ChannelIndex extends Table
         new Column("hasStatic", CType.BOOLEAN,  1,                  Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
         new Column("hasTstPnt", CType.BOOLEAN,  1,                  Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
         new Column("cisAvail",  CType.CHAR,     1,                  Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
-        new Column("nServers",  CType.INTEGER,  Integer.SIZE / 8,   Boolean.FALSE,  Boolean.TRUE,  Boolean.TRUE,  Boolean.FALSE),
+        new Column("nServers",  CType.INTEGER,  Integer.SIZE / 8,   Boolean.FALSE,  Boolean.FALSE, Boolean.TRUE,  Boolean.FALSE),
+        new Column("epochs",    CType.INTEGER,  Integer.SIZE / 8,   Boolean.FALSE,  Boolean.FALSE, Boolean.TRUE,  Boolean.FALSE),
+
     };
     // bulk insert
     private int insertCount;
@@ -204,6 +207,20 @@ public class ChannelIndex extends Table
         String where = getWhere(ifo, subsys, fsCmp, fs, cType, cnamePat);
         return getSearchResults(where,strt, limit);
     }
+    /**
+     * Count how many matches to specification
+     * 
+     * @param ifo
+     * @param subsys
+     * @param fsCmp
+     * @param fs
+     * @param cType
+     * @param cnamePat
+     * @return
+     * @throws LdvTableException 
+     * @see #getWhere(java.lang.String, java.lang.String, java.lang.String, java.lang.Float, java.lang.String, java.lang.String) 
+     * 
+     */
     public int getMatchCount(String ifo, String subsys, String fsCmp, Float fs,
                              String cType, String cnamePat) throws LdvTableException
     {
@@ -236,7 +253,7 @@ public class ChannelIndex extends Table
      * @param fsCmp
      * @param fs
      * @param cType
-     * @param cnamePat
+     * @param cnamePat pattern to match against channel name 
      * @return 
      */
     private String getWhere(String ifo, String subsys, String fsCmp, Float fs, 
@@ -281,6 +298,12 @@ public class ChannelIndex extends Table
                 where += " " + fld + " = 'T' ";
             }
         }
+        where = getNamePatWhere(ifo, subsys, cnamePat, where);
+        return where;
+    }
+    private String getNamePatWhere(String ifo, String subsys, String cnamePat, String where)
+    {
+        
         if (!cnamePat.isEmpty())
         {
             if (needRegex(cnamePat))
@@ -296,6 +319,35 @@ public class ChannelIndex extends Table
         }
         return where;
     }
+    public static boolean needRegex(String pat)
+    {
+        String chars = "* ()?|";     // these have special meanings
+        pat = pat == null ? "" : pat.trim();
+        boolean ret = false;
+        for(int i=0;i<chars.length() && !ret;i++)
+        {
+            ret |= pat.contains(chars.substring(i, i));
+        }
+        return ret;
+    }
+
+    /**
+     * Make a mysql regexp from a subset of bash syntax The current implementation handles these
+     * constructs: * matches zero or more characters ? matches any one character
+     *
+     * @param pat bash like pattern
+     * @return mysql compatible regexp
+     */
+    private String makeRegexp(String pat)
+    {
+        String regexp = pat;
+        regexp = regexp.replace(".", "\\.");
+        regexp = regexp.replace("*", ".*");
+        regexp = regexp.replace(" ", ".*");
+        regexp = regexp.replace("?", ".");
+        return regexp;
+    }
+
     private ArrayList<ChanIndexInfo> getSearchResults(String where, int strt, int count) throws LdvTableException 
     {
         ArrayList<ChanIndexInfo> ret = new ArrayList<ChanIndexInfo>();
@@ -355,25 +407,5 @@ public class ChannelIndex extends Table
             }
         }
         return ret;
-    }
-    private boolean needRegex(String pat)
-    {
-        boolean ret = pat.contains("*") || pat.contains("?");
-        return ret;
-    }
-    /**
-     * Make a mysql regexp from a subset of bash syntax
-     * The current implementation handles these constructs:
-     * * matches zero or more characters
-     * ? matches any one character
-     * @param pat bash like pattern
-     * @return mysql compatible regexp
-     */
-    private String makeRegexp(String pat)
-    {
-        String regexp = pat.replace("*", ".*");
-        regexp = regexp.replace(".", "\\.");
-        regexp = regexp.replace("?", ".");
-        return regexp;
     }
 }
