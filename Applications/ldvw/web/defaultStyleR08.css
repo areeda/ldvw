@@ -80,6 +80,10 @@ th{
     border-bottom: 1px solid #333333;
     border-left: 1px solid #CCCCCC;
 }
+.closeButton
+{
+    float: right;
+}
 .linkRow {
     height: 32px;
     border: hidden;
