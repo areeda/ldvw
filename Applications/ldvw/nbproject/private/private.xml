@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="13">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="15">
+        <file>
+            <url>src/java/edu/fullerton/ldvw/ChanSourceData.java</url>
+            <bookmark id="15">
+                <name/>
+                <line>131</line>
+                <key/>
+            </bookmark>
+        </file>
         <file>
             <url>src/java/edu/fullerton/ldvplugin/CrossSpectrumManager.java</url>
             <bookmark id="9">
@@ -13,12 +21,12 @@
             <url>src/java/edu/fullerton/ldvw/BaseChannelSelector.java</url>
             <bookmark id="7">
                 <name/>
-                <line>298</line>
+                <line>301</line>
                 <key/>
             </bookmark>
             <bookmark id="13">
                 <name/>
-                <line>620</line>
+                <line>623</line>
                 <key/>
             </bookmark>
         </file>
@@ -32,6 +40,14 @@
             <bookmark id="12">
                 <name/>
                 <line>579</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>src/java/edu/fullerton/ldvservlet/SrcList.java</url>
+            <bookmark id="14">
+                <name/>
+                <line>147</line>
                 <key/>
             </bookmark>
         </file>
@@ -100,8 +116,7 @@
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
         </group>
         <group>
-            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/ChanSourceData.java</file>
-            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/SrcList.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/BaseChannelSelector.java</file>
         </group>
     </open-files>
 </project-private>
