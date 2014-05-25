@@ -147,9 +147,16 @@ public class SrcList extends HttpServlet
             PageItemList tables = new PageItemList();
             boolean zoom = request.getParameter("replot") != null;
             TimeInterval searchRange=new TimeInterval(0, 1800000000);
+            String menuChoice = "";
             if (zoom)
             {
                 searchRange=getSearchRange(request.getParameterMap());
+                String[] timrng=request.getParameterMap().get("timerange");
+                if (timrng != null)
+                {
+                    menuChoice = timrng[0];
+                }
+
             }
             
             if (baseIds != null)
@@ -190,7 +197,8 @@ public class SrcList extends HttpServlet
                         PageItem plots = makePlots(csdList, cii.getName(), servletSupport.getDb(),
                                                    servletSupport.getVpage(), 
                                                    servletSupport.getVuser(), contextPath);
-                        PageItem plotForm = getImgForm(servletSupport, plots, bid);
+                        PageItem plotForm = getImgForm(servletSupport, plots, bid, zoom, 
+                                                       searchRange, menuChoice);
                         vpage.add(plotForm);
                         vpage.add(tables);
 
@@ -559,7 +567,9 @@ public class SrcList extends HttpServlet
         }
         return ret;
     }
-    PageItem getImgForm(ServletSupport servletSupport, PageItem img, int bid) throws WebUtilException
+    PageItem getImgForm(ServletSupport servletSupport, PageItem img, int bid,
+                        boolean zoom, TimeInterval timeRange, String menuChoice) 
+            throws WebUtilException
     {
         PageItemList ret = new PageItemList();
         PageForm form = new PageForm();
@@ -577,9 +587,16 @@ public class SrcList extends HttpServlet
 
         PageTable reqTbl = new PageTable();
 
-        addReqRow(reqTbl, "Time range:", getTimeRangeSelector(), "use list or specify start/end");
-        addReqRow(reqTbl, "Start time:",new PageFormText("start", ""), "leave blank for named range");
-        addReqRow(reqTbl, "End time:", new PageFormText("end", "now"), "applies to start or named range");
+        addReqRow(reqTbl, "Time range:", getTimeRangeSelector(menuChoice), "use list or specify start/end");
+        String strtStr = "";
+        String endStr = "now";
+        if (zoom)
+        {
+            strtStr = TimeAndDate.gpsAsUtcString(timeRange.getStartGps());
+            endStr = TimeAndDate.gpsAsUtcString(timeRange.getStopGps());
+        }
+        addReqRow(reqTbl, "Start time:",new PageFormText("start", strtStr), "leave blank for named range");
+        addReqRow(reqTbl, "End time:", new PageFormText("end", endStr), "applies to start or named range");
         PageFormButton submit = new PageFormButton("submit", "Replot", "submit");
         submit.setType("submit");
         addReqRow(reqTbl, "", submit, "");
@@ -619,7 +636,7 @@ public class SrcList extends HttpServlet
         return ts;
     }
 
-    private PageFormSelect getTimeRangeSelector()
+    private PageFormSelect getTimeRangeSelector(String menuChoice)
     {
         PageFormSelect ret = new PageFormSelect("timerange");
         ret.add("day", "Previous 24 hrs.", Boolean.TRUE);
@@ -630,6 +647,10 @@ public class SrcList extends HttpServlet
         for(String enam : epochNames)
         {
             ret.add(enam, enam, Boolean.FALSE);
+        }
+        if (! menuChoice.isEmpty())
+        {
+            ret.setSelected(menuChoice);
         }
         return ret;
     }
