@@ -133,7 +133,8 @@ public class ChanStat
             {
                 if (rawRates.contains(rate))
                 {
-                    errors += String.format("    Duplicate rate of raw channel: %1$.2f%n",rate);
+                    // @TODO channels may have the same data rate but differ by data type.  Need to check.
+                    //errors += String.format("    Duplicate rate of raw channel: %1$.2f%n",rate);
                 }
                 else
                 {
