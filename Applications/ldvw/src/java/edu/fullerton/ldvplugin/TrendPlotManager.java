@@ -49,6 +49,14 @@ public class TrendPlotManager extends ExternalPlotManager implements PlotProduct
         super(db, vpage, vuser);
     }
 
+    /**
+     * Submit a condor job to do the work
+     * 
+     * @param dbuf
+     * @param compact
+     * @return
+     * @throws WebUtilException 
+     */
     @Override
     public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbuf, boolean compact) throws WebUtilException
     {
