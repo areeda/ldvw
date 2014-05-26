@@ -467,6 +467,7 @@ public class NDSProxyClient
             {
                 ChanInfo cInfo = new ChanInfo();
                 cInfo.fill(nextLine);
+                cInfo.setServer(server);
                 ret.add(cInfo);
             }
 
