@@ -58,8 +58,8 @@ public class ChannelIndex extends Table
         new Column("hasStatic", CType.BOOLEAN,  1,                  Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
         new Column("hasTstPnt", CType.BOOLEAN,  1,                  Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
         new Column("cisAvail",  CType.CHAR,     1,                  Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
-        new Column("nServers",  CType.INTEGER,  Integer.SIZE / 8,   Boolean.FALSE,  Boolean.FALSE, Boolean.TRUE,  Boolean.FALSE),
-        new Column("epochs",    CType.INTEGER,  Integer.SIZE / 8,   Boolean.FALSE,  Boolean.FALSE, Boolean.TRUE,  Boolean.FALSE),
+        new Column("nServers",  CType.INTEGER,  Integer.SIZE / 8,   Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE,  Boolean.FALSE),
+        new Column("epochs",    CType.INTEGER,  Integer.SIZE / 8,   Boolean.FALSE,  Boolean.TRUE,  Boolean.FALSE,  Boolean.FALSE),
 
     };
     // bulk insert
