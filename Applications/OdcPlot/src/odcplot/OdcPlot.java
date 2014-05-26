@@ -1005,7 +1005,7 @@ public class OdcPlot
         Option geomOpt = OptionBuilder.withArgName("geometry").hasArg().withDescription("image size <X>x<Y>").create("geom");
         Option chanOpt = OptionBuilder.withArgName("channel").hasArg().withDescription("channel <name,type>").create("chan");
         Option srvOpt = OptionBuilder.withArgName("server").hasArg().withDescription("server <URL>").create("server");
-        Option filOpt = OptionBuilder.withArgName("file").hasArg().withDescription("filename").create("file");
+        Option filOpt = OptionBuilder.withArgName("file").hasArg().withDescription("raw data input filename").create("file");
         Option strtOpt = OptionBuilder.withArgName("start").hasArg().withDescription("GPS start time").create("start");
         Option durOpt = OptionBuilder.withArgName("duration").hasArg().withDescription("duration (seconds)").create("dur");
         Option xtkOpt = OptionBuilder.withArgName("xticks").hasArg().withDescription("tick marks/grid lines on time axis").create("xticks");
