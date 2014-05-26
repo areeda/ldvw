@@ -645,11 +645,11 @@ public class ChanInfo implements Comparable
             int t;
             ci = (ChanInfo) o;
             ret = this.chanName.compareTo(ci.chanName);
-            if (ret == 0)
+            if (ret == 0 && server != null && ci.server != null)
             {
                 ret = server.compareTo(ci.server);
             }
-            else if (ret == 0)
+            else if (ret == 0 && cType != null && ci.cType != null)
             {
                 ret = cType.compareTo(ci.cType);
             }
@@ -657,7 +657,7 @@ public class ChanInfo implements Comparable
             {
                 ret = rate.compareTo(ci.rate);
             }
-            else
+            else if (ret == 0 && dType != null && ci.dType != null)
             {
                 ret = dType.compareTo(ci.dType);
             }
