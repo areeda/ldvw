@@ -33,6 +33,7 @@ import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -67,12 +68,12 @@ public class ChanUpdater
     private ChannelTable chnTbl;        // The real Channels table
     private ChanUpdateTable chUpdTbl;   // Records raw chan lists, with md5 hash
     
-    private static final int verbose = 2;
+    private int verbose = 1;
 
     // what we're supposed to do
-    private final boolean doGetFileList = true;
+    private boolean doGetFileList = true;
     
-    private final boolean doPendingUpds = true;
+    private boolean doPendingUpds = true;
     private final boolean doDeletes = true;
     private final boolean doCleanup = true;
 
@@ -99,6 +100,7 @@ public class ChanUpdater
     private final String programName="ChanUpdater";
     private String configFile = "";
     private final String version="0.1.0";
+    private boolean rebuild;
     
     private void doit(String[] args)
     {
@@ -108,7 +110,7 @@ public class ChanUpdater
             {
                 setup();
                 getCounts();
-                //@todo add command line argument processor
+                
                 if (doGetFileList)
                 {
                     getChanListFiles();
@@ -123,26 +125,26 @@ public class ChanUpdater
                     cleanUp();
                 }
             }
+            if (verbose > 0)
+            {
+                long elap = System.currentTimeMillis() - startTime;
+                System.out.format("Errors getting counts from servers: %1$d%n", countErrors);
+                System.out.format("Total channels reported by nds servers: %1$,d, in our DB %2$,d%n", total, dbCount);
+                if (totalAdds + totalDels > 0)
+                {
+                    System.out.format("Total additions: %1$,d, total removals: %2$,d\n", totalAdds, totalDels);
+                }
+                else
+                {
+                    System.out.println("No changes to channel tables.");
+                }
+
+                System.out.format("Elapsed time: %1$,.1fs\n", elap / 1000.);
+            }
         }
         catch (Exception ex)
         {
             Logger.getLogger(ChanUpdater.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        if (verbose > 0)
-        {
-            long elap = System.currentTimeMillis() - startTime;
-            System.out.format("Errors getting counts from servers: %1$d%n", countErrors);
-            System.out.format("Total channels reported by nds servers: %1$,d, in our DB %2$,d%n", total, dbCount);
-            if (totalAdds + totalDels > 0)
-            {
-                System.out.format("Total additions: %1$,d, total removals: %2$,d\n", totalAdds, totalDels);
-            }
-            else
-            {
-                System.out.println("No changes to channel tables.");
-            }
-
-            System.out.format("Elapsed time: %1$,.1fs\n", elap/1000.);
         }
     }
     //=================================
@@ -202,13 +204,21 @@ public class ChanUpdater
             System.out.println(vc.getLog());
         }
         chnTbl = new ChannelTable(db);
-        if (! chnTbl.exists(true))
+        if (rebuild)
+        {
+            chnTbl.recreate();      // drop table and create a new empty table
+        }
+        else if (! chnTbl.exists(true))
         {
             chnTbl.createTable();
         }
         
         chUpdTbl = new ChanUpdateTable(db);
-        if (! chUpdTbl.exists(true))
+        if (rebuild)
+        {
+            chUpdTbl.recreate();
+        }
+        else if (! chUpdTbl.exists(true))
         {
             chUpdTbl.createTable();
         }
@@ -250,14 +260,14 @@ public class ChanUpdater
                             {
                                 cLists.add(cls);
                             }
+                            if (verbose > 0)
+                            {
+                                System.out.format("Server: %1$-24s, type: %2$-12s, count: %3$,9d,"
+                                                  + " crc: %4$-9s, needs Update: %5$b\n",
+                                                  srv, ctyp.toString(), n, crc, needsUpdate);
+                            }
                         }
                         chUpdTbl.setUpdateFlag(srv, ctyp, needsUpdate);
-                        if (verbose > 1)
-                        {
-                            System.out.format("Server: %1$-24s, type: %2$-12s, count: %3$,9d,"
-                                    + " crc: %4$-9s, needs Update: %5$b\n",
-                                          srv,ctyp.toString(),n, crc, needsUpdate);
-                        }
                     }
                 }
             }
@@ -305,7 +315,11 @@ public class ChanUpdater
                     nds = new NDSProxyClient(srv);
                     nds.connect(600000);
                     ArrayList<ChanInfo> channelList = nds.getChanList(ctypStr);
-                    cls.dumpFile(channelList);
+                    if (channelList != null && ! channelList.isEmpty())
+                    {
+                        Collections.sort(channelList);
+                        cls.dumpFile(channelList);
+                    }
                 }
                 catch (NDSException ex)
                 {
@@ -480,8 +494,12 @@ public class ChanUpdater
 
         options.addOption(new Option("help", "print this message"));
         options.addOption(new Option("version", "print the version information and exit"));
+        options.addOption(new Option("rebuild", "delete and rebuild tables, default is update if needed"));
+        options.addOption(new Option("skip_download", "don't download channel lists, use existing files"));
+        options.addOption(new Option("noupdates", "don't update the database"));
 
         options.addOption(OptionBuilder.withArgName("config").hasArg().withDescription("ldvw configuration path").create("config"));
+        options.addOption(OptionBuilder.withArgName("verbose").hasArg().withDescription("verbosity level 0-5").create("verbose"));
 
         CommandLineParser parser = new GnuParser();
 
@@ -505,6 +523,18 @@ public class ChanUpdater
             if (line.hasOption("version"))
             {
                 System.out.println(programName + " - version " + version);
+                ret = false;
+            }
+            rebuild = line.hasOption("rebuild");
+            doGetFileList = ! line.hasOption("skip_download");
+            doPendingUpds = ! line.hasOption("noupdates");
+            if (line.hasOption("verbose"))
+            {
+                String verboseStr = line.getOptionValue("verbose");
+                if (verboseStr.matches("^\\d+"))
+                {
+                    verbose = Integer.parseInt(verboseStr);
+                }
             }
 
             wantHelp = line.hasOption("help");
