@@ -18,6 +18,7 @@ package odcplot;
 
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.Progress;
+import viewerconfig.ViewConfigException;
 
 /**
  *
@@ -35,7 +36,7 @@ public class MatlabGlue
     {
         pb = pbar;
     }
-    public static String createImageFile(Integer startTime, Integer duration, String outFile)
+    public static String createImageFile(Integer startTime, Integer duration, String outFile) throws ViewConfigException
     {
         String ret;
 
