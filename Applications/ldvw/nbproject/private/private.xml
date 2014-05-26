@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="15">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="16">
         <file>
             <url>src/java/edu/fullerton/ldvw/ChanSourceData.java</url>
             <bookmark id="15">
@@ -44,18 +44,23 @@
             </bookmark>
         </file>
         <file>
+            <url>src/java/edu/fullerton/ldvplugin/WplotManager.java</url>
+            <bookmark id="3">
+                <name/>
+                <line>113</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
             <url>src/java/edu/fullerton/ldvservlet/SrcList.java</url>
             <bookmark id="14">
                 <name/>
                 <line>147</line>
                 <key/>
             </bookmark>
-        </file>
-        <file>
-            <url>src/java/edu/fullerton/ldvplugin/WplotManager.java</url>
-            <bookmark id="3">
+            <bookmark id="16">
                 <name/>
-                <line>113</line>
+                <line>199</line>
                 <key/>
             </bookmark>
         </file>
