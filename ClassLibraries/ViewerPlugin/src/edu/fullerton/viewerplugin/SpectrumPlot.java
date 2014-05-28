@@ -220,7 +220,9 @@ public
             }
             plot.setDomainAxis(domainAxis);
             plot.setDataset(0, mtds);
-            
+            plot.setDomainGridlinePaint(Color.DARK_GRAY);
+            plot.setRangeGridlinePaint(Color.DARK_GRAY);
+
             // Set the line thickness
             XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
             BasicStroke str = new BasicStroke(lineThickness);
