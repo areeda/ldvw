@@ -53,7 +53,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * UI class to filter channel lists and select channels (V2)
+ * UI class to filter channel lists and select channels (V2) and present list of selections
  * 
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
@@ -94,7 +94,17 @@ public class BaseChannelSelector extends GUISupport
 
     private final HttpServletRequest request;
 
-    public BaseChannelSelector(HttpServletRequest request, HttpServletResponse response, Database db, Page vpage, ViewUser vuser)
+    /**
+     * Constructor assumes we're a servlet facility
+     * 
+     * @param request from the servlet
+     * @param response
+     * @param db ldvw database
+     * @param vpage output page
+     * @param vuser current user
+     */
+    public BaseChannelSelector(HttpServletRequest request, HttpServletResponse response, 
+                               Database db, Page vpage, ViewUser vuser)
     {
         super(db, vpage, vuser);
         setParamMap(request.getParameterMap());
@@ -112,6 +122,8 @@ public class BaseChannelSelector extends GUISupport
     
     /**
      * Generate the form with the channel list filter parameters
+     * This form would be added by a servlet that needs to select channels
+     * 
      * @param mainPage - flag to specify what the retrieve button looks like
      * @return the form to be added to the page.
      * @throws WebUtilException
@@ -320,8 +332,6 @@ public class BaseChannelSelector extends GUISupport
             vpage.add(pf);
         }
         vpage.addBlankLines(2);
-
-
     }
     
     //--------------- Private utility methods --------------
@@ -351,7 +361,6 @@ public class BaseChannelSelector extends GUISupport
         row.add();
         row.setClassAll("noborder");
         specTbl.addRow(row);
-
     }
     /**
      * get a request parameter but return empty string if not available or set to any
