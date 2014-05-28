@@ -210,13 +210,10 @@ public class PluginManager extends GUISupport
         pfDiv.add(chmPil);
         
         // add Omega scan
-        if (vuser.isTester())
-        {
-            WplotManager wpm = new WplotManager(db, vpage, vuser);
-            PageItemList wpmPil = getSelectorContent(wpm, "doWplot", nSel, multDisp);
-            wpmPil.setUseDiv(false);
-            pfDiv.add(wpmPil);
-        }
+        WplotManager wpm = new WplotManager(db, vpage, vuser);
+        PageItemList wpmPil = getSelectorContent(wpm, "doWplot", nSel, multDisp);
+        wpmPil.setUseDiv(false);
+        pfDiv.add(wpmPil);
         
         // add Long term trend plots
         if (vuser.isTester())
