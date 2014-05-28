@@ -81,8 +81,8 @@ public class ChannelTable extends Table
         "", "Name", "Sample<br/>Rate", "Type", "Server", "Data<br/>Type", "CIS"
     };
     private final String baseCISurl = "https://cis.ligo.org/channel/byname/";
-    private final String infoIconDescUrl = "/viewer/infoicon3.png";
-    private final String infoIconNoDescUrl = "/viewer/infoicon4.png";
+    private final String infoIconDescUrl = "/ldvw/view/infoicon3.png";
+    private final String infoIconNoDescUrl = "/ldvw/view/infoicon4.png";
     private PageItemImage infoDescIcon = null;
     private PageItemImage infoNoDescIcon = null;
     
