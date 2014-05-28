@@ -58,8 +58,8 @@ import viewerconfig.ViewerConfig;
  */
 public class ChanUpdater
 {
-    private final String[] servers;
-    private final String[] cTypes;
+    private String[] servers;
+    private String[] cTypes;
     
     private final ArrayList<ChanListSummary> cLists;
     private NDSProxyClient nds;
@@ -500,6 +500,8 @@ public class ChanUpdater
 
         options.addOption(OptionBuilder.withArgName("config").hasArg().withDescription("ldvw configuration path").create("config"));
         options.addOption(OptionBuilder.withArgName("verbose").hasArg().withDescription("verbosity level 0-5").create("verbose"));
+        options.addOption(OptionBuilder.withArgName("server").hasArg().withDescription("comma separated list of servers, default=all").create("server"));
+        options.addOption(OptionBuilder.withArgName("chantype").hasArg().withDescription("comma separated list of channel types, default=all").create("chantype"));
 
         CommandLineParser parser = new GnuParser();
 
@@ -534,6 +536,33 @@ public class ChanUpdater
                 if (verboseStr.matches("^\\d+"))
                 {
                     verbose = Integer.parseInt(verboseStr);
+                }
+            }
+            if (line.hasOption("server"))
+            {
+                String srvStr = line.getOptionValue("server");
+                String[] srv = srvStr.split(",");
+                if (srv.length > 0)
+                {
+                    servers = new String[srv.length];
+                    for(int i=0;i<srv.length;i++)
+                    {
+                        servers[i] = srv[i].trim();
+                    }
+                }
+            }
+            
+            if (line.hasOption("chantype"))
+            {
+                String optStr = line.getOptionValue("chantype");
+                String[] opts = optStr.split(",");
+                if (opts.length > 0)
+                {
+                    cTypes = new String[opts.length];
+                    for (int i = 0; i < opts.length; i++)
+                    {
+                        cTypes[i] = opts[i].trim();
+                    }
                 }
             }
 
