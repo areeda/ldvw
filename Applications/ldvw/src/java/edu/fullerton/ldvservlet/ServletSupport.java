@@ -289,7 +289,7 @@ public class ServletSupport
     /**
      * Add a table of links to our main pages.
      *
-     * @param imgCnt total number of records in selection
+     * @throws edu.fullerton.jspWebUtils.WebUtilException
      */
     public void addNavBar() throws WebUtilException
     {
@@ -340,7 +340,7 @@ public class ServletSupport
         String[][] experimentalCommands =
         {
             {
-                "New Chan sel", "baseChan"
+                "Base channel selector", "baseChan"
             }
         };
 
