@@ -71,7 +71,7 @@ public class ViewUser extends Table
         new Column("isMemberOf",CType.STRING,   0,              Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
         new Column("nVisits",   CType.INTEGER,  Integer.SIZE,   Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
     };
-    private final boolean localhostIsAdmin = true;    // for debugging login from local host can be a regular user or administrator
+    private final boolean localhostIsAdmin = false;    // for debugging login from local host can be a regular user or administrator
     private String mailFwdAddr;
     private String userAgent;
     
