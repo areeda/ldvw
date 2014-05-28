@@ -133,18 +133,18 @@ public class ChanInfo implements Comparable
      */
     public String getCSV()
     {
-        String line = "";
-        line += String.format("%1$s,", chanName);
-        line += String.format("%1$.5f,", rate);
-        line += String.format("%1$d,", tstPnt);
-        line += String.format("%1$s,", cType);
-        line += String.format("%1$d,", bytesPerSample);
-        line += String.format("%1$s,", dType);
-        line += String.format("%1$.4f,", gain);
-        line += String.format("%1$.4f,", offset);
-        line += String.format("%1$.4f,", slope);
-        line += String.format("%1$s", units);
-        return line;
+        StringBuilder line = new StringBuilder();
+        line.append(chanName).append(",");
+        line.append(String.format("%1$.5f,", rate));
+        line.append(String.format("%1$d,", tstPnt));
+        line.append(cType).append(",");
+        line.append(String.format("%1$d,", bytesPerSample));
+        line.append(dType).append(",");
+        line.append(String.format("%1$.4f,", gain));
+        line.append(String.format("%1$.4f,", offset));
+        line.append(String.format("%1$.4f,", slope));
+        line.append(units);
+        return line.toString();
     }
 
     
