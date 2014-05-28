@@ -202,15 +202,22 @@ public class ChanListSummary
         md5 = Utils.getMd5String(md);
     }
 
+    /**
+     * Read the text file with a list of channels and return a Map of Sets indexed on IFO
+     * @return
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws LdvTableException
+     */
     public TreeMap<String,HashSet<ChanInfo>> getChanSets() throws FileNotFoundException, IOException, LdvTableException
     {
-        TreeMap<String,HashSet<ChanInfo>> ret = new TreeMap<String, HashSet<ChanInfo>>();
+        TreeMap<String,HashSet<ChanInfo>> ret = new TreeMap<>();
         Pattern ifoPat = Pattern.compile("(.+):");
         Matcher ifoMat;
         String ifo;
         HashSet<ChanInfo> chnSet;
         
-        if (cListFile.exists() && cListFile.canRead())
+        if (cListFile != null && cListFile.exists() && cListFile.canRead())
         {
             BufferedReader br = new BufferedReader(new FileReader(cListFile));
             String line;
