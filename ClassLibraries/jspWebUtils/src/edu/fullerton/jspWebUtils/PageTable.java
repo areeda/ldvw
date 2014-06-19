@@ -175,13 +175,15 @@ public class PageTable extends PageItem
                 if (initialSortColumn >= 0)
                 {
                     String isort=String.format("jQuery(\"#%1$s\").tablesorter({ " +
-                                                " sortList: [[%2$d,%3$d]] " +
+                                                " sortList: [[%2$d,%3$d]], widgets:['zebra'] " +
                                                 " }); ",getId(),initialSortColumn,initialSortDir);
                     page.addReadyJS(isort);
                 }
                 else
                 {
-                    page.addReadyJS(String.format("jQuery(\"#%1$s\").tablesorter(); ", getId()));
+                    String isort = String.format("jQuery(\"#%1$s\")."
+                                               + "tablesorter({widgets:['zebra']}); ", getId());
+                    page.addReadyJS(isort);
                 }
             }
             setClassName("tablesorter");
