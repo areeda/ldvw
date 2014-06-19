@@ -42,7 +42,7 @@ public class CISdbXfer
     {
         if (args.length < 1)
         {
-            System.err.println("usage: java -Xmx1g -jar CISdbXfer <infile>");
+            System.err.println("usage: java -Xmx3g -jar CISdbXfer <infile>");
             System.exit(2);
         }
         String infile = args[0];
