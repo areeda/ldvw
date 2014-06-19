@@ -79,6 +79,8 @@ import viewerconfig.ViewerConfig;
 public class TrendPlot
 {
     /**
+     * Create an object and start the process pass the exit status back
+     * 
      * @param args the command line arguments
      */
     public static void main(String[] args)
@@ -136,6 +138,9 @@ public class TrendPlot
     private StringWriter outStringWriter;
     private PrintWriter outPrintWriter;
     private long qtime;
+    private int xtics=0;
+    private boolean norand;
+    private boolean intXlabels;
 
     private int doAll(String[] args)
     {
@@ -163,7 +168,7 @@ public class TrendPlot
         }
         try
         {
-            if (!checkOnly)
+            if (!checkOnly && ! email.isEmpty())
             {
                 emailResults();
             }
@@ -225,12 +230,14 @@ public class TrendPlot
         options.addOption(new Option("version", "print the version information and exit"));
         options.addOption(new Option("verbose", "print lots of progress messages"));
         options.addOption(new Option("check", "just check the arguments"));
+        options.addOption(new Option("norand", "don't randomize output filenames"));
+        options.addOption(new Option("int", "use integers for time axis labels"));
 
         options.addOption(OptionBuilder.withArgName("out").hasArg().withDescription("output filename").create("outfile"));
         options.addOption(OptionBuilder.withArgName("geometry").hasArg().withDescription("image size <X>x<Y> [default=1280x768]").create("geom"));
 
         options.addOption(OptionBuilder.withArgName("chan").hasArgs().withDescription("channel name multiple allowed").create("chan"));
-        options.addOption(OptionBuilder.withArgName("start").hasArg().withDescription("start time").create("start"));
+        options.addOption(OptionBuilder.withArgName("start").hasArg().withDescription("start time, used for X-axis label").create("start"));
         options.addOption(OptionBuilder.withArgName("end").hasArg().withDescription("end time (or use duration)").create("end"));
         options.addOption(OptionBuilder.withArgName("server").hasArg().withDescription("LDR server default=use system default").create("server"));
         options.addOption(OptionBuilder.withArgName("duration").hasArg().withDescription("duration (or use end time)").create("duration"));
@@ -246,6 +253,7 @@ public class TrendPlot
         options.addOption(OptionBuilder.withArgName("config").hasArg().withDescription("Viewer config ").create("config"));
         options.addOption(OptionBuilder.withArgName("qtime").hasArg().withDescription("System time in ms of condor_submit ").create("qtime"));
         options.addOption(OptionBuilder.withArgName("geom").hasArg().withDescription("Plot dimensions XxY").create("geom"));
+        options.addOption(OptionBuilder.withArgName("xtics").hasArg().withDescription("Number of tic marks on x axis").create("xtics"));
         
         CommandLineParser parser = new GnuParser();
 
@@ -274,6 +282,9 @@ public class TrendPlot
             wantHelp = line.hasOption("help");
             verbose = line.hasOption("verbose");
             checkOnly = line.hasOption("check");
+            norand=line.hasOption("norand");
+            intXlabels = line.hasOption("int");
+            
             String[] chans = line.getOptionValues("chan");
             chanNames = new TreeSet<>();
             hasData = false;
@@ -437,6 +448,11 @@ public class TrendPlot
             if (it != null && !it.isEmpty())
             {
                 config = it;
+            }
+            it = line.getOptionValue("xtics");
+            if (it != null && !it.isEmpty() && it.matches("^\\d+$"))
+            {
+                xtics = Integer.parseInt(it);
             }
         }
         if (wantHelp || gotError)
@@ -632,7 +648,15 @@ public class TrendPlot
                 continue;
             }
             scaleData(datFile);
-            File outFile = File.createTempFile(cName, ".png", datDir);
+            File outFile;
+            if (!norand)
+            {
+                outFile = File.createTempFile(cName, ".png", datDir);
+            }
+            else
+            {
+                outFile = new File(datDir + "/" + cName + ".png");
+            }
 
             StringBuilder gnuCmds = new StringBuilder();
             String[] gnuEnv =
@@ -652,8 +676,20 @@ public class TrendPlot
             gnuCmds.append("set xlabel '").append(timeUnitName).append(" since ");
             gnuCmds.append(strtDate).append("' font ',18'\n");
             
-            int xtics = (int) Math.ceil(tRange/40);
-            gnuCmds.append(String.format("set xtics %d%n", xtics));
+            int pxtics;
+            if (xtics < 1)
+            {
+                pxtics = (int) Math.ceil(tRange/40);
+            }
+            else
+            {
+                pxtics = (int) Math.ceil(tRange/xtics);
+            }
+            gnuCmds.append(String.format("set xtics %d%n", pxtics));
+            if (intXlabels)
+            {
+                gnuCmds.append("set format x '%.0f'\n");
+            }
             
             gnuCmds.append("set ylabel 'Counts' font ',18'\n");
             
@@ -681,8 +717,16 @@ public class TrendPlot
                 outPrintWriter.println(gnuCmds.toString());
             }
             // save the gnuplot commands
-            File gnuFile = File.createTempFile(cName, ".gnuPlot", datDir);
+            File gnuFile;
             
+            if (!norand)
+            {
+                gnuFile = File.createTempFile(cName, ".gnuPlot", datDir);
+            }
+            else
+            {
+                gnuFile = new File(datDir + "/" + cName + ".gnuPlot");
+            }
             try (FileWriter gnuWriter = new FileWriter(gnuFile))
             {
                 gnuWriter.append(gnuCmds);
