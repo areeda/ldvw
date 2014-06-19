@@ -649,15 +649,15 @@ public class ChanInfo implements Comparable
             {
                 ret = server.compareTo(ci.server);
             }
-            else if (ret == 0 && cType != null && ci.cType != null)
+            if (ret == 0 && cType != null && ci.cType != null)
             {
                 ret = cType.compareTo(ci.cType);
             }
-            else if (ret == 0)
+            if (ret == 0)
             {
                 ret = rate.compareTo(ci.rate);
             }
-            else if (ret == 0 && dType != null && ci.dType != null)
+            if (ret == 0 && dType != null && ci.dType != null)
             {
                 ret = dType.compareTo(ci.dType);
             }
