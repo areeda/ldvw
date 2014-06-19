@@ -259,14 +259,7 @@ public class NDSProxyClient
      */
     public void bye()throws NDSException
     {
-        try
-        {
-            disconnect();
-        }
-        catch (Exception ex)
-        {
-            
-        }
+        
         try
         {
             flushInput();
