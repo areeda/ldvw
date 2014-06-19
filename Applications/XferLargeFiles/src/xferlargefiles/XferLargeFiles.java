@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import viewerconfig.ViewConfigException;
 import viewerconfig.ViewerConfig;
 
 /**
@@ -367,7 +368,7 @@ public class XferLargeFiles
     /**
      * Connect to the database and create table objects we need
      */
-    private void getDbTables() throws LdvTableException, SQLException
+    private void getDbTables() throws LdvTableException, SQLException, ViewConfigException
     {
         if (db == null)
         {
