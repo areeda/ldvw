@@ -60,11 +60,14 @@ public class ChanSourceData
         mergedIntervals = null;
         timeRange=null;
     }
-    
+    /**
+     * connect to server and retrieve the channel source list for this channel
+     * @param ci specific channel
+     */
     public void pullData(ChanInfo ci)
     {
         this.chanInfo = ci;
-        NDSProxyClient nds = null;
+        
         serverMax = serverMin = -1;
         nRawIntervals = 0;
         
@@ -73,13 +76,8 @@ public class ChanSourceData
             Pattern intervalPat = Pattern.compile("(.*):(\\d+)-(\\d+|all|inf)");
             Matcher intervalMat;
 
-            nds = new NDSProxyClient(ci.getServer());
-            nds.connect();
-            String[] channelNames =
-            {
-                ci.getChanName() + "," + ci.getcType()
-            };
-            String channelSourceInfo = nds.getChannelSourceInfo(channelNames);
+            String channelSourceInfo = getChnSrcData(ci);
+            
             int strt = channelSourceInfo.indexOf("{");
             long earliestCframeGps=TimeAndDate.utc2gps(System.currentTimeMillis() / 1000) - 28*24*3600;
             
@@ -150,6 +148,7 @@ public class ChanSourceData
             {
                 errors.append("I didn't understand this server response: ").append(channelSourceInfo);
                 errors.append("\n");
+                serverMax = serverMin = -2;
             }
         }
         catch (NDSException ex)
@@ -159,22 +158,31 @@ public class ChanSourceData
                                          ex.getClass().getSimpleName(), ex.getLocalizedMessage());
             errors.append(ermsg);
             errors.append("\n");
+            serverMax = serverMin = -3;
         }
-        finally
+    }
+    public String getChnSrcData(ChanInfo ci) throws NDSException
+    {
+        NDSProxyClient nds = null;
+        nds = new NDSProxyClient(ci.getServer());
+        nds.connect();
+        String[] channelNames =
         {
-            if (nds != null)
+            ci.getChanName() + "," + ci.getcType()
+        };
+        String channelSourceInfo = nds.getChannelSourceInfo(channelNames);
+        if (nds != null)
+        {
+            try
             {
-                try
-                {
-                    nds.bye();
-                }
-                catch (NDSException ex)
-                {
+                nds.bye();
+            }
+            catch (NDSException ex)
+            {
 
-                }
             }
         }
-
+        return channelSourceInfo;
     }
     private void addInterval(String frameType, long strtGps, long stopGps)
     {
