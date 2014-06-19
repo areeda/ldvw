@@ -32,6 +32,7 @@ vector<string> trends;
 long plotStart = 0;
 bool isGpsTime;
 double lastPoint;
+bool addTimeToFilename;
 bool raw=false;
 bool useInt=false;
 bool verbose=false;
@@ -74,6 +75,8 @@ int main( int argc, char** argv )
             dur += lexical_cast<int> (durString);
         }
     }
+    ostringstream timeStr;
+    timeStr << plotStart << "-" << dur;
     
     // create the output files
     int nChans = chanNames.size();
@@ -84,7 +87,12 @@ int main( int argc, char** argv )
     }
     for ( int c = 0; c < chanNames.size(); c++ )
     {
-        string oname = outDir + chanNames[c] + string(".dat");
+        string oname = outDir + chanNames[c];
+        if (addTimeToFilename)
+        {
+            oname += "-" + timeStr.str();
+        }
+        oname += string(".dat");
         oFiles[c] = new ofstream(oname.c_str(),ios::out | ios::binary);
     }
     for(int f=0;f < fname.size(); f++)
@@ -176,15 +184,17 @@ void setup( int argc, char** argv )
     static struct option long_options[] =
     {
                                           /* These options set a flag. */
+        {"help",    no_argument, 0, 'h'},
+        {"int",     no_argument, 0, 'i'},
+        {"raw",     no_argument, 0, 'r'},
+        {"time",    no_argument, 0, 't'},
         {"verbose", no_argument, 0, 'v'},
                                           /* These options don't set a flag.
            We distinguish them by their indices. */
-        {"frame", required_argument, 0, 'f'},
         {"chan",  required_argument, 0, 'c'},
-        {"raw",   no_argument,       0, 'r'},
+        {"frame", required_argument, 0, 'f'},
         {"outdir",required_argument, 0, 'o'},
         {"unit",  required_argument, 0, 'u'},
-        {"help",  no_argument,       0, 'h'},
         {0, 0, 0, 0}
     };
     int c;
@@ -212,12 +222,20 @@ void setup( int argc, char** argv )
                 doHelp = true;
                 break;
                 
+            case 'i':
+                useInt = true;
+                break;
+                
             case 'o':
                 outDir = string(optarg);
                 break;
                 
             case 'r':
                 raw = true;
+                break;
+                
+            case 't':
+                addTimeToFilename = true;
                 break;
                 
             case 'u':
@@ -277,7 +295,8 @@ void setup( int argc, char** argv )
     {
         cout << "Empty channel list or frame file list" << endl;
         cout << "framereadertest [--help] [--verbose] [--raw] --frame <file> --chan <file>" << endl;
-        cout << "                [--outdir <path>] [--unit <smhdw> (sec, min, hr, day, week)]" << endl;
+        cout << "                [--int (output value as long] [--unit <gsmhdw> (gps,sec, min, hr, day, week)]" << endl;
+        cout << "                [--outdir <path>] [--unit <gsmhdw> (gps,sec, min, hr, day, week)]" << endl;
         cout << "   unit: s: sec, m: min, h: hr, d: day, w: week" << endl;
         exit(2);
     }
@@ -349,7 +368,17 @@ void writeIVect(ofstream *oFile, FrVect *vect)
         int nData = vect->nData;
         double dx = *(vect->dx);
         double strt = vect->GTime;
-        // handle missing data
-        
+        double t;
+        long v;
+        for ( int x = 0; x < nData; x++ )
+        {
+            t = ( strt + x * dx );
+            t -= isGpsTime ? 0 : plotStart;
+            t /= timeFact;
+            v = (long)vect->dataD[x];
+            oFile->write( (char*) &t, sizeof (double) );
+            oFile->write( (char*) &v, sizeof(long));
+        }
+        FrVectFree( vect);
     }
 }
