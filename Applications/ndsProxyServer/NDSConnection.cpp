@@ -60,13 +60,14 @@ void NDSConnection::disconnect()
 {
     try
     {
-        int rc2 = daq_disconnect(&daqd);
-        if ( rc2 < 0 )
-        {
-            cerr << " Error on close client connection (daq_disconnect)";
-            cerr << errno << ". " << strerror( errno );
-        }
-        daq_destroy(&this->daqd);
+        daq_destroy(&this->daqd); 
+        //int rc2 = daq_disconnect(&daqd);
+//        if ( rc2 < 0 )
+//        {
+//            cerr << " Error on close client connection (daq_disconnect)";
+//            cerr << errno << ". " << strerror( errno );
+//        }
+
         memset(&daqd,0,sizeof(daqd));
     }
     catch(...)
