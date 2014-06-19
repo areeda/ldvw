@@ -25,7 +25,7 @@ public:
     
 private:
     struct addrinfo *servinfo; // Address information on our server port
-    int sock;   // The socket we're serving
+    
     bool verbose;
     bool noThreads;
     static const int maxThreads = 5;
