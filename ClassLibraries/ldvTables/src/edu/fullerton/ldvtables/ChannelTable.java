@@ -21,7 +21,6 @@ import com.areeda.jaDatabaseSupport.CType;
 import com.areeda.jaDatabaseSupport.Column;
 import com.areeda.jaDatabaseSupport.Database;
 import com.areeda.jaDatabaseSupport.Table;
-import edu.fullerton.jspWebUtils.PageFormCheckbox;
 import edu.fullerton.jspWebUtils.PageItem;
 import edu.fullerton.jspWebUtils.PageItemImage;
 import edu.fullerton.jspWebUtils.PageItemImageLink;
@@ -33,11 +32,12 @@ import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
 
 import edu.fullerton.ldvjutils.ChanInfo;
-import edu.fullerton.ldvjutils.LdvTableException;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 
@@ -76,13 +76,10 @@ public class ChannelTable extends Table
     {
         "myId", "name", "server", "sampleRate", "cType", "dtype"
     };
-    private final String[] hdr =
-    {
-        "", "Name", "Sample<br/>Rate", "Type", "Server", "Data<br/>Type", "CIS"
-    };
+    
     private final String baseCISurl = "https://cis.ligo.org/channel/byname/";
-    private final String infoIconDescUrl = "/ldvw/view/infoicon3.png";
-    private final String infoIconNoDescUrl = "/ldvw/view/infoicon4.png";
+    private final String infoIconDescUrl = "/ldvw/infoicon3.png";
+    private final String infoIconNoDescUrl = "/ldvw/infoicon4.png";
     private PageItemImage infoDescIcon = null;
     private PageItemImage infoNoDescIcon = null;
     
@@ -91,7 +88,7 @@ public class ChannelTable extends Table
     private StringBuilder insertCommand=null;
     private final int insertNum=5000;
     // streaming retrieval
-    private ResultSet allStream;
+    
     private int minChanId, maxChanId;
 
     public ChannelTable(Database db) throws SQLException
@@ -241,7 +238,7 @@ public class ChannelTable extends Table
 
     public HashMap<ChanInfo,ChanInfo> getAsMap(String server) throws SQLException
     {
-        HashMap<ChanInfo,ChanInfo> map = new HashMap<ChanInfo,ChanInfo>();
+        HashMap<ChanInfo,ChanInfo> map = new HashMap<>();
         Statement st = db.createStatement(1000);
         String q = "SELECT * from " + getName() + " WHERE server='" + server + "'";
         ResultSet rs = st.executeQuery(q);
@@ -353,124 +350,6 @@ public class ChannelTable extends Table
         return ret;
     }
 
-    /**
-     * Get a table to select channels from a database query
-     * @param nCols
-     * @param strt
-     * @param count
-     * @param sel
-     * @param filter
-     * @param selections
-     * @return a table object ready for display with selection
-     * @throws LdvTableException
-     * @throws WebUtilException 
-     */
-    public PageTable getPageTable(int nCols, int strt, int count, boolean sel, 
-                                  String filter, HashSet<Integer> selections) throws LdvTableException, WebUtilException
-    {
-        PageTable t = new PageTable();
-        
-        
-        String q = "SELECT * FROM " + getName();
-        if (filter.length() > 0)
-        {
-            q += " WHERE (" + filter + ") ";
-        }
-        
-        q += " ORDER BY name,server,cType ";
-        
-        if ( strt != 0 || count != 0)
-        {
-            q += String.format(" limit %1$d, %2$d ", strt, count);
-        }
-        try
-        {
-            ResultSet rs = db.executeQuery(q);
-            boolean doHdr = true;
-            boolean odd = true;
-            infoDescIcon = new PageItemImage(infoIconDescUrl, "chan info", "CIS");
-            infoDescIcon.setDim(18, 18);
-            ChanDataAvailability cda = new ChanDataAvailability(db);
-            
-            while(rs.next())
-            {
-                if (doHdr)
-                {
-                    t.addRow(getHdrRow());
-                    doHdr = false;
-                }
-                
-                PageTableRow d = new PageTableRow();        // d contains data for all channels
-                PageTableRow d1 = new PageTableRow();       // d1 contains availability if we have it
-                // change color on alternating rows of table
-                d.setClassName(odd ? "odd" : "even");
-                d1.setClassName(odd ? "odd" : "even");
-                odd = !odd;
-                
-                ChanInfo ci = new ChanInfo();
-                ci.fill(rs);
-                
-                Integer myId = rs.getInt("myId");
-                String selName = String.format("selchan_%1$d", myId);
-                PageFormCheckbox selcb = new PageFormCheckbox(selName, "");
-                selcb.setClassName("selBox");
-                if (selections.contains(myId))
-                {
-                    selcb.setChecked(true);
-                    selections.remove(myId);
-                }
-                PageItemString cname = new PageItemString(ci.getChanName());
-                PageTableColumn selcbCol = new PageTableColumn(selcb);
-                PageTableColumn cnameCol = new PageTableColumn(cname);
-                
-                String availability = cda.getAvailability(ci.getAvailId());
-                boolean gotAvailability = availability.length()>6;
-                if (gotAvailability)
-                {
-                    selcbCol.setRowSpan(2);
-                    cnameCol.setRowSpan(2);
-                    PageTableColumn availCol = new PageTableColumn(availability);
-                    availCol.setSpan(hdr.length-2);
-                    d1.add(availCol);
-                }
-                
-                d.add(selcbCol);
-                d.add(cnameCol);
-                
-                d.add(getNumericCol(ci.getRate()));
-                
-                String ctyp = ci.getcType();
-                PageTableColumn ctc = new PageTableColumn(ctyp);
-                ctc.setAlign(PageItem.Alignment.CENTER);
-                d.add(ctc);
-                
-                d.add(ci.getServer());
-                d.add(ci.getdType());
-                
-                // Add link to CIS if we think they have anything for us
-                if (ci.getCisAvail().equalsIgnoreCase("a") || ci.getCisAvail().equalsIgnoreCase("d"))
-                {
-                    PageItemImageLink infoLink = getCisLink(ci);
-                    d.add(infoLink);
-                }
-                else
-                {
-                    d.add();    // else make it blank
-                }
-                t.addRow(d);
-                if (gotAvailability)
-                {
-                    t.addRow(d1);
-                }
-            }
-        }
-        catch (SQLException ex)
-        {
-            throw new LdvTableException(ex);
-        }
-        
-        return t;
-    }
 
     public ChanInfo getChanInfo(int id)
     {
@@ -503,19 +382,19 @@ public class ChannelTable extends Table
     {
         PageItemList ret = new PageItemList();
         String servq = "select distinct server from Channels";
-        ArrayList<String> servers = new ArrayList<String>();
+        ArrayList<String> servers = new ArrayList<>();
         ResultSet rs = db.executeQuery(servq);
         while(rs.next())
         {
             servers.add(rs.getString("server"));
         }
         rs.close();
-        TreeSet<String> cTypeset = new TreeSet<String>();
-        TreeMap<String,HashMap<String,Integer>> srvrCnts = new TreeMap<String,HashMap<String,Integer>>();
+        TreeSet<String> cTypeset = new TreeSet<>();
+        TreeMap<String,HashMap<String,Integer>> srvrCnts = new TreeMap<>();
         
         for(String s : servers)
         {
-            HashMap<String,Integer> aserver = new HashMap<String, Integer>();
+            HashMap<String,Integer> aserver = new HashMap<>();
             
             String sCntr = "select cType,count(cType) as cnt from Channels where server='" + s +"' group by cType";
             rs = db.executeQuery(sCntr);
@@ -597,7 +476,6 @@ public class ChannelTable extends Table
         }
         PageTableRow totalCounts = new PageTableRow();
         totalCounts.setClassName(odd ? "odd" : "even");
-        odd = !odd;
         
         PageItemString totPI = new PageItemString("Totals", false);
         totPI.setAlign(PageItem.Alignment.CENTER);
@@ -739,37 +617,39 @@ public class ChannelTable extends Table
         
         return ret;
     }
-    //===========================Private Methods============================
-    public PageTableRow getHdrRow() throws WebUtilException
+    public ArrayList<ChanInfo> getFilterChanList (int strt, int count, boolean sel,
+                                  String filter) throws WebUtilException
     {
-        PageTableRow r = new PageTableRow();
-        for (String h : hdr)
+        ArrayList<ChanInfo> ret = new ArrayList<>();
+        String q = "SELECT * FROM " + getName();
+        if (filter.length() > 0)
         {
-            if(h.isEmpty())
-            {
-                h = "&nbsp;";
-            }
-            r.add(new PageItemString(h, false));
+            q += " WHERE (" + filter + ") ";
         }
-        r.setRowType(PageTableRow.RowType.HEAD);
 
-        return r;
-    }
-    private PageTableColumn getNumericCol(Float fs) throws WebUtilException
-    {
-        String str;
-        if (fs > 0.9999)
+        q += " ORDER BY name,server,cType ";
+
+        if (strt != 0 || count != 0)
         {
-            str = String.format("%1$.0f", fs);
+            q += String.format(" limit %1$d, %2$d ", strt, count);
         }
-        else
+        try
         {
-            str = String.format("%1$.3f", fs);
+            ResultSet rs = db.executeQuery(q);
+            while (rs.next())
+            {
+                ChanInfo ci = new ChanInfo();
+                ci.fill(rs);
+                ret.add(ci);
+            }
         }
-        PageTableColumn fsc = new PageTableColumn(str);
-        fsc.setAlign(PageItem.Alignment.RIGHT);
-        return fsc;
+        catch (SQLException ex)
+        {
+            throw new WebUtilException("Builing filtered channel list", ex);
+        }
+        return ret;
     }
+    //===========================Private Methods============================
 
     /**
      * Link into the Channel Information system
@@ -873,8 +753,6 @@ public class ChannelTable extends Table
      *
      * @param server empty string for all, null not allowed
      * @param chanType Channel Type, empty string for all, null not allowed
-     * @param start start in the list
-     * @param cnt number of channels to return
      * @return a list of channel info objects specified
      * @throws SQLException
      */
@@ -1084,6 +962,7 @@ public class ChannelTable extends Table
     /**
      * Get a streaming result set of name and id for use in updating CIS
      * @return the resultset which much be closed before any other operation on this connection can be done
+     * @throws java.sql.SQLException
      */
     public ResultSet getAllNameId() throws SQLException
     {
@@ -1092,21 +971,7 @@ public class ChannelTable extends Table
         ResultSet ret = myStmt.executeQuery(query);
         return ret;
     }
-    /**
-     * Open a streaming result set of all Channels.
-     * 
-     * Note that no other operations can be performed on this connection until the stream is closed.
-     * 
-     * @see #streamNext() 
-     * @see #streamClose() 
-     * @throws SQLException 
-     */
-    public void streamAll() throws SQLException
-    {
-        Statement myStmt = db.createStatement(1);
-        String query="SELECT * from " + getName();
-        allStream = myStmt.executeQuery(query);
-    }
+    
     /**
      * Open a streaming result set of all Channels whose name matches the parameter.
      * 
@@ -1120,9 +985,25 @@ public class ChannelTable extends Table
      */
     public void streamByName(String chanNameMatchStr) throws SQLException
     {
-        Statement myStmt = db.createStatement(1);
         String query = "SELECT * from " + getName() + " WHERE name like '" + chanNameMatchStr + "'";
-        allStream = myStmt.executeQuery(query);
+        streamByQuery(query);
+    }
+    
+    /**
+     * Stream all channels that match server and name pattern (SQL glob)
+     * 
+     * Note: no other operations can be performed on this connection until the stream is closed.
+     * @param server
+     * @param chanNameMatchStr
+     * @throws SQLException
+     */
+    public void streamByServerName(String server, String chanNameMatchStr) throws SQLException
+    {
+        String query;
+        chanNameMatchStr = chanNameMatchStr.replaceAll("_", "\\\\_");
+        query = String.format("SELECT * from %1$s WHERE server = '%2$s' and name like '%3$s'",
+                              getName(), server, chanNameMatchStr);
+        streamByQuery(query);
     }
     /**
      * Get the next channel information object from the open stream
@@ -1140,21 +1021,7 @@ public class ChannelTable extends Table
         return ret;
     }
     
-    /**
-     * close the currently open stream.
-     * @see #streamAll() 
-     * @see #streamClose() 
-     * @throws SQLException 
-     */
-    public void streamClose() throws SQLException
-    {
-        if (allStream != null)
-        {
-            allStream.close();
-            allStream = null;
-        }
-    }
-
+   
     public int getMinChanId() throws SQLException
     {
         if (maxChanId == 0)
@@ -1183,4 +1050,45 @@ public class ChannelTable extends Table
             maxChanId = rs.getInt("max");
         }
     }
+    /**
+     * Search the entire Channel table and build a set of unique IFO:Subsystem strings
+     */
+    public Set<String> buildIfoSubsysSet() throws WebUtilException
+    {
+        TreeSet<String> ifoSubsysSet = new TreeSet<>();
+        try
+        {
+            streamAll();
+
+            ChanInfo ci;
+            Pattern ifoSubsysPat = Pattern.compile("\\s*(.+:.+?[-_])");
+            while ((ci = streamNext()) != null)
+            {
+                String basename = ci.getBaseName();
+                Matcher m = ifoSubsysPat.matcher(basename);
+                if (m.find())
+                {
+                    String ifoSubsys = m.group(1);
+                    ifoSubsysSet.add(ifoSubsys);
+                }
+            }
+        }
+        catch (SQLException ex)
+        {
+            throw new WebUtilException("Building ifo subsystem set",ex);
+        }
+        finally
+        {
+            try
+            {
+                streamClose();
+            }
+            catch (SQLException ex)
+            {
+                throw new WebUtilException("building ifo subsystem set", ex);
+            }
+        }
+        return ifoSubsysSet;
+    }
+
 }
