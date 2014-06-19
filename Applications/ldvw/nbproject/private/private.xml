@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="16">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="17">
         <file>
             <url>src/java/edu/fullerton/ldvw/ChanSourceData.java</url>
             <bookmark id="15">
@@ -32,6 +32,11 @@
         </file>
         <file>
             <url>src/java/edu/fullerton/ldvw/TimeAndPlotSelector.java</url>
+            <bookmark id="17">
+                <name/>
+                <line>86</line>
+                <key/>
+            </bookmark>
             <bookmark id="6">
                 <name/>
                 <line>133</line>
@@ -81,22 +86,22 @@
             <url>src/java/edu/fullerton/ldvw/PluginManager.java</url>
             <bookmark id="4">
                 <name/>
-                <line>218</line>
+                <line>216</line>
                 <key/>
             </bookmark>
             <bookmark id="8">
                 <name/>
-                <line>276</line>
+                <line>273</line>
                 <key/>
             </bookmark>
             <bookmark id="1">
                 <name/>
-                <line>297</line>
+                <line>294</line>
                 <key/>
             </bookmark>
             <bookmark id="2">
                 <name/>
-                <line>351</line>
+                <line>348</line>
                 <key/>
             </bookmark>
         </file>
@@ -121,11 +126,7 @@
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
         </group>
         <group>
-            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/BaseChannelSelector.java</file>
-            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/TimeAndPlotSelector.java</file>
-            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/LdvDispatcher.java</file>
-            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/SrcList.java</file>
-            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/TrendPlotDefinition.java</file>
         </group>
     </open-files>
 </project-private>
