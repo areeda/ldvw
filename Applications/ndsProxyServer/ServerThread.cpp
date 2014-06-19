@@ -6,6 +6,7 @@
  */
 
 #include "ServerThread.h"
+
 #include <errno.h>
 #if __APPLE__
 #include <err.h>
@@ -20,6 +21,8 @@
 #include <cstdio>
 #include <cstddef>
 #include <errno.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -1029,11 +1032,14 @@ void ServerThread::sayBye()
     {
         cout << getCurTime( ) << " Connection " << fd << " closed." << endl;
     }
-    int crc = close( fd );
-    if ( crc < 0 )
+    if (fcntl(fd, F_GETFD) != -1 && errno != EBADF)
     {
-        cerr << getCurTime( ) << " Error on close client connection ";
-        cerr << errno << ". " << strerror( errno );
+        int crc = close( fd );
+        if ( crc < 0 )
+        {
+            cerr << getCurTime( ) << " Error on close client connection ";
+            cerr << errno << ". " << strerror( errno );
+        }
     }
     int rc2 = shutdown( fd, SHUT_RDWR );
     if (rc2 < 0 )
