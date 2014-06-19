@@ -18,6 +18,7 @@ package edu.fullerton.ldvw;
 
 import edu.fullerton.viewerplugin.GUISupport;
 import com.areeda.jaDatabaseSupport.Database;
+import commonUI.ChannelsSelector;
 import edu.fullerton.jspWebUtils.*;
 import edu.fullerton.ldvjutils.ChanInfo;
 
@@ -528,62 +529,31 @@ public class TimeAndPlotSelector extends GUISupport
     }
     public PageTable getChannelSelectTable(Set<Integer> selections) throws SQLException, WebUtilException
     {
-        PageTable t = new PageTable();
+        PageTable ret = new PageTable();
         Set<ChanInfo> cList = ct.getAsSet(selections);
-        ChanDataAvailability cda = new ChanDataAvailability(db);
+        ChannelsSelector cs = new ChannelsSelector(contextPath);
+        ret = cs.getSelector(cList, selections);
+        return ret;
+    }
+    private final String[] hdr =
+    {
+        "", "Name", "Sample<br/>Rate", "Type", "Server", "Data<br/>Type", "CIS"
+    };
 
-        int cnt = 1;
-        PageTableRow hdr = ct.getHdrRow();
-        t.addRow(hdr);
-        boolean odd = true;
-        for (ChanInfo ci : cList)
+    private PageTableRow getHdrRow() throws WebUtilException
+    {
+        PageTableRow r = new PageTableRow();
+        for (String h : hdr)
         {
-            PageTableRow d = new PageTableRow();        // d contains data for all channels
-            PageTableRow d1 = new PageTableRow();       // d1 contains availability if we have it
-            String className = odd ? "odd" : "even";
-            odd = !odd;
-            d.setClassName(className);
-            d1.setClassName(className);
-
-
-            Integer myId = ci.getId();
-            String selName = String.format("selchan_%1$d", myId);
-            PageFormCheckbox selcb = new PageFormCheckbox(selName, "");
-            selcb.setClassName("selBox");
-            selcb.setChecked(true);
-            PageTableColumn selCol = new PageTableColumn(selcb);
-            PageTableColumn cnameCol = new PageTableColumn(ci.getChanName());
-
-
-            String availability = cda.getAvailability(ci.getChanName(), ci.getServer(), "");
-            boolean gotAvailability = availability.length() > 6;
-            if (gotAvailability)
+            if (h.isEmpty())
             {
-                selCol.setRowSpan(2);
-                cnameCol.setRowSpan(2);
-                PageTableColumn availCol = new PageTableColumn(availability);
-                availCol.setSpan(hdr.getColumnCount() - 2);
-                d1.add(availCol);
+                h = "&nbsp;";
             }
-            d.add(selCol);
-            d.add(cnameCol);
-
-            float fs = ci.getRate();
-            d.add(getNumericCol(fs));
-            d.add(ci.getcType());
-            d.add(ci.getServer());
-            d.add(ci.getdType());
-
-            PageItemImageLink infoLink = ct.getCisLink(ci);
-            d.add(infoLink);
-
-            t.addRow(d);
-            if (gotAvailability)
-            {
-                t.addRow(d1);
-            }
+            r.add(new PageItemString(h, false));
         }
-        return t;
+        r.setRowType(PageTableRow.RowType.HEAD);
+
+        return r;
     }
 
     private PageTableColumn getNumericCol(Float fs) throws WebUtilException
