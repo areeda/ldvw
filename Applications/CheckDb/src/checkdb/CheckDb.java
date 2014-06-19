@@ -17,6 +17,7 @@
 package checkdb;
 
 import com.areeda.jaDatabaseSupport.Database;
+import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.ChanIndexInfo;
 import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvjutils.ChanPointer;
@@ -28,10 +29,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -48,7 +49,8 @@ import viewerconfig.ViewConfigException;
 import viewerconfig.ViewerConfig;
 
 /**
- *
+ * Perform basic checks on the Channel tables and build the base channel tables
+ * 
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
 public class CheckDb
@@ -63,7 +65,7 @@ public class CheckDb
             CheckDb me = new CheckDb();
             me.doAll(args);
         }
-        catch (SQLException | ClassNotFoundException | ViewConfigException ex)
+        catch (WebUtilException | SQLException | ClassNotFoundException | ViewConfigException ex)
         {
             Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -84,7 +86,7 @@ public class CheckDb
     private String programName = "CheckDb";
     private String version = "0.1.0";
     
-    private void doAll(String[] args)
+    private void doAll(String[] args) throws WebUtilException
     {
         try
         {
@@ -92,8 +94,17 @@ public class CheckDb
             {
                 setup();
                 chnTbl = new ChannelTable(db);
-                buildIfoSubsysSet();
-                chanstats = new TreeMap<>();
+                ifoSubsysSet = chnTbl.buildIfoSubsysSet();
+                
+                if (verbose > 2)
+                {
+                    System.out.println("List of ifo:subsystem");
+                    for(String ifoSubsys : ifoSubsysSet)
+                    {
+                        System.out.format("%1$s%n", ifoSubsys);
+                    }
+                }
+                    chanstats = new TreeMap<>();
 
                 cidx = new ChannelIndex(db);
                 cidx.recreate();
@@ -104,35 +115,29 @@ public class CheckDb
                 chnTbl = new ChannelTable(db);
                 
                 long chanCount = chnTbl.getRecordCount();
-                long pntrCount = cpt.getRecordCount();
+                System.out.format("There are %1$,d channels in Channels table%n", chanCount);
                 
-                if (chanCount != pntrCount)
+                out = new BufferedWriter(new FileWriter("/tmp/chanNames.txt"));
+                int nifoSubsys = ifoSubsysSet.size();
+                int cur = 0;
+                for(String ifoSubsys : ifoSubsysSet)
                 {
-                    out = new BufferedWriter(new FileWriter("/tmp/chanNames.txt"));
-                    int nifoSubsys = ifoSubsysSet.size();
-                    int cur = 0;
-                    for(String ifoSubsys : ifoSubsysSet)
+                    ifoSubsys = ifoSubsys.replaceAll("_", "\\\\_");
+                    cur++;
+                    buildChanStats(ifoSubsys);
+                    doReport(ifoSubsys);
+                    saveNames();
+                    try
                     {
-                        cur++;
-                        buildChanStats(ifoSubsys);
-                        doReport(ifoSubsys);
-                        saveNames();
-                        try
-                        {
-                            makeChannelIndexTable();
-                            makeChanPointerTable(ifoSubsys);
-                            String msg = String.format("Processed: %1$d of %2$d, %3$s", cur, nifoSubsys, ifoSubsys);
-                            logTime(msg, 2);
-                        }
-                        catch (SQLException ex)
-                        {
-                            Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+                        makeChannelIndexTable();
+                        makeChanPointerTable(ifoSubsys);
+                        String msg = String.format("Processed: %1$d of %2$d, %3$s", cur, nifoSubsys, ifoSubsys);
+                        logTime(msg, 2);
                     }
-                }
-                else
-                {
-                    System.out.println("Channel table and pointer table are same size, so we did not check");
+                    catch (SQLException ex)
+                    {
+                        Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         }
@@ -154,47 +159,6 @@ public class CheckDb
                 }
             }
         }
-    }
-    /**
-     * Search the entire Channel table and build a set of unique IFO:Subsystem strings
-     */
-    private void buildIfoSubsysSet() 
-    {
-        try
-        {
-            ifoSubsysSet = new HashSet<>();
-            chnTbl.streamAll();
-            
-            ChanInfo ci;
-            Pattern ifoSubsysPat = Pattern.compile("\\s*(.+:.+?[-_])");
-            while ((ci = chnTbl.streamNext()) != null)
-            {
-                String basename = ci.getBaseName();
-                Matcher m = ifoSubsysPat.matcher(basename);
-                if (m.find())
-                {
-                    String ifoSubsys = m.group(1);
-                    ifoSubsysSet.add(ifoSubsys);
-                }
-            }
-        }
-        catch (SQLException ex)
-        {
-            Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        finally
-        {
-            try
-            {
-                chnTbl.streamClose();
-            }
-            catch (SQLException ex)
-            {
-                Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        String logStr = String.format("There are %1$,d ifo-subsys.", ifoSubsysSet.size());
-        logTime(logStr, 1);
     }
     /**
      * Build a map of all channels that are derived from each base name for a single IFO:Subsystem
