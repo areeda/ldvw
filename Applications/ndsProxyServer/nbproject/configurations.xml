@@ -56,7 +56,6 @@
         </cTool>
         <ccTool>
           <incDir>
-            <pElem>/usr/include</pElem>
             <pElem>/usr/include/nds2-client</pElem>
           </incDir>
           <commandLine>-O0</commandLine>
@@ -64,7 +63,7 @@
         </ccTool>
         <linkerTool>
           <linkerAddLib>
-            <pElem>/usr/local/lib</pElem>
+            <pElem>/usr/lib64</pElem>
             <pElem>/usr/lib/sasl2</pElem>
             <pElem>/usr/lib/x86_64-linux-gnu</pElem>
           </linkerAddLib>

@@ -59,7 +59,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -L/usr/lib/sasl2 -L/usr/lib/x86_64-linux-gnu -lboost_regex -lpthread -lrt -lndsclient -lsasl2 -lstdc++
+LDLIBSOPTIONS=-L/usr/lib64 -L/usr/lib/sasl2 -L/usr/lib/x86_64-linux-gnu -lboost_regex -lpthread -lrt -lndsclient -lsasl2 -lstdc++
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -72,42 +72,42 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ndsproxyserver: ${OBJECTFILES}
 ${OBJECTDIR}/Channels.o: nbproject/Makefile-${CND_CONF}.mk Channels.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -I/usr/include -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Channels.o Channels.cpp
+	$(COMPILE.cc) -g -Wall -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Channels.o Channels.cpp
 
 ${OBJECTDIR}/NDSConnection.o: nbproject/Makefile-${CND_CONF}.mk NDSConnection.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -I/usr/include -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NDSConnection.o NDSConnection.cpp
+	$(COMPILE.cc) -g -Wall -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NDSConnection.o NDSConnection.cpp
 
 ${OBJECTDIR}/NDSData.o: nbproject/Makefile-${CND_CONF}.mk NDSData.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -I/usr/include -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NDSData.o NDSData.cpp
+	$(COMPILE.cc) -g -Wall -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NDSData.o NDSData.cpp
 
 ${OBJECTDIR}/NDSException.o: nbproject/Makefile-${CND_CONF}.mk NDSException.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -I/usr/include -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NDSException.o NDSException.cpp
+	$(COMPILE.cc) -g -Wall -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NDSException.o NDSException.cpp
 
 ${OBJECTDIR}/ProxyServer.o: nbproject/Makefile-${CND_CONF}.mk ProxyServer.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -I/usr/include -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ProxyServer.o ProxyServer.cpp
+	$(COMPILE.cc) -g -Wall -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ProxyServer.o ProxyServer.cpp
 
 ${OBJECTDIR}/ServerThread.o: nbproject/Makefile-${CND_CONF}.mk ServerThread.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -I/usr/include -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ServerThread.o ServerThread.cpp
+	$(COMPILE.cc) -g -Wall -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ServerThread.o ServerThread.cpp
 
 ${OBJECTDIR}/Utils.o: nbproject/Makefile-${CND_CONF}.mk Utils.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -I/usr/include -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Utils.o Utils.cpp
+	$(COMPILE.cc) -g -Wall -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Utils.o Utils.cpp
 
 ${OBJECTDIR}/main.o: nbproject/Makefile-${CND_CONF}.mk main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -I/usr/include -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -g -Wall -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
 # Subprojects
 .build-subprojects:
