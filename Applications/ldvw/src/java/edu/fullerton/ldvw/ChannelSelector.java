@@ -19,15 +19,21 @@ package edu.fullerton.ldvw;
 import edu.fullerton.viewerplugin.GUISupport;
 import com.areeda.jaDatabaseSupport.Database;
 import com.areeda.jaDatabaseSupport.Utils;
+import commonUI.ChannelsSelector;
 import edu.fullerton.jspWebUtils.*;
+import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvtables.ChannelTable;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvplugin.HelpManager;
 import edu.fullerton.ldvjutils.ChanParts;
+import edu.fullerton.ldvtables.ChanDataAvailability;
 import edu.fullerton.ldvtables.ViewUser;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
@@ -155,7 +161,7 @@ public class ChannelSelector extends GUISupport
             pf.add(pgCntrlBar);
             pf.add(new PageItemBlanks());
 
-            PageTable cpt = ct.getPageTable(0, strt, cnt, true, where, selections);
+            PageTable cpt = getPageTable(0, strt, cnt, true, where, selections);
             pf.add(cpt);
         
             if (nMatch > 10)
@@ -661,6 +667,17 @@ public class ChannelSelector extends GUISupport
 
     }
 
+    /**
+     * Create a drop down menu
+     * @param id
+     * @param label
+     * @param paramName
+     * @param vals
+     * @param allowMult
+     * @param defVal
+     * @param addAny
+     * @return 
+     */
     public static PageItem getListSelector(String id, String label, String paramName, String[] vals, boolean allowMult, String defVal, boolean addAny)
     {
 
@@ -688,4 +705,38 @@ public class ChannelSelector extends GUISupport
 
         return pil3;
     }
+    /**
+     * Get a table to select channels from a database query
+     *
+     * @param nCols
+     * @param strt
+     * @param count
+     * @param sel
+     * @param filter
+     * @param selections
+     * @return a table object ready for display with selection
+     * @throws LdvTableException
+     * @throws WebUtilException
+     */
+    public PageTable getPageTable(int nCols, int strt, int count, boolean sel,
+                                  String filter, HashSet<Integer> selections) throws LdvTableException, WebUtilException
+    {
+        ChannelTable ct;
+        try
+        {
+            ct = new ChannelTable(db);
+        }
+        catch (SQLException ex)
+        {
+            throw new WebUtilException("Getting channel selection table", ex);
+        }
+        ArrayList<ChanInfo> cList;
+        cList = ct.getFilterChanList(strt, count, sel, filter);
+
+        ChannelsSelector cs = new ChannelsSelector(contextPath);
+        PageTable ret = cs.getSelector(cList, selections);
+        return ret;
+    }
+
+
 }
