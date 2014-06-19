@@ -175,6 +175,8 @@ public class OdcPlot
     }
     /**
      * Create specified plots
+     * @throws edu.fullerton.jspWebUtils.WebUtilException
+     * @throws viewerconfig.ViewConfigException
      */
     public void doPlot() throws WebUtilException, ViewConfigException
     {
@@ -192,7 +194,7 @@ public class OdcPlot
             }
             setProgress("Starting transfer.");
             getBitNames(channelName);
-            int nSamples=0;
+            long nSamples=0;
             if (!infilename.isEmpty())
             {
                 nSamples = setupFileReads();
@@ -459,14 +461,14 @@ public class OdcPlot
      * @param buffer - nds2 buffer object
      * @param strtSampleNum - starting position in samples
      */
-    private void addBuf(byte[][] data, int strtSampleNum, int len) throws NDSException, IOException
+    private void addBuf(byte[][] data, int strtSampleNum, long len) throws NDSException, IOException
     {
         
         bufn++;
 //        System.out.println(String.format("%1$d, strt: %2$d, end: %3$d sample: %4$d",
 //                                         bufn, firstCol, lastCol, strtSampleNum));
         
-        for(int ip=0;ip<len;ip++)
+        for(long ip=0;ip<len;ip++)
         {
             int col = (int) Math.round((strtSampleNum+ip) * sample2colFact);
             col = col >= dimX ? dimX-1 : col;
@@ -1461,14 +1463,15 @@ public class OdcPlot
     }
 
     /**
-     * For binary input files from our frame reader set up the input streadm
+     * For binary input files from our frame reader set up the input stream
      * @return number of entries to read
      * @throws WebUtilException 
      */
-    private int setupFileReads() throws WebUtilException
+    private long setupFileReads() throws WebUtilException
     {
+        setProgress("Scan input file for min/max GPS times.");
         File inFile = new File(infilename);
-        int siz = (int) (inFile.length()/(Float.SIZE/8)/2);     // convert bytes to # entries (time, val)
+        long siz = inFile.length()/(Float.SIZE/8)/2;     // convert bytes to # entries (time, val)
         if (!inFile.canRead())
         {
             throw new WebUtilException("Can't open " + infilename + " for reading");
@@ -1479,8 +1482,16 @@ public class OdcPlot
             float minTime=Float.MAX_VALUE;
             float maxTime = - Float.MAX_VALUE;
             
+            setProgress("Searhing for min/max time in input file.");
+            int opct = 0;
             for(int i = 0 ; i< siz; i++)
             {
+                int pct = (int) (100*i/siz);
+                if (pct > opct)
+                {
+                    setProgress(pct,100);
+                    opct = pct;
+                }
                 Float t = inStream.readFloat();
                 Float d = inStream.readFloat();
                 minTime = Math.min(minTime, t);
