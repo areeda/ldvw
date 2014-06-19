@@ -26,6 +26,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -169,6 +171,23 @@ public class ChanPointerTable extends Table
         }
         return ret;
     }
-
+    public ArrayList<Integer> getAllChanIds() throws LdvTableException
+    {
+        ArrayList<Integer> ret = new ArrayList<>();
+        try
+        {
+            streamAll();
+            ResultSet rs;
+            while(allStream.next())
+            {
+                ret.add(allStream.getInt("myId"));
+            }
+        }
+        catch (SQLException ex)
+        {
+            throw new LdvTableException("Getting list of all channel poitners", ex);
+        }
+        return ret;
+    }
 }
 
