@@ -44,6 +44,7 @@ public class Table
     protected Database db;
     protected HashMap<String, CType> fieldNames = null;
     protected TreeMap<String, Integer> unknownColumns = new TreeMap<String, Integer>();
+    protected ResultSet allStream;
 
     protected Table()
     {
@@ -410,8 +411,6 @@ public class Table
         
         db.execute("ALTER TABLE " + getName() + " ENABLE KEYS");
         db.execute("UNLOCK TABLES ");
-
-        
     }
 
     /**
@@ -432,4 +431,43 @@ public class Table
         String cmd = "OPTIMIZE TABLE " + getName();
         db.execute(cmd);
     }
+    
+    /**
+     * Open a streaming result set of all Channels.
+     *
+     * Note that no other operations can be performed on this connection until the stream is closed.
+     *
+     * @see #streamNext()
+     * @see #streamClose()
+     * @throws SQLException
+     */
+    public void streamAll() throws SQLException
+    {
+        Statement myStmt = db.createStatement(1);
+        String query = "SELECT * from " + getName();
+        allStream = myStmt.executeQuery(query);
+    }
+    
+    public void streamByQuery(String query) throws SQLException
+    {
+        Statement myStmt = db.createStatement(1);
+        allStream = myStmt.executeQuery(query);
+    }
+    
+    /**
+     * close the currently open stream.
+     *
+     * @see #streamAll()
+     * @see #streamClose()
+     * @throws SQLException
+     */
+    public void streamClose() throws SQLException
+    {
+        if (allStream != null)
+        {
+            allStream.close();
+            allStream = null;
+        }
+    }
+
 }
