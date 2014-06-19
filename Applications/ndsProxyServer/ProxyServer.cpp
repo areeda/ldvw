@@ -41,6 +41,7 @@ ProxyServer::~ProxyServer()
 void ProxyServer::Listen()
 {
     int status=0;
+    int sock; // The socket we're serving
     struct addrinfo hints;
     signal(SIGPIPE, SIG_IGN);
     
@@ -124,6 +125,15 @@ void ProxyServer::serveItUp(int sock) throw(NDSException)
         socklen_t addrLen = sizeof(addr);
         int fd = accept(sock, &addr, &addrLen);
         if (fd == -1)
+        {
+            throw NDSException(errno, strerror(errno));
+        }
+        struct timeval timeout;
+        timeout.tv_sec = 600;
+        timeout.tv_usec = 0;
+
+        if ( setsockopt( sock, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout,
+                         sizeof (timeout ) ) < 0 )
         {
             throw NDSException(errno, strerror(errno));
         }
