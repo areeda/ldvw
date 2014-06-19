@@ -40,6 +40,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
@@ -199,14 +200,17 @@ public
                 
                 rangeAxis.setNumberFormatOverride(lanf);
                 rangeAxis.setRange(smallest, maxy*Math.pow(10,exp));
+                rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
                 plot.setRangeAxis(rangeAxis);
             }
             if (logXaxis)
             {
                 LogAxis domainAxis = new LogAxis(xLabel);
                 domainAxis.setMinorTickCount(9);
+                domainAxis.setMinorTickMarksVisible(true);
                 domainAxis.setSmallestValue(smallestX);
-                domainAxis.setNumberFormatOverride(new LogAxisNumberFormat());
+                //domainAxis.setNumberFormatOverride(new LogAxisNumberFormat());
+                domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
                 plot.setDomainAxis(domainAxis);
             }
             ValueAxis domainAxis = plot.getDomainAxis();
