@@ -44,7 +44,7 @@ public class TrendPlotDefinition extends PluginController
             
             addAttribute(new PluginAttribute("stackable", true));
             addAttribute(new PluginAttribute("needsDataXfer", false));
-            addAttribute(new PluginAttribute("program", "gsissh ldas-pcdev2.ligo.caltech.edu /home/areeda/condor/trendPlot "));
+            addAttribute(new PluginAttribute("program", "gsissh ldas-pcdev2.ligo.caltech.edu bin/trendPlot "));
             addAttribute(new PluginAttribute("useEquals", false));
             addAttribute(new PluginAttribute("nDashes", 2));
             
