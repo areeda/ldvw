@@ -1,0 +1,4 @@
+#!/bin/bash
+cd swig
+swig -c++ -java -debug-classes -debug-symtabs -debug-module 1 -outcurrentdir -outdir java ../nds.i
+cd ..

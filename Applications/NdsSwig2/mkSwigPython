@@ -1,0 +1,5 @@
+
+#!/bin/bash
+cd swig
+swig -c++ -python -debug-classes -debug-symtabs -debug-module 1 -outcurrentdir -outdir python ../nds.i
+cd ..
