@@ -464,9 +464,17 @@ public class SrcList extends HttpServlet
                 {
                     timeRange = ti;
                 }
-                else
+                else if (timeRange.overlaps(ti))
                 {
                     timeRange = timeRange.mergeIntervals(ti);
+                }
+                else if (ti.getStartGps() < timeRange.getStartGps())
+                {
+                    timeRange.setStartGps(ti.getStartGps());
+                }
+                else if (ti.getStopGps() > timeRange.getStopGps())
+                {
+                    timeRange.setStopGps(ti.getStopGps());
                 }
             }
         }
