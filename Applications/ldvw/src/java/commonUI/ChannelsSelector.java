@@ -91,7 +91,7 @@ public class ChannelsSelector
             if (selections.contains(myId))
             {
                 selcb.setChecked(true);
-                selections.remove(myId);
+//                selections.remove(myId);
             }
             PageItemString cname = new PageItemString(ci.getChanName());
             PageTableColumn selcbCol = new PageTableColumn(selcb);
