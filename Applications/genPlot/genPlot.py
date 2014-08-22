@@ -3,6 +3,10 @@
 __author__ = 'joseph areeda'
 __version__ = '0.0.0'
 
+import os.path
+import os
+if os.environ['HOME'] is not None:
+    os.environ['HOME'] = '/usr/local/ldvw/.config/'
 from astropy.time import Time
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -11,7 +15,6 @@ from numpy import genfromtxt
 import plotArgs
 import sys
 import re
-import os.path
 
 argList=plotArgs.getargs(sys.argv[1:])  # parse command line arguments
 if argList.test :
