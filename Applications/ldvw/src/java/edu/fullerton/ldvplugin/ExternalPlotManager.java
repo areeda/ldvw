@@ -18,6 +18,7 @@ package edu.fullerton.ldvplugin;
 
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
+import edu.fullerton.jspWebUtils.PageItem;
 import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.ImageCoordinate;
@@ -426,4 +427,5 @@ public class ExternalPlotManager extends ExternalProgramManager
         }
         return imgId;
     }
+
 }
