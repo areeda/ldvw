@@ -452,6 +452,21 @@ public class Database
         totalMs += System.currentTimeMillis() - strtMs;
         return ret;
     }
+    
+    public ResultSet executeUpdateGetKeys(String updateSql) throws SQLException
+    {
+        long strtMs = System.currentTimeMillis();
+        ResultSet ret=null;
+        
+        if (stmt.executeUpdate(updateSql, Statement.RETURN_GENERATED_KEYS) > 0)
+        {
+            ret = stmt.getGeneratedKeys();
+        }
+
+        nQueries++;
+        totalMs += System.currentTimeMillis() - strtMs;
+        return ret;
+    }
     /**
      * Executes the given SQL query string, which returns a single ResultSet object.
      * This implementation keeps statistics and handles errors
