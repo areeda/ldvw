@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Defines a plugin in terms of its User Interface and execution properties
@@ -43,6 +44,8 @@ import java.util.Map;
  */
 public abstract class PluginController
 {
+    public static String fltPat = "^(([1-9][0-9]*\\.?[0-9]*)|(\\.[0-9]+))([Ee][+-]?[0-9]+)?$";
+    
     private String name;
     private String description;
     private String namespace;
