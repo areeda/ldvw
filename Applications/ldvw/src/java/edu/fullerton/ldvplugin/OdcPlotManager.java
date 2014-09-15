@@ -19,6 +19,7 @@ package edu.fullerton.ldvplugin;
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageForm;
+import edu.fullerton.jspWebUtils.PageFormCheckbox;
 import edu.fullerton.jspWebUtils.PageFormSelect;
 import edu.fullerton.jspWebUtils.PageFormSubmit;
 import edu.fullerton.jspWebUtils.PageItem;
@@ -33,13 +34,16 @@ import edu.fullerton.ldvjutils.ImageCoordinate;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ImageCoordinateTbl;
 import edu.fullerton.ldvtables.ImageTable;
-import edu.fullerton.ldvtables.TimeInterval;
+import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.ldvw.TimeAndPlotSelector;
+import edu.fullerton.viewerplugin.ChanDataBuffer;
+import edu.fullerton.viewerplugin.PlotProduct;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -51,26 +55,33 @@ import java.util.regex.Pattern;
  * 
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
-public class OdcPlotManager extends ExternalPlotManager
+public class OdcPlotManager extends ExternalPlotManager implements PlotProduct
 {
+    private int width;
+    private int height;
     
     public OdcPlotManager( Database db, Page vpage, ViewUser vuser)
     {
         super(db,vpage,vuser);
     }
 
-    public void doPlot(String chanName, String server, ArrayList<TimeInterval> times) throws WebUtilException
+    public int doPlot(String chanName, String server, ArrayList<TimeInterval> times) throws WebUtilException
     {
         File tmpDir = new File("/tmp");
         //@TODO get the path to our programs from config file
         String odcDir = "/usr/local/ldvw/OdcPlot";
         String prog = String.format("java -Xmx1g -jar %s/OdcPlot.jar", odcDir);
         String cmd;
+        int imgId=0;
         for(TimeInterval t : times)
         {
             try
             {
                 String[] plotSizes = paramMap.get("odcPlotSize");
+                if (plotSizes == null || plotSizes.length < 1)
+                {
+                    plotSizes = paramMap.get("plotSize");
+                }
                 String geometry = "";
                 if (plotSizes != null && plotSizes.length == 1)
                 {
@@ -81,6 +92,10 @@ public class OdcPlotManager extends ExternalPlotManager
                         geometry="--geom " + gMat.group(1);
                     }
                 }
+                if (geometry.isEmpty() && width >0 && height > 0)
+                {
+                    geometry=String.format("--geom %1$dx%2$d", width, height);
+                }
                 Long start = t.getStartGps();
                 Long stop = t.getStopGps();
                 File outFile = File.createTempFile("odc", ".png", tmpDir);
@@ -88,7 +103,8 @@ public class OdcPlotManager extends ExternalPlotManager
                         + "%6$s --outfile %7$s",
                         prog, server, chanName, start, (stop-start), geometry,
                         outFile.getCanonicalPath());
-                int imgId = callProgramSaveOutput(cmd, outFile, prog, chanName);
+                
+                imgId = callProgramSaveOutput(cmd, outFile, prog, chanName);
                 PageItemList desc = addIntro(t, chanName, server);
                 ImageTable imgTbl2 = new ImageTable(db);
                 imgTbl2.addDescription(imgId, desc.getHtml());
@@ -124,7 +140,22 @@ public class OdcPlotManager extends ExternalPlotManager
             }
                     
         }
-        
+        return imgId;
+    }
+    @Override
+    public void setParameters(Map<String, String[]> parameterMap)
+    {
+        this.paramMap = parameterMap;
+    }
+    @Override
+    public PageItem getSelector(String enableKey, int nSel, String[] multDisp)
+    {
+        PageItemList ret = new PageItemList();
+        String enableText = "Generate ODC Plot";
+        enableText += nSel > 1 ? "s<br><br>" : "<br><br>";
+        ret.add(new PageFormCheckbox(enableKey, enableText));
+        ret.add(new PageItemString("No special options for ODC plots"));
+        return ret;
     }
     public static TreeMap<String, String> getOdcPlotChannelMap()
     {
@@ -363,5 +394,65 @@ public class OdcPlotManager extends ExternalPlotManager
         pf.add(odcBtn);
 
         return pf;
+    }
+
+    @Override
+    public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbuf, boolean compact) throws WebUtilException
+    {
+        ArrayList<Integer> ret = new ArrayList<>();
+        for(ChanDataBuffer buf : dbuf)
+        {
+            ArrayList<TimeInterval> tis = new ArrayList<>();
+            tis.add(buf.getTimeInterval());
+            int imgId = doPlot(buf.getChanInfo().getChanName(), buf.getChanInfo().getServer(), tis);
+            if (imgId > 0)
+            {
+                ret.add(imgId);
+            }
+        }
+        return ret;
+    }
+
+    @Override
+    public boolean isStackable()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean needsImageDescriptor()
+    {
+        return false;
+    }
+
+    @Override
+    public void setSize(int width, int height)
+    {
+        this.width = width;
+        this.height = height;
+    }
+
+    @Override
+    public boolean needsDataXfer()
+    {
+        return false;
+    }
+
+    @Override
+    public void setDispFormat(String dispFormat)
+    {
+        
+    }
+
+    @Override
+    public boolean hasImages()
+    {
+        return true;
+    }
+
+    @Override
+    public String getProductName()
+    {
+        return "ODC Plot";
     }
 }
