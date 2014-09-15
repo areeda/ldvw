@@ -16,6 +16,7 @@
  */
 package edu.fullerton.ldvtables;
 
+import edu.fullerton.ldvjutils.Server;
 import com.areeda.jaDatabaseSupport.CType;
 import com.areeda.jaDatabaseSupport.Column;
 import com.areeda.jaDatabaseSupport.Database;
@@ -38,10 +39,9 @@ public class ServerTable extends Table
         //         name,            type            length          can't be null   index          unique         auto inc
         new Column("myId",          CType.INTEGER,  Integer.SIZE/8,     Boolean.TRUE, Boolean.TRUE,  Boolean.TRUE, Boolean.TRUE),
         new Column("name",          CType.CHAR,     64,                 Boolean.TRUE, Boolean.TRUE,  Boolean.TRUE, Boolean.FALSE),
-        new Column("fqdn",          CType.CHAR,     64,                 Boolean.TRUE, Boolean.FALSE, Boolean.TRUE, Boolean.FALSE),
+        new Column("fqdn",          CType.CHAR,     64,                 Boolean.TRUE, Boolean.TRUE,  Boolean.TRUE, Boolean.FALSE),
+        new Column("site",          CType.CHAR,     48,                 Boolean.TRUE, Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE),
         new Column("lastmod",       CType.TIMESTAMP, 8,                 Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
-        new Column("minAvail",      CType.INTEGER,  Integer.SIZE/8,     Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
-        new Column("maxOnline",     CType.INTEGER,  Integer.SIZE/8,     Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
     };
     
     public ServerTable(Database db) 
@@ -75,7 +75,7 @@ public class ServerTable extends Table
     {
         try
         {
-            String q = "SELECT * FROM " + getName() + "WHERE name = ?";
+            String q = "SELECT * FROM " + getName() + " WHERE name = ?";
             PreparedStatement ps = db.prepareStatement(q, Statement.NO_GENERATED_KEYS);
             ps.setString(1, srv.getName());
             ResultSet rs = db.executeQuery(ps);
@@ -84,25 +84,23 @@ public class ServerTable extends Table
                 Server oldSrv = new Server(rs);
                 
                 String upd = "UPDATE " + getName() + "SET name=?, fqdn=?, lastMod=now(),"
-                             + "minAvail=?, maxOnline=? WHERE myId = ?";
+                             + "site=?, WHERE myId = ?";
                 PreparedStatement updPs = db.prepareStatement(upd, Statement.NO_GENERATED_KEYS);
                 updPs.setString(1, srv.getName());
                 updPs.setString(2, srv.getFqdn());
-                updPs.setInt(3, srv.getMinAvail());
-                updPs.setInt(4, srv.getMaxOnline());
+                updPs.setString(3, srv.getSite());
                 updPs.setInt(5, oldSrv.getMyId());
                 db.execute(updPs);
                 updPs.close();
             }
             else
             {
-                String ins = "INSERT INTO " + getName() + "SET name=?, fqdn=?, lastMod=now(),"
-                             + "minAvail=?, maxOnline=?";
+                String ins = "INSERT INTO " + getName() + " SET name=?, fqdn=?, lastMod=now(),"
+                             + "site=?";
                 PreparedStatement insPs = db.prepareStatement(ins, Statement.RETURN_GENERATED_KEYS);
                 insPs.setString(1, srv.getName());
                 insPs.setString(2, srv.getFqdn());
-                insPs.setInt(3, srv.getMinAvail());
-                insPs.setInt(4, srv.getMaxOnline());
+                insPs.setString(3, srv.getSite());
                 db.execute(insPs);
                 insPs.close();
             }
@@ -120,9 +118,10 @@ public class ServerTable extends Table
         Server ret = null;
         try
         {
-            String q = "SELECT * FROM " + getName() + " WHERE name = ?";
+            String q = "SELECT * FROM " + getName() + " WHERE name = ? OR fqdn = ?";
             PreparedStatement ps = db.prepareStatement(q, Statement.NO_GENERATED_KEYS);
             ps.setString(1, selName);
+            ps.setString(2, selName);
             ResultSet rs = db.executeQuery(ps);
             if (rs.next())
             {
