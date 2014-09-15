@@ -69,9 +69,9 @@ public class WplotDefinition extends PluginController
             addParameter(p);
 
             p = ParameterFactory.buildParam(PluginParameter.Type.STANDARD, "tempDir", null, null);
-            p.setArgumentName("outputDirectory");
+            p.setArgumentName("outDir");
             addParameter(p);
-
+            
             p = ParameterFactory.buildParam(PluginParameter.Type.LIST, "Plot type", "plttyp", "One or more plots");
             p.setVal(plotType).setMultiSel(true);
             p.setArgumentName("plotType");
