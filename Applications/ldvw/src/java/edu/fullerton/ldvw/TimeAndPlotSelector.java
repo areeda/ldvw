@@ -18,7 +18,7 @@ package edu.fullerton.ldvw;
 
 import edu.fullerton.viewerplugin.GUISupport;
 import com.areeda.jaDatabaseSupport.Database;
-import commonUI.ChannelsSelector;
+import commonUI.ChannelsUI;
 import edu.fullerton.jspWebUtils.*;
 import edu.fullerton.ldvjutils.ChanInfo;
 
@@ -27,7 +27,7 @@ import edu.fullerton.ldvjutils.TimeAndDate;
 import edu.fullerton.ldvplugin.HelpManager;
 import edu.fullerton.ldvtables.ChanDataAvailability;
 import edu.fullerton.ldvtables.ChannelTable;
-import edu.fullerton.ldvtables.TimeInterval;
+import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.ldvtables.ViewUser;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -531,7 +531,7 @@ public class TimeAndPlotSelector extends GUISupport
     {
         PageTable ret = new PageTable();
         Set<ChanInfo> cList = ct.getAsSet(selections);
-        ChannelsSelector cs = new ChannelsSelector(contextPath);
+        ChannelsUI cs = new ChannelsUI(contextPath);
         ret = cs.getSelector(cList, selections);
         return ret;
     }
