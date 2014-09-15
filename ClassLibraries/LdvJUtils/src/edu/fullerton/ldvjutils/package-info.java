@@ -16,7 +16,8 @@
  */
 
 /**
- * A collection of Java classes designed to be called from Matlab and useful to LigoDV and other Java programs
+ * A collection of Java classes to support LigoDV and LigoDV-web
+ * Most classes in this package represent rows in the ligoDV database
  * 
  */
 package edu.fullerton.ldvjutils;
