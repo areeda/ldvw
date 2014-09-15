@@ -105,6 +105,11 @@ public class Utils
         return ret;
     }
 
+    /**
+     * An attempt to quote SQL strings to minimize injection risks
+     * @param in any string
+     * @return quoted string with special characters escaped
+     */
     public static String sqlQuote(String in)
     {
         int s = 0;
