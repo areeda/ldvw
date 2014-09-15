@@ -34,11 +34,11 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * Display of lists from the Channels table
+ * Display interfaces for the Channels table
  * 
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
-public class ChannelsSelector
+public class ChannelsUI
 {
     private final String baseCISurl = "https://cis.ligo.org/channel/byname/";
     private final String infoIconDescUrl;
@@ -52,7 +52,7 @@ public class ChannelsSelector
     private PageItemImage srcIcon = null;
     private final String baseSrcUrl;
 
-    public ChannelsSelector(String contextPath)
+    public ChannelsUI(String contextPath)
     {
         infoIconDescUrl = contextPath + "/infoicon3.png";
         infoIconNoDescUrl = contextPath + "/infoicon4.png";
@@ -91,7 +91,7 @@ public class ChannelsSelector
             if (selections.contains(myId))
             {
                 selcb.setChecked(true);
-//                selections.remove(myId);
+                selections.remove(myId);
             }
             PageItemString cname = new PageItemString(ci.getChanName());
             PageTableColumn selcbCol = new PageTableColumn(selcb);
@@ -121,7 +121,8 @@ public class ChannelsSelector
     {
         String[] hdr =
         {
-            "", "Name", "Sample<br/>Rate", "Type", "Server", "Data<br/>Type", "Info link"
+            "", "Name&nbsp;&nbsp;", "Sample&nbsp;&nbsp;&nbsp;&nbsp;<br/>Rate", "Type&nbsp;&nbsp;&nbsp;&nbsp;", 
+            "Server&nbsp;&nbsp;", "Data&nbsp;&nbsp;<br/>Type", "Info link&nbsp;&nbsp;"
         };
 
         PageTableRow r = new PageTableRow();
@@ -167,12 +168,12 @@ public class ChannelsSelector
             cisInfo = new PageItemString("&nbsp;", false);
         }
         PageItem pemInfo = getPemLink(ci);
-//        PageItem csrcInfo = getSrcInfoLink(ci);
+        PageItem csrcInfo = getSrcInfoLink(ci);
 
         PageItemList infoLinks = new PageItemList();
         infoLinks.add(cisInfo);
         infoLinks.add(new PageItemString("&nbsp;", false));
-//        infoLinks.add(csrcInfo);
+        infoLinks.add(csrcInfo);
         infoLinks.add(new PageItemString("&nbsp;", false));
         if (pemInfo != null)
         {
@@ -226,9 +227,9 @@ public class ChannelsSelector
         PageItem ret = null;
         String cname = cii.getBaseName();
 
-        if (cname.matches("[HL]1:PEM-.*_DQ"))
+        if (cname.matches("[HL]1:PEM-.*OUT_DQ"))
         {
-            String pemName = cname.replace("_DQ", "");
+            String pemName = cname.replace("_OUT_DQ", "");
 
             String pemUrl = basePemUrl + pemName;
             PageItemImageLink link;
@@ -237,5 +238,12 @@ public class ChannelsSelector
         return ret;
     }
 
-    
+    private PageItem getSrcInfoLink(ChanInfo ci)
+    {
+        PageItem ret;
+        String url = String.format("%1$s?chanid=%2$d", baseSrcUrl, ci.getId());
+        ret = new PageItemImageLink(url, srcIcon, "_blank");
+        return ret;
+    }
+ 
 }
