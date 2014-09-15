@@ -39,7 +39,7 @@ import edu.fullerton.ldvjutils.TimeAndDate;
 import edu.fullerton.ldvtables.ChanPointerTable;
 import edu.fullerton.ldvtables.ChannelIndex;
 import edu.fullerton.ldvtables.ChannelTable;
-import edu.fullerton.ldvtables.TimeInterval;
+import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.ndsproxyclient.ChanSourceData;
 import edu.fullerton.ldvw.Epochs;
@@ -197,7 +197,7 @@ public class SrcList extends HttpServlet
                         PageItem plots = makePlots(csdList, cii.getName(), servletSupport.getDb(),
                                                    servletSupport.getVpage(), 
                                                    servletSupport.getVuser(), contextPath);
-                        PageItem plotForm = getImgForm(servletSupport, plots, bid, zoom, 
+                        PageItem plotForm = getImgForm(servletSupport, plots, bid, 0,zoom, 
                                                        searchRange, menuChoice);
                         vpage.add(plotForm);
                         vpage.add(tables);
@@ -205,6 +205,30 @@ public class SrcList extends HttpServlet
                     }
                 }
                         
+            }
+            String[] chanIds = request.getParameterValues("chanid");
+            if (chanIds != null)
+            {
+                ChanInfo ci;
+            
+                for (String chanId : chanIds)
+                {
+                    if (chanId.trim().matches("^\\d+$"))
+                    {
+                        int id = Integer.parseInt(chanId);
+                        ci = ctbl.getChanInfo(id);
+                        List<Integer> chanList = new ArrayList<>();
+                        chanList.add(id);
+                        tblNum = addChanSource(tables, chanList, ctbl, tblNum, csdList, searchRange);
+                        PageItem plots = makePlots(csdList, ci.getChanName(), servletSupport.getDb(),
+                                                   servletSupport.getVpage(),
+                                                   servletSupport.getVuser(), contextPath);
+                        PageItem plotForm = getImgForm(servletSupport, plots, 0, id, zoom,
+                                                       searchRange, menuChoice);
+                        vpage.add(plotForm);
+                        vpage.add(tables);
+                    }
+                }
             }
             
             servletSupport.showPage(response);
@@ -575,14 +599,25 @@ public class SrcList extends HttpServlet
         }
         return ret;
     }
-    PageItem getImgForm(ServletSupport servletSupport, PageItem img, int bid,
+    PageItem getImgForm(ServletSupport servletSupport, PageItem img, int bid, int cid,
                         boolean zoom, TimeInterval timeRange, String menuChoice) 
             throws WebUtilException
     {
+        if (bid == 0 && cid == 0)
+        {
+            throw new WebUtilException("Srclist display without a base chan id or chan id");
+        }
         PageItemList ret = new PageItemList();
         PageForm form = new PageForm();
         form.addHidden("replot", "true");
-        form.addHidden("baseid", Integer.toString(bid));
+        if (bid > 0)
+        {
+            form.addHidden("baseid", Integer.toString(bid));
+        }
+        if (cid > 0)
+        {
+            form.addHidden("chanid", Integer.toString(cid));
+        }
         form.setAction(servletSupport.getServletPath());
         form.setMethod("GET");
         form.setNoSubmit(true);
