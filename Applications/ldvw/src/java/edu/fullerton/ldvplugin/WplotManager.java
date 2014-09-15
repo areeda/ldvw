@@ -23,6 +23,7 @@ import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvtables.ViewUser;
+import edu.fullerton.plugindefn.PluginController;
 import edu.fullerton.plugindefn.WplotDefinition;
 import edu.fullerton.viewerplugin.ChanDataBuffer;
 import edu.fullerton.viewerplugin.PlotProduct;
