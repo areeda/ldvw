@@ -19,7 +19,7 @@ package edu.fullerton.ldvw;
 import edu.fullerton.viewerplugin.GUISupport;
 import com.areeda.jaDatabaseSupport.Database;
 import com.areeda.jaDatabaseSupport.Utils;
-import commonUI.ChannelsSelector;
+import commonUI.ChannelsUI;
 import edu.fullerton.jspWebUtils.*;
 import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvtables.ChannelTable;
@@ -157,7 +157,7 @@ public class ChannelSelector extends GUISupport
             pf.add(pgCntrlBar);
             pf.add(new PageItemBlanks());
 
-            PageTable cpt = getPageTable(0, strt, cnt, true, where, selections);
+            PageTable cpt = getChanListTable(0, strt, cnt, true, where, selections);
             pf.add(cpt);
         
             if (nMatch > 10)
@@ -238,8 +238,6 @@ public class ChannelSelector extends GUISupport
                 strt = Math.max(strt, 0);
             }
         }
-
-        
 
         // construct a where clause
         StringBuilder where = new StringBuilder();
@@ -714,7 +712,7 @@ public class ChannelSelector extends GUISupport
      * @throws LdvTableException
      * @throws WebUtilException
      */
-    public PageTable getPageTable(int nCols, int strt, int count, boolean sel,
+    public PageTable getChanListTable(int nCols, int strt, int count, boolean sel,
                                   String filter, HashSet<Integer> selections) throws LdvTableException, WebUtilException
     {
         ChannelTable ct;
@@ -729,7 +727,7 @@ public class ChannelSelector extends GUISupport
         ArrayList<ChanInfo> cList;
         cList = ct.getFilterChanList(strt, count, sel, filter);
 
-        ChannelsSelector cs = new ChannelsSelector(contextPath);
+        ChannelsUI cs = new ChannelsUI(contextPath);
         PageTable ret = cs.getSelector(cList, selections);
         return ret;
     }
