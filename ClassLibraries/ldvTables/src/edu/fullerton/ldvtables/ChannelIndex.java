@@ -27,9 +27,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * The base channel look up tables
@@ -146,6 +143,7 @@ public class ChannelIndex extends Table
      * @see #streamClose()
      * @throws SQLException
      */
+    @Override
     public void streamAll() throws SQLException
     {
         Statement myStmt = db.createStatement(1);
