@@ -35,6 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/1140831991/nds.o \
 	${OBJECTDIR}/Channels.o \
 	${OBJECTDIR}/NDSConnection.o \
 	${OBJECTDIR}/NDSData.o \
@@ -68,6 +69,11 @@ LDLIBSOPTIONS=-L/usr/lib64 -L/usr/lib/sasl2 -L/usr/lib/x86_64-linux-gnu -lboost_
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ndsproxyserver: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ndsproxyserver ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/_ext/1140831991/nds.o: nbproject/Makefile-${CND_CONF}.mk /home/joe/NetBeansProjects/ldvw/Applications/ndsProxyServer/nds.i 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1140831991
+	${RM} "$@.d"
+	$(COMPILE.c) -g -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1140831991/nds.o /home/joe/NetBeansProjects/ldvw/Applications/ndsProxyServer/nds.i
 
 ${OBJECTDIR}/Channels.o: nbproject/Makefile-${CND_CONF}.mk Channels.cpp 
 	${MKDIR} -p ${OBJECTDIR}

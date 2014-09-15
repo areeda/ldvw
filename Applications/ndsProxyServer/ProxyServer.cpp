@@ -90,7 +90,9 @@ void ProxyServer::Listen()
                 }
             }
             if (status != 0)
-            ermsg = strerror(errno);
+            {
+                ermsg = strerror(errno);
+            }
         }
     }
     if (status == 0)
@@ -107,7 +109,6 @@ void ProxyServer::Listen()
     {
         serveItUp(sock);
     }
-
     else
     {
         printf("Error: %d - %s", status, ermsg.c_str());
@@ -126,16 +127,24 @@ void ProxyServer::serveItUp(int sock) throw(NDSException)
         int fd = accept(sock, &addr, &addrLen);
         if (fd == -1)
         {
-            throw NDSException(errno, strerror(errno));
+            cerr << getCurTime() << "Error on accept: (" << errno  << ") "<< strerror(errno) << endl;
+            continue;
         }
         struct timeval timeout;
         timeout.tv_sec = 600;
         timeout.tv_usec = 0;
 
-        if ( setsockopt( sock, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout,
+        /**
+         * client connections should have a time out
+         * sock is the server listen socket
+         * fd is the client 
+         */
+        if ( setsockopt( fd, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout,
                          sizeof (timeout ) ) < 0 )
         {
-            throw NDSException(errno, strerror(errno));
+            cerr << getCurTime() << "Error on set socket timeout: (" << errno << ") " ;
+            cerr << strerror(errno) << endl;
+            continue;
         }
         char peer[INET6_ADDRSTRLEN];
         memset(peer,0,sizeof(peer));
@@ -144,7 +153,9 @@ void ProxyServer::serveItUp(int sock) throw(NDSException)
         int in_port = get_in_port(&addr);
         
         if (verbose) 
+        {
             cout << getCurTime() << "Connected to " <<  peer << " on port " << in_port <<  " as fd: " << fd << endl;
+        }
         
         void *pport = &fd;
         int rc;
@@ -153,7 +164,7 @@ void ProxyServer::serveItUp(int sock) throw(NDSException)
         {
             ServerThread::setNoThreads(true);
             ServerThread::threadHelper(pport);
-            break;
+            continue;
         }
         else
         {
@@ -162,7 +173,8 @@ void ProxyServer::serveItUp(int sock) throw(NDSException)
         }
         if (rc)
         {
-            cerr << getCurTime() << rc << strerror(rc) << endl;
+            cerr << getCurTime() << "error on pthread_create" << rc << strerror(rc) << endl;
+            continue;
         }
         
     }
