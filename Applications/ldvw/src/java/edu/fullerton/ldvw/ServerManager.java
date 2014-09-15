@@ -25,7 +25,7 @@ import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.LdvTableException;
-import edu.fullerton.ldvtables.Server;
+import edu.fullerton.ldvjutils.Server;
 import edu.fullerton.ldvtables.ServerTable;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.viewerplugin.GUISupport;
@@ -69,7 +69,7 @@ class ServerManager extends GUISupport
         frm.setName("server");
         frm.setAction(servletPath);
         frm.addHidden("act", "procSrvFrm");
-        frm.setMethod("POST");
+        frm.setMethod("GET");
         
         if (! existing.isEmpty())
         {
@@ -86,8 +86,7 @@ class ServerManager extends GUISupport
         PageTable newParms = new PageTable();
         newParms.addRow(getStrParamRow("Short name",editing.getName()));
         newParms.addRow(getStrParamRow("Fully qualified domain name",editing.getFqdn()));
-        newParms.addRow(getStrParamRow("Est. min available time (sec) ",editing.getMinAvail().toString()));
-        newParms.addRow(getStrParamRow("Est. max tim on disk (sec)",editing.getMaxOnline().toString()));
+        newParms.addRow(getStrParamRow("Site name",editing.getSite()));
         frm.add(newParms);
         
         vpage.add(frm);
@@ -102,13 +101,29 @@ class ServerManager extends GUISupport
         return row;
     }
 
-    void procForm()
+    void procForm() throws LdvTableException
     {
         if (paramMap.get("submit") != null)
         {
-            String[] nicknames = paramMap.get("Short name");
-            String[] fqdns = paramMap.get("Fully qualified domain name");
+            String nickname = getParamStr("Short name");
+            String fqdn = getParamStr("Fully qualified domain name");
+            String site = getParamStr("Site name");
+            
+            Server newServer = new Server(nickname, site, fqdn);
+            ServerTable st = new ServerTable(db);
+            st.save(newServer);
         }
+    }
+
+    private String getParamStr(String pname)
+    {
+        String ret = "";
+        String[] p = paramMap.get(pname);
+        if (p != null && p.length > 0)
+        {
+            ret = p[0];
+        }
+        return ret;
     }
     
     
