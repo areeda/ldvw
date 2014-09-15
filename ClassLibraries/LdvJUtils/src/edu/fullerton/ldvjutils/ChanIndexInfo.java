@@ -334,7 +334,59 @@ public class ChanIndexInfo
         this.hasTstPnt = hasTstpnt;
     }
 
-    
- 
-    
+    public String getCSV()
+    {
+        StringBuilder ret = new StringBuilder();
+        ret.append(name).append(", ");
+        ret.append(ifo).append(", ");
+        ret.append(subsys).append(", ");
+        ret.append(getRateStr(minRawRate)).append(", ");
+        ret.append(getRateStr(maxRawRate)).append(", ");
+        ret.append(getRateStr(minRdsRate)).append(", ");
+        ret.append(getRateStr(maxRdsRate)).append(", ");
+        ret.append(getBoolStr(hasRaw)).append(", ");
+        ret.append(getBoolStr(hasRds)).append(", ");
+        ret.append(getBoolStr(hasOnline)).append(", ");
+        ret.append(getBoolStr(hasMtrends)).append(", ");
+        ret.append(getBoolStr(hasStrends)).append(", ");
+        ret.append(getBoolStr(hasTstPnt)).append(", ");
+        ret.append(getBoolStr(hasStatic)).append(", ");
+        String cisAvailability = "no";
+        if (cisAvail.equalsIgnoreCase("a"))
+        {
+            cisAvailability = "auto";
+        }
+        else if (cisAvail.equalsIgnoreCase("d"))
+        {
+            cisAvailability = "desc";
+        }
+        ret.append(cisAvailability).append(", ");
+        ret.append(Integer.toString(nServers));
+        
+        return ret.toString();
+    }
+    private String getRateStr(float v)
+    {
+        String ret;
+        if (v >= 1)
+        {
+            ret = String.format("%.0f",v);
+        }
+        else
+        {
+            ret = String.format("%.4f",v);
+        }
+        return ret;
+    }
+    private String getBoolStr(boolean b)
+    {
+        return b ? "T" : "F";
+    }
+    public static String getCSVHeader()
+    {
+        String hdr = "name, ifo, subsys, minRawRate, maxRawRate, minRdsRate, maxRdsRate,"
+                + "hasRaw, hasRds, hasOnline, hasMtrends, hasStrends, hasTstPnt, hasStatic,"
+                + "cisAvail, nServers";
+        return hdr;
+    }  
 }
