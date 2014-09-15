@@ -16,6 +16,7 @@
  */
 package edu.fullerton.ldvtables;
 
+import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.ChanInfo;
 import com.areeda.jaDatabaseSupport.*;
