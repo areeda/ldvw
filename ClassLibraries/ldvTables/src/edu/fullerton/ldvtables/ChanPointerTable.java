@@ -26,8 +26,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -103,6 +101,33 @@ public class ChanPointerTable extends Table
                 insertCount = 0;
             }
         }
+    }
+    /**
+     * get a list of pointers to all entries in the Channel table for this base channel
+     *
+     * @param indexID id of the base channel
+     * @return list of ids in Channels table
+     * @throws edu.fullerton.ldvjutils.LdvTableException
+     */
+    public List<Integer> getChanList(Integer indexID) throws LdvTableException
+    {
+        String q = String.format("SELECT * FROM %1$s WHERE indexID = %2$s",
+                                 getName(), indexID);
+        ArrayList<Integer> ret = new ArrayList<>();
+
+        try
+        {
+            ResultSet rs = db.executeQuery(q);
+            while (rs.next())
+            {
+                ret.add(rs.getInt("myId"));
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new LdvTableException("Getting channel pointers.", ex);
+        }
+        return ret;
     }
 
     /**
