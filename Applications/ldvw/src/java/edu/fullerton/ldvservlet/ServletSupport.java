@@ -137,6 +137,7 @@ public class ServletSupport
      * @param tableNames
      * @throws ServletException 
      */
+    
     public void checkDb(String[] tableNames) throws ServletException
     {
         viewerConfig = new ViewerConfig();
