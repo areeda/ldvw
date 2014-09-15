@@ -143,7 +143,9 @@ public class ChanInfo implements Comparable
         line.append(String.format("%1$.4f,", gain));
         line.append(String.format("%1$.4f,", offset));
         line.append(String.format("%1$.4f,", slope));
-        line.append(units);
+        line.append(units.isEmpty()? "Counts" : units).append(",");
+        line.append(server);
+        
         return line.toString();
     }
 
