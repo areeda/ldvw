@@ -21,6 +21,7 @@ import com.areeda.jaDatabaseSupport.CType;
 import com.areeda.jaDatabaseSupport.Column;
 import com.areeda.jaDatabaseSupport.Database;
 import com.areeda.jaDatabaseSupport.Table;
+import com.areeda.jaDatabaseSupport.Utils;
 import edu.fullerton.jspWebUtils.PageItem;
 import edu.fullerton.jspWebUtils.PageItemImage;
 import edu.fullerton.jspWebUtils.PageItemImageLink;
@@ -77,11 +78,6 @@ public class ChannelTable extends Table
         "myId", "name", "server", "sampleRate", "cType", "dtype"
     };
     
-    private final String baseCISurl = "https://cis.ligo.org/channel/byname/";
-    private final String infoIconDescUrl = "/ldvw/infoicon3.png";
-    private final String infoIconNoDescUrl = "/ldvw/infoicon4.png";
-    private PageItemImage infoDescIcon = null;
-    private PageItemImage infoNoDescIcon = null;
     
     // bulk insert
     private int insertCount;
@@ -295,9 +291,9 @@ public class ChannelTable extends Table
         return ret;
     }
 
-    public HashSet<ChanInfo> getAsSet(Set<Integer> selections) throws SQLException
+    public HashSet<ChanInfo> getAsSet(Collection<Integer> selections) throws SQLException
     {
-        HashSet<ChanInfo> ret = new HashSet<ChanInfo>();
+        HashSet<ChanInfo> ret = new HashSet<>();
         
         String q = "SELECT * from " + getName() ;
         String where = "";
@@ -364,6 +360,7 @@ public class ChannelTable extends Table
                 ret = new ChanInfo();
                 ret.fill(rs);
             }
+            rs.close();
         }
         catch (SQLException ex)
         {
@@ -617,6 +614,16 @@ public class ChannelTable extends Table
         
         return ret;
     }
+    /**
+     * Use a precalculated filter to get a partial channel list
+     * @param strt first channel number from search
+     * @param count a page worth
+     * @param sel no longer used
+     * @param filter SQL where clause for Channels table
+     * @return list of ChanInfo object
+     * 
+     * @throws WebUtilException 
+     */
     public ArrayList<ChanInfo> getFilterChanList (int strt, int count, boolean sel,
                                   String filter) throws WebUtilException
     {
@@ -627,15 +634,16 @@ public class ChannelTable extends Table
             q += " WHERE (" + filter + ") ";
         }
 
-        q += " ORDER BY name,server,cType ";
+        q += " ORDER BY sampleRate desc,name,server,cType ";
 
         if (strt != 0 || count != 0)
         {
             q += String.format(" limit %1$d, %2$d ", strt, count);
         }
+        ResultSet rs=null;
         try
         {
-            ResultSet rs = db.executeQuery(q);
+            rs = db.executeQuery(q);
             while (rs.next())
             {
                 ChanInfo ci = new ChanInfo();
@@ -647,47 +655,26 @@ public class ChannelTable extends Table
         {
             throw new WebUtilException("Builing filtered channel list", ex);
         }
+        finally
+        {
+            if (rs != null)
+            {
+                try
+                {
+                    rs.close();
+                }
+                catch (SQLException ex)
+                {
+                    throw new WebUtilException("Closing result set after getting chan info", ex);
+                }
+            }
+        }
+
         return ret;
     }
     //===========================Private Methods============================
 
-    /**
-     * Link into the Channel Information system
-     * 
-     * @param ci our channel info object
-     * @return an image link
-     */
-    public PageItemImageLink getCisLink(ChanInfo ci)
-    {
-        if (infoDescIcon == null)
-        {
-            infoDescIcon = new PageItemImage(infoIconDescUrl, "chan info", "CIS");
-            infoDescIcon.setDim(24, 24);
-        }
-        if (infoNoDescIcon == null)
-        {
-            infoNoDescIcon = new PageItemImage(infoIconNoDescUrl, "chan info", "CIS");
-            infoNoDescIcon.setDim(24, 24);
-        }
-        
-        String cname = ci.getChanName();
-        if (cname.contains("."))
-        {   // trend data has .mean or .max
-            cname = cname.substring(0, cname.lastIndexOf("."));
-        }
-        String cisUrl = baseCISurl + cname;
-        PageItemImageLink infoLink;
-        if (ci.getCisAvail().equalsIgnoreCase("d"))
-        {
-            infoLink = new PageItemImageLink(cisUrl, infoDescIcon, "_blank");
-        }
-        else
-        {
-            infoLink = new PageItemImageLink(cisUrl, infoNoDescIcon, "_blank");
-        }
-        
-        return infoLink;
-    }
+    
     /**
      * get the list of channel types
      * @return distinct channel types in db
@@ -892,10 +879,14 @@ public class ChannelTable extends Table
             {   // data at the observatories is generally fresher
                 String bsrv = bestGuess.getServer();
                 String csrv = ci.getServer();
-                if (bsrv.equals("nds.ligo.caltech.edu") && csrv.matches(".*\\.ligo-.*\\.caltech.edu")  )
+                if (bsrv.equals(".*\\.ligo.caltech.edu") && csrv.matches(".*\\.ligo-.*\\.caltech.edu")  )
                 {
                     bestGuess = ci;
                 }
+                else if (bsrv.matches(".*\\.ligo-.*\\.caltech.edu")  && csrv.matches("nds.?\\.ligo-.+\\.caltech.edu"))
+                {   // in general the nds.ligo-[lw]a is prefered over ldas-pcdev\d
+                    bestGuess=ci;
+                }                                                                                                
             }
             else if (ci.getcType().equalsIgnoreCase("rds") && !bestGuess.getcType().contains("trend"))
             {
@@ -1001,8 +992,12 @@ public class ChannelTable extends Table
     {
         String query;
         chanNameMatchStr = chanNameMatchStr.replaceAll("_", "\\\\_");
-        query = String.format("SELECT * from %1$s WHERE server = '%2$s' and name like '%3$s'",
-                              getName(), server, chanNameMatchStr);
+        query = String.format("SELECT * from %1$s WHERE server = '%2$s'",
+                              getName(), server );
+        if (chanNameMatchStr != null && !chanNameMatchStr.isEmpty())
+        {
+            query += String.format(" and name like '%1$s'",chanNameMatchStr);
+        }
         streamByQuery(query);
     }
     /**
@@ -1089,6 +1084,259 @@ public class ChannelTable extends Table
             }
         }
         return ifoSubsysSet;
+    }
+
+    private String decodeGlobString(String nameMatcher, String chnamefilt)
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private String decodeRegexString(String nameMatcher, String chnamefilt)
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    public enum ChanFiltType
+    {
+        NONE, LDVW, GLOB, REGEX
+    }
+    public ArrayList<ChanInfo> getList(String server, String ifo, String subsys, String fsCmp, 
+                                       String fs, String ctype, String dtype, 
+                                       ChanFiltType cft, String chnamefilt, 
+                                       int strt, int count) throws WebUtilException
+    {
+        // construct a where clause
+        
+        StringBuilder where = new StringBuilder();
+        if (server != null && server.length() > 0 && !server.equalsIgnoreCase("any"))
+        {
+            where.append(String.format("server=\"%1$s\"", Utils.sqlQuote(server)));
+        }
+
+        boolean gotIFO = false;
+        String nameMatcher = "";
+        if (ifo != null && ifo.length() > 0 && !ifo.equalsIgnoreCase("any"))
+        {
+            nameMatcher = ifo + ":";
+            gotIFO = true;
+        }
+        if (subsys != null && subsys.length() > 0 && !subsys.equalsIgnoreCase("any"))
+        {
+            nameMatcher += gotIFO ? "" : "%:";
+            nameMatcher += subsys;
+        }
+        if (fs != null && fs.length() > 0 && !fs.equalsIgnoreCase("any") && fsCmp != null && fsCmp.length() > 0)
+        {
+            if (where.length() > 0)
+            {
+                where.append(" AND ");
+            }
+            //@todo probably should convert sample rate to a float and add it to the query that way
+            switch (fsCmp)
+            {
+                case ">=":
+                    where.append(String.format(" sampleRate >= %1$s ", fs));
+                    break;
+                case ">":
+                    where.append(String.format(" sampleRate > %1$s ", fs));
+                    break;
+                case "<=":
+                    where.append(String.format(" sampleRate <= %1$s ", fs));
+                    break;
+                case "<":
+                    where.append(String.format(" sampleRate < %1$s ", fs));
+                    break;
+                case "~=":
+                    where.append(String.format(" abs(sampleRate - %1$s) >= .01 ", fs));
+                    break;
+                default:
+                    where.append(String.format(" abs(sampleRate - %1$s) < .01 ", fs));
+                    break;
+            }
+
+        }
+        if (dtype != null && dtype.length() > 0 && !dtype.equalsIgnoreCase("any"))
+        {
+            //@todo we probably want to be smarter about trend data
+            if (where.length() > 0)
+            {
+                where.append(" AND ");
+            }
+
+            where.append(String.format("dtype = \"%1$s\" ", dtype));
+        }
+
+        String cnf="";
+        switch(cft)
+        {
+            case LDVW:
+                cnf = decodeFilterString(nameMatcher, chnamefilt);
+                break;
+            case GLOB:
+                cnf = decodeGlobString(nameMatcher, chnamefilt);
+                break;
+            case REGEX:
+                cnf = decodeRegexString(nameMatcher,chnamefilt);
+                break;
+            case NONE:
+            default:
+                break;
+        }
+        if (cnf.toLowerCase().startsWith("error"))
+        {
+            throw new WebUtilException("Channel name match string is invalid.");
+        }
+        else if (!cnf.isEmpty())
+        {
+            if (where.length() > 0)
+            {
+                where.append(" AND ");
+            }
+            where.append(cnf);
+        }
+        ArrayList<ChanInfo> filterChanList = getFilterChanList(strt, count, false, where.toString());
+        return filterChanList;
+    }
+    private String decodeFilterString(String prefix, String chnamefilt)
+    {
+        // <filter> :== null | <and clause> [ | <and clause> ...]
+        // <and clause :== <term> [ <white space> <term> ...]
+        // <term> :== [!] <alnum>*
+
+        String ret = "";
+        String nm = prefix;
+        if (!nm.isEmpty())
+        {
+            // check for ifo or subsystem conflict
+
+        }
+        if (chnamefilt != null && !chnamefilt.isEmpty())
+        {
+            String work = chnamefilt.trim();
+            Pattern p = Pattern.compile("([^\\!\\s\\|]*)([\\!\\s\\|]*)(.*)$");
+            Pattern ifoPat = Pattern.compile("^\\w+:");
+            ArrayList<String> andList = new ArrayList<>();
+            boolean gotNot = false;
+            boolean gotOr = false;
+            boolean gotErr = false;
+
+            while (work.length() > 0 && !gotErr)
+            {
+                Matcher m = p.matcher(work);
+                if (m.find())
+                {
+                    String a = m.group(1);
+                    String b = m.group(2);
+                    work = m.group(3);
+
+                    if (a != null && !a.isEmpty())
+                    {
+                        String comp = gotNot ? " NOT LIKE" : " LIKE ";
+                        String clause = " name " + comp + "\"";
+                        Matcher ifoMat = ifoPat.matcher(a);
+                        if (!ifoMat.find())
+                        {   // add leading % iff ifo not specified.
+                            clause += "%";
+                        }
+                        clause += a + "%\"";
+                        andList.add(clause);
+                        gotNot = false;
+                    }
+                    if ((b == null || b.isEmpty()) && (a == null || a.isEmpty()))
+                    {
+                        gotErr = true;
+                    }
+                    else if (!b.matches("\\s"))
+                    {
+                        b = b.trim();
+                        if (b.length() > 1)
+                        {
+                            gotErr = true;
+                        }
+                        else if (b.equals("!"))
+                        {
+                            if (gotNot)
+                            {
+                                gotErr = true;
+                            }
+                            else
+                            {
+                                gotNot = true;
+                            }
+                        }
+                        else if (b.equals("|"))
+                        {
+                            if (!andList.isEmpty())
+                            {
+                                String al = "";
+                                for (String s : andList)
+                                {
+                                    if (!al.isEmpty())
+                                    {
+                                        al += " AND ";
+                                    }
+                                    al += s;
+                                }
+                                if (!ret.isEmpty() && gotOr)
+                                {
+                                    ret += " OR ";
+                                }
+                                ret += " (" + al + ") ";
+                                andList.clear();
+                                gotOr = true;
+                            }
+
+                        }
+                    }
+                }
+            }
+            if (gotErr)
+            {
+                ret = "error";
+            }
+            else if (!andList.isEmpty())
+            {
+                String al = "";
+                for (String s : andList)
+                {
+                    if (!al.isEmpty())
+                    {
+                        al += " AND ";
+                    }
+                    al += s;
+                }
+                if (!ret.isEmpty() && gotOr)
+                {
+                    if (!nm.isEmpty())
+                    {
+                        ret = "(name LIKE '" + nm + "%'" + (ret.isEmpty() ? "" : " AND " + ret + ") ");
+                    }
+                    ret += " OR ";
+                    if (!nm.isEmpty())
+                    {
+                        al = "name LIKE '" + nm + "%'" + " AND " + al;
+                    }
+                }
+                ret += " (" + al + ") ";
+            }
+        }
+
+        if (!ret.isEmpty())
+        {
+            if (!nm.isEmpty())
+            {
+                ret = " ( name like '" + nm + "%' ) AND (" + ret + ")";
+            }
+            else
+            {
+                ret = " (" + ret + ") ";
+            }
+
+        }
+        else if (!nm.isEmpty())
+        {
+            ret = " ( name like '" + nm + "%' ) ";
+        }
+        return ret;
     }
 
 }
