@@ -21,11 +21,12 @@ import edu.fullerton.viewerplugin.ChanDataBuffer;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.ChanInfo;
-import edu.fullerton.ldvtables.TimeInterval;
+import edu.fullerton.ldvjutils.TimeInterval;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
@@ -196,25 +197,24 @@ class DataExporter
         float[] data = buf.getData();
         float fs = chanInfo.getRate();
         Long startgps = timeInterval.getStartGps();
-        mainFn = new StringBuilder();
-
-        double t;
-        int n=data.length;
-        String oline;
-        for(int x=0;x<n;x++)
-        {
-            t = x/fs ;
-            t += startgps;
-            oline=String.format("%1$25.6f, %2$25.16G\n", t,data[x]);
-            mainFn.append(oline);
-        }
-        String fnName = "ldvw_export_" + nowAsUtcString();
+        
+        String fnName = buf.getChanInfo().getChanName() + "_" +
+                        Long.toString(buf.getTimeInterval().getStartGps()) +
+                        Long.toString(buf.getTimeInterval().getDuration());
         response.setContentType("text/csv");
         response.setHeader("content-disposition", "attachment; filename=\"" + fnName + ".csv\"");
 
-        response.setContentLength(mainFn.length());
-        response.getWriter().append(mainFn.toString());
-        
+        PrintWriter writer = response.getWriter();
+
+        double t;
+        int n = data.length;
+        String oline;
+        for (int x = 0; x < n; x++)
+        {
+            t = x / fs;
+            t += startgps;
+            writer.append(String.format("%1$25.6f, %2$25.16G\n", t, data[x]));
+        }
         return false;
     }
 
