@@ -18,6 +18,8 @@
 package llplotter;
 
 /**
+ * Base class for watcher or change listener
+ * Descendents will pass new frame files to the plot routines
  * 
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */

@@ -17,6 +17,7 @@
 
 package llplotter;
 
+import edu.fullerton.ldvjutils.TimeAndDate;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.concurrent.BlockingQueue;
@@ -57,6 +58,8 @@ public class IgnoreQueue extends QueueProcessor implements Runnable
                 int cnt = 0;
                 final int maxCnt = 50;
                 final int sleepInterval = 100;
+                long age=0;
+                
                 if (fnameMat.find())
                 {
                     if (fnameMat.group(4).equals("tmp"))
@@ -74,12 +77,31 @@ public class IgnoreQueue extends QueueProcessor implements Runnable
                         }
                         if (newInfile.exists())
                         {
+                            long startGps = Long.parseLong(fnameMat.group(2));
+                            long now = System.currentTimeMillis();
+                            
+                            age = now - TimeAndDate.gps2utc(startGps) * 1000;
+
                             infile = newInfile;
                         }
                     }
+                    else
+                    {
+                        long startGps = Long.parseLong(fnameMat.group(2));
+                        long now = System.currentTimeMillis();
+
+                        age = now - TimeAndDate.gps2utc(startGps) * 1000;
+                    }
                 }
-                String msg = String.format("Ignore - %1$s, wait: %2$.2f", infile.getAbsolutePath(),
-                                            (cnt * sleepInterval)/1000f);
+                String msg = "Ignore - " + infile.getAbsolutePath();
+                if (cnt > 0)
+                {
+                    msg += String.format(", wait: %1$.2f", (cnt * sleepInterval)/1000f);
+                }
+                if (age > 0)
+                {
+                    msg += String.format(", age(s): %1$.1f", (age/1000.f));
+                }
                 logit( msg);
             }
         }

@@ -21,7 +21,6 @@ import edu.fullerton.ldvjutils.TimeAndDate;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
@@ -109,7 +108,7 @@ public class FrameWatcher implements Runnable
                             long startGps = Long.parseLong(fnameMat.group(2));
                             long now = System.currentTimeMillis();
                             long age = now - TimeAndDate.gps2utc(startGps) * 1000;
-                            logit(String.format("Queued: %1$s age: %2$.2f", fname, age/1000.));
+                            //logit(String.format("Queued: %1$s age: %2$.2f", fname, age/1000.));
 
                             File file = new File(sourceDir + "/" + fname);
                             for(BlockingQueue<File> q : outQueues)
@@ -118,7 +117,7 @@ public class FrameWatcher implements Runnable
                             }
                         }
                     }
-                    logit(String.format("%1$s - %2$s", fname, kindName));
+//                    logit(String.format("%1$s - %2$s", fname, kindName));
                 }
                 if (!wkey.reset())
                 {
