@@ -296,10 +296,11 @@ public class ImageTable extends Table
     /**
      * query table for number of images for each user
      * @return TreeMa<UserName,Number of Images>
+     * @throws edu.fullerton.ldvjutils.LdvTableException
      */
     public TreeMap<String,Integer> getCountByUser() throws LdvTableException
     {
-        TreeMap<String,Integer> ret = new TreeMap<String,Integer>();
+        TreeMap<String,Integer> ret = new TreeMap<>();
         
         String q = "select count(*) as cnt, user from Images group by user;";
         
@@ -310,7 +311,10 @@ public class ImageTable extends Table
             {
                 String user = rs.getString("user");
                 Integer cnt = rs.getInt("cnt");
-                ret.put(user, cnt);
+                if (user != null && cnt != null)
+                {
+                    ret.put(user, cnt);
+                }
             }
         }
         catch (SQLException ex)
