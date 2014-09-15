@@ -17,7 +17,7 @@
 
 package edu.fullerton.ldvw;
 
-import edu.fullerton.ldvtables.TimeInterval;
+import edu.fullerton.ldvjutils.TimeInterval;
 import java.util.ArrayList;
 
 /**
