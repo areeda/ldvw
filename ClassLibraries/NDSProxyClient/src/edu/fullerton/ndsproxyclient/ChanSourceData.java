@@ -23,7 +23,7 @@ import edu.fullerton.ldvjutils.LdvTableException;
 
 import edu.fullerton.ldvjutils.TimeAndDate;
 
-import edu.fullerton.ldvtables.TimeInterval;
+import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.ndsproxyclient.NDSException;
 import edu.fullerton.ndsproxyclient.NDSProxyClient;
 import java.util.ArrayList;
