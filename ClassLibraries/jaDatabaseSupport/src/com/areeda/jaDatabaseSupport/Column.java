@@ -129,7 +129,7 @@ public class Column
         {
             ret += " DEFAULT 0";     // otherwise it becomes auto init auto update
         }
-        if (unique && !indexKey)
+        if (unique)
         {
             ret += " UNIQUE";
         }
