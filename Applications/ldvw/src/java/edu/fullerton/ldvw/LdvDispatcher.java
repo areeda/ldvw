@@ -705,6 +705,7 @@ public class LdvDispatcher extends GUISupport
         else
         {
             sm.procForm();
+            sm.showForm();
         }
     }
 
