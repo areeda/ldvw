@@ -1408,7 +1408,7 @@ public class OdcPlot
         {
             checkParity = false;
             bitNames = new String[maxBits];
-            for(int i=0;i<nbits;i++)
+            for(int i=0;i<maxBits;i++)
             {
                 bitNames[i] = String.format("Bit %1$02d",i);
             }
