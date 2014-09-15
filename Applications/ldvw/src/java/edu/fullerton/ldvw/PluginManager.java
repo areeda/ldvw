@@ -37,10 +37,12 @@ import edu.fullerton.ldvtables.ChannelTable;
 import edu.fullerton.ldvtables.ImageCoordinateTbl;
 import edu.fullerton.ldvtables.ImageGroupTable;
 import edu.fullerton.ldvtables.ImageTable;
-import edu.fullerton.ldvtables.TimeInterval;
+import edu.fullerton.ldvjutils.TimeInterval;
+import edu.fullerton.ldvplugin.ExternalPlotManager;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.viewerplugin.GDSFilter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -51,6 +53,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
@@ -119,8 +123,8 @@ public class PluginManager extends GUISupport
         
         String[] plotSize =
         {
-            "Small (320x240)", "Medium (640x480)", "Large (1280x960)", "Wide but short (1280x300)",
-            "Larger (1920x1080)", "Huge (2200x1400)"
+            "Small (320x240)", "Medium (640x480)", "Default (1200x600)", "Large (1280x960)", 
+            "Wide but short (1280x300)", "Larger (1920x1080)", "Huge (2200x1400)"
         };
 
         ArrayList<PageFormSelect.Option> testDataOptions = new ArrayList<>();
@@ -192,6 +196,7 @@ public class PluginManager extends GUISupport
         
         // add Spectrum
         SpectrumPlot sp = new SpectrumPlot();
+        sp.setup(db, vpage, vuser);
         PageItemList spPil = getSelectorContent(sp, "doSpectrum", nSel, multDisp);
         spPil.setUseDiv(false);
         pfDiv.add(spPil);
@@ -214,6 +219,12 @@ public class PluginManager extends GUISupport
         PageItemList wpmPil = getSelectorContent(wpm, "doWplot", nSel, multDisp);
         wpmPil.setUseDiv(false);
         pfDiv.add(wpmPil);
+        
+        // add ODC plots
+        OdcPlotManager odm = new OdcPlotManager(db, vpage, vuser);
+        PageItemList odmPil = getSelectorContent(odm, "doOdc", nSel, multDisp);
+        odmPil.setUseDiv(false);
+        pfDiv.add(odmPil);
         
         // add Long term trend plots
         if (vuser.isTester())
@@ -248,7 +259,7 @@ public class PluginManager extends GUISupport
         PageItemList pltSize = new PageItemList();
         pltSize.add("Plot size: ");
         PageFormSelect psizSel = new PageFormSelect("plotSize", plotSize);
-        psizSel.setSelected(plotSize[1]);
+        psizSel.setSelected(plotSize[2]);
         pltSize.add(psizSel);
         PageTableRow pltSizeRow = new PageTableRow();
         pltSizeRow.setClassName("noborder");
@@ -281,7 +292,7 @@ public class PluginManager extends GUISupport
             String[] allProducts =
             {
                 "doTimeSeries", "doSpectrum", "doSpectrogram", "doCoherence","doWplot", "trndplt",
-                "csaplot"
+                "csaplot", "doOdc"
             };
             ArrayList<PlotProduct> selectedProducts = new ArrayList< >();
 
@@ -290,6 +301,11 @@ public class PluginManager extends GUISupport
 
             if (paramMap.containsKey("download"))
             {   // if downloading they don't get anything else
+                nProducts = 1;
+                downloadRequested = true;
+            }
+            else if (paramMap.containsKey("sp_dnld"))
+            {   // they want us to calculate a spectrum and download results
                 nProducts = 1;
                 downloadRequested = true;
             }
@@ -340,6 +356,14 @@ public class PluginManager extends GUISupport
                 groupBy = paramMap.get("plotGroup")[0];
             }
 
+            // right now we can only download one thing per call
+            if (downloadRequested && nProducts * times.size() != 1)
+            {
+                vpage.add("Only one thing can be downloaded per request right now.  "
+                        + "This limitation will be removed in the future.");
+                vpage.addBlankLines(1);
+                gotProblem = true;
+            }
             // ============preprocessing options===========
             doDetrend = paramMap.containsKey("doDetrend");
             prefilterSetup();
@@ -349,9 +373,16 @@ public class PluginManager extends GUISupport
             {
                 if (downloadRequested)
                 {
-                    String[] dwnFmt = paramMap.get("dwnFmt");
-                    String format = dwnFmt[0];   // one of these days there will be more options
-                    ret = doDownload(selections,times,format);
+                    if (paramMap.containsKey("sp_dnld"))
+                    {   // calculate spectrum and send them the results
+                        ret = doSpectrumDownload(selections,times);
+                    }
+                    else
+                    {   // send them the raw data
+                        String[] dwnFmt = paramMap.get("dwnFmt");
+                        String format = dwnFmt[0];   // one of these days there will be more options
+                        ret = doDownload(selections,times,format);
+                    }
                 }
                 else
                 {
@@ -602,6 +633,10 @@ public class PluginManager extends GUISupport
             case "doSpectrogram":
                 ret = new SpectrogramManager(db, vpage, vuser);
                 break;
+            case "doOdc":
+                ret = new OdcPlotManager(db, vpage, vuser);
+                ret.setParameters(paramMap);
+                break;
             case "doCoherence":
                 ret = new CoherenceManager(db, vpage, vuser);
                 break;
@@ -643,6 +678,65 @@ public class PluginManager extends GUISupport
         
         return intro;
     }
+    /**
+     * User request product output for download rather than plot
+     * @param selections channels selected
+     * @param times time intervals requested
+     * @return true if we did not do it successfully and want the page sent instead
+     */
+    private boolean doSpectrumDownload(HashSet<Integer> selections, ArrayList<TimeInterval> times) throws WebUtilException
+    {
+        boolean ret = true;
+
+        ArrayList<ChanDataBuffer> bufList = getData(selections, times, false);
+
+        try
+        {
+            if (response == null)
+            {
+                throw new WebUtilException("Response not set for data download: Joe's bug");
+            }
+            if (bufList.isEmpty())
+            {
+                vpage.addLine("No data to export.");
+                ret = true;
+            }
+            else 
+            {
+                SpectrumPlot sp = new SpectrumPlot();
+                sp.setParameters(paramMap);
+                ChanDataBuffer buf = bufList.get(0);
+                double[][] spectrum = sp.calcSpectrum(buf);
+                float fs = buf.getChanInfo().getRate();
+                Long startgps = buf.getTimeInterval().getStartGps();
+
+                String fnName = "Spectrum_" + buf.getChanInfo().getChanName() + "_"
+                                + Long.toString(buf.getTimeInterval().getStartGps()) + "_"
+                                + Long.toString(buf.getTimeInterval().getDuration());
+                response.setContentType("text/csv");
+                response.setHeader("content-disposition", "attachment; filename=\"" + fnName + ".csv\"");
+
+                PrintWriter writer = response.getWriter();
+
+                double t;
+                int n = spectrum.length;
+
+                for (int x = 0; x < n; x++)
+                {
+                    String oline=String.format("%1$.6f, %2$.16G%n", spectrum[x][0], spectrum[x][1]);
+                    oline=oline.replaceAll(" +", " ");
+                    writer.append(oline);
+                }
+                return false;
+
+            }
+        }
+        catch (IOException ex)
+        {
+            throw new WebUtilException("Calulate and send spectrum", ex);
+        }
+        return false;
+    }
 
     /**
      * User requested data be downloaded to their computer, not plotted by us
@@ -650,7 +744,7 @@ public class PluginManager extends GUISupport
      * @param selections channels selected
      * @param times time interval requested
      * @param format format of the download "ligodv" weird matlab code, "csv" plain csv file
-     * @return true if we did it successfully
+     * @return true if we did not do it successfully and want the page sent instead
      * @throws WebUtilException 
      */
     private boolean doDownload(Set<Integer> selections, List<TimeInterval> times, String format) 
@@ -1170,4 +1264,6 @@ public class PluginManager extends GUISupport
         
         return ret;
     }
+
+    
 }
