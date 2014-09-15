@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="13">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="18">
+        <file>
+            <url>src/java/edu/fullerton/ldvw/ChanSourceData.java</url>
+            <bookmark id="15">
+                <name/>
+                <line>131</line>
+                <key/>
+            </bookmark>
+        </file>
         <file>
             <url>src/java/edu/fullerton/ldvplugin/CrossSpectrumManager.java</url>
             <bookmark id="9">
@@ -39,7 +47,7 @@
             <url>src/java/edu/fullerton/ldvplugin/WplotManager.java</url>
             <bookmark id="3">
                 <name/>
-                <line>113</line>
+                <line>114</line>
                 <key/>
             </bookmark>
         </file>
@@ -47,12 +55,12 @@
             <url>src/java/edu/fullerton/plugindefn/PluginController.java</url>
             <bookmark id="5">
                 <name/>
-                <line>340</line>
+                <line>343</line>
                 <key/>
             </bookmark>
             <bookmark id="11">
                 <name/>
-                <line>426</line>
+                <line>429</line>
                 <key/>
             </bookmark>
         </file>
@@ -60,22 +68,27 @@
             <url>src/java/edu/fullerton/ldvw/PluginManager.java</url>
             <bookmark id="4">
                 <name/>
-                <line>218</line>
+                <line>220</line>
                 <key/>
             </bookmark>
             <bookmark id="8">
                 <name/>
-                <line>276</line>
+                <line>277</line>
                 <key/>
             </bookmark>
             <bookmark id="1">
                 <name/>
-                <line>297</line>
+                <line>298</line>
                 <key/>
             </bookmark>
             <bookmark id="2">
                 <name/>
-                <line>351</line>
+                <line>365</line>
+                <key/>
+            </bookmark>
+            <bookmark id="18">
+                <name/>
+                <line>738</line>
                 <key/>
             </bookmark>
         </file>
@@ -99,9 +112,6 @@
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/PluginManager.java</file>
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
         </group>
-        <group>
-            <file>file:/Users/areeda/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/TimeAndPlotSelector.java</file>
-            <file>file:/Users/areeda/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/CoherenceManager.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>
