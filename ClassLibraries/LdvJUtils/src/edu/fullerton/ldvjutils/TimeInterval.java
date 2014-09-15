@@ -14,10 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edu.fullerton.ldvtables;
-
-import edu.fullerton.ldvjutils.LdvTableException;
-import edu.fullerton.ldvjutils.TimeAndDate;
+package edu.fullerton.ldvjutils;
 
 /**
  * represents a requested time interval or an entry available in data cache
@@ -31,6 +28,11 @@ public class TimeInterval implements Comparable<TimeInterval>
     private int cacheId;
     private long dataLength;
     
+    public TimeInterval()
+    {
+        startGps = stopGps = dataLength = 0;
+        cacheId = 0;
+    }
     /**
      * construct a new time interval representing a request
      * @param start starting gps time in seconds
@@ -99,6 +101,15 @@ public class TimeInterval implements Comparable<TimeInterval>
         return stopGps;
     }
 
+    /**
+     * get the duration specified by interval in seconds
+     * 
+     * @return number of seconds in the interval
+     */
+    public long getDuration()
+    {
+        return stopGps-startGps;
+    }
     /**
      * set stop time, next seconds after last sample
      * @param stopGps stop time in gps seconds
@@ -200,8 +211,28 @@ public class TimeInterval implements Comparable<TimeInterval>
         }
         return ret;
     }
+    public boolean equals(Object t)
+    {
+        boolean ret = t.getClass().equals(getClass());
+        TimeInterval it = (TimeInterval) t;
+        if (ret)
+        {
+            ret = it.startGps == startGps && it.stopGps == stopGps;
+        }
+        return ret;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 3;
+        hash = 61 * hash + (int) (this.startGps ^ (this.startGps >>> 32));
+        hash = 61 * hash + (int) (this.stopGps ^ (this.stopGps >>> 32));
+        return hash;
+    }
+    
     /**
-     * test if 2 time interval overlap
+     * test if 2 time interval overlap or abut
      * @param ti the other time interval
      * @return true if they overlap
      */
@@ -225,7 +256,9 @@ public class TimeInterval implements Comparable<TimeInterval>
     {
         if (!overlaps(ti))
         {
-            throw new LdvTableException("Time intervals cannot be merged because they do not overlap");
+            String ermsg = String.format("Time intervals cannot be merged because they "
+                    + "do not overlap: %1$s and %2$s", toString(), ti.toString());
+            throw new LdvTableException(ermsg);
         }
         long start = Math.min(startGps, ti.getStartGps());
         long stop = Math.max(stopGps, ti.getStopGps());

@@ -15,13 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package edu.fullerton.ldvtables;
+package edu.fullerton.ldvjutils;
 
+import ndsJUtils.NDSChannelAvailability;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents an entry in the Server table, describes an NDS2 server
@@ -31,35 +33,51 @@ public class Server
 {
     private int myId;
     private String name;
+    private String site;
     private String fqdn;
     private Timestamp lastmod;
-    private Integer minAvail;
-    private Integer maxOnline;
+    private Set<NDSChannelAvailability> avail;    // used only in some apps
+    private boolean availModified;
     
     public Server()
     {
         myId = 0;
         name = "";
+        site = "";
         fqdn = "";
         lastmod = new Timestamp(0);
-        minAvail = 0;
-        maxOnline = 0;
+        avail = null;
+        availModified = false;
     }
-    
-    public Server(ResultSet rs)
+    public Server(String name, String site, String fqdn)
     {
-        try
+        this.name = name;
+        this.site = site;
+        this.fqdn = fqdn;
+        lastmod = new Timestamp(0);
+        avail = null;
+        availModified = false;
+    }
+    public Server(ResultSet rs) throws SQLException
+    {
+        myId = rs.getInt("myId");
+        name = rs.getString("name");
+        fqdn = rs.getString("fqdn");
+        site = rs.getString("site");
+        lastmod = rs.getTimestamp("lastmod");
+        avail = null;
+    }
+
+    Server(Server server)
+    {
+        myId = server.myId;
+        name = server.name;
+        fqdn = server.fqdn;
+        site = server.site;
+        if (server.avail != null)
         {
-            myId = rs.getInt("myId");
-            name = rs.getString("name");
-            fqdn = rs.getString("fqdn");
-            lastmod = rs.getTimestamp("lastmod");
-            minAvail = rs.getInt("minAvail");
-            maxOnline = rs.getInt("maxOnline");
-        }
-        catch (SQLException ex)
-        {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            avail = new HashSet<>();
+            avail.addAll(server.avail);
         }
     }
 
@@ -103,26 +121,35 @@ public class Server
         this.lastmod = lastmod;
     }
 
-    public Integer getMinAvail()
+    public String getSite()
     {
-        return minAvail;
+        return site;
     }
 
-    public void setMinAvail(int minAvail)
+    public void setSite(String site)
     {
-        this.minAvail = minAvail;
+        this.site = site;
     }
 
-    public Integer getMaxOnline()
+    public void addAvail(Collection<NDSChannelAvailability> av)
     {
-        return maxOnline;
-    }
-
-    public void setMaxOnline(int maxOnline)
-    {
-        this.maxOnline = maxOnline;
+        if (avail == null)
+        {
+            avail = new HashSet<>();
+        }
+        if (!avail.containsAll(av))
+        {
+            avail.addAll(av);
+            availModified = true;
+        }
     }
     
-    
-            
+    public Set getAvail()
+    {
+        if (avail == null)
+        {
+            avail = new HashSet<>();
+        }
+        return avail;
+    }
 }
