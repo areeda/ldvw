@@ -21,6 +21,7 @@ import edu.fullerton.jspWebUtils.PageFormCheckbox;
 import edu.fullerton.jspWebUtils.PageFormSelect;
 import edu.fullerton.jspWebUtils.PageItem;
 import edu.fullerton.jspWebUtils.PageItemList;
+import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
@@ -29,18 +30,19 @@ import edu.fullerton.viewerplugin.SpectrumCalc.Scaling;
 import edu.fullerton.viewerplugin.WindowGen.Window;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogAxis;
-import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
@@ -81,19 +83,28 @@ public
     @Override
     public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbufs, boolean compact) throws WebUtilException
     {
-        int imageId;
-        ChartPanel cpnl = getPanel(dbufs,compact);
-        try
-        {
-            imageId = saveImageAsPNG(cpnl);
-        }
-        catch (IOException | NoSuchAlgorithmException | SQLException ex)
-        {
-            throw new WebUtilException("Creating spectrum plot: " + ex.getClass().getSimpleName() 
-                    + ": " + ex.getLocalizedMessage());
-        }
         ArrayList<Integer> ret = new ArrayList<>();
-        ret.add(imageId);
+        if (parameterMap.containsKey("sp_newplt"))
+        {
+            ret = makeAddPlotFiles(dbufs, compact);
+        }
+        else
+        {
+            int imageId;
+            ChartPanel cpnl = getPanel(dbufs,compact);
+            try
+            {
+                imageId = saveImageAsPNG(cpnl);
+                ret.add(imageId);
+            }
+            catch (IOException | NoSuchAlgorithmException | SQLException ex)
+            {
+                throw new WebUtilException("Creating spectrum plot: " + ex.getClass().getSimpleName() 
+                        + ": " + ex.getLocalizedMessage());
+            }
+        }
+        
+        
         return ret;
 
     }
@@ -200,18 +211,23 @@ public
                 
                 rangeAxis.setNumberFormatOverride(lanf);
                 rangeAxis.setRange(smallest, maxy*Math.pow(10,exp));
-                rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+                rangeAxis.setStandardTickUnits(LogAxis.createLogTickUnits(Locale.US));
                 plot.setRangeAxis(rangeAxis);
+                plot.setRangeGridlinesVisible(true);
+                plot.setRangeGridlinePaint(Color.BLACK);
             }
             if (logXaxis)
             {
                 LogAxis domainAxis = new LogAxis(xLabel);
+                domainAxis.setBase(2);
                 domainAxis.setMinorTickCount(9);
                 domainAxis.setMinorTickMarksVisible(true);
                 domainAxis.setSmallestValue(smallestX);
-                //domainAxis.setNumberFormatOverride(new LogAxisNumberFormat());
-                domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+                domainAxis.setNumberFormatOverride(new LogAxisNumberFormat());
+                //domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
                 plot.setDomainAxis(domainAxis);
+                plot.setDomainGridlinesVisible(true);
+                plot.setDomainGridlinePaint(Color.BLACK);
             }
             ValueAxis domainAxis = plot.getDomainAxis();
             if (fmin > Float.MIN_VALUE)
@@ -271,12 +287,12 @@ public
             wantStacked = true;
         }
     }
-
-    private float calcSpectrum(XYSeries xySeries, ChanDataBuffer dbuf)
+    public double[][] calcSpectrum(ChanDataBuffer dbuf)
     {
+        
         long dlen = dbuf.getDataLength();
         float rate = dbuf.getChanInfo().getRate();
-        
+
         int flen = Math.round(rate * secperfft);
         int ov = Math.round(rate * overlap);
         //@todo verify all this will work
@@ -329,32 +345,33 @@ public
         }
         // calculate scale factor
         double winsum = 0., winsumsq = 0;
-        for (int idx = 0; idx < flen ; idx++)
+        for (int idx = 0; idx < flen; idx++)
         {
             winsum += win[idx];
             winsumsq += win[idx] * win[idx];
         }
-        double scale=1.;
+        double scale = 1.;
         if (pwrScale == Scaling.AS)
         {
             scale = Math.sqrt(2.) / winsum;
         }
         else if (pwrScale == Scaling.ASD)
         {
-            scale =  Math.sqrt(2. / (winsumsq * rate));
+            scale = Math.sqrt(2. / (winsumsq * rate));
         }
         else if (pwrScale == Scaling.PS)
         {
-            scale =  2 / (winsum*winsum);
+            scale = 2 / (winsum * winsum);
         }
         else if (pwrScale == Scaling.PSD)
         {
-            scale =  2 / (rate * winsumsq);
+            scale = 2 / (rate * winsumsq);
         }
-        
-        
+
         // create data series for plotting
-        float df = 1 / secperfft;       // frequency separation for each fft bin
+        double df = 1 / secperfft;       // frequency separation for each fft bin
+        double[][] spectrum = new double[flen/2+1][2];
+        
         for (int idx = 0; idx < flen / 2 + 1; idx++)
         {
             double x = df * idx;     // frequency of this bin
@@ -367,8 +384,19 @@ public
             {
                 y *= scale;
             }
-            xySeries.add(x, y);
+            spectrum[idx][0] = x;
+            spectrum[idx][1] = y;
         }
+        return spectrum;
+    }
+    private float calcSpectrum(XYSeries xySeries, ChanDataBuffer dbuf)
+    {
+        double[][] spectrum = calcSpectrum(dbuf);
+        for (double[] spectrum1 : spectrum)
+        {
+            xySeries.add(spectrum1[0], spectrum1[1]);
+        }
+        float df = 1 / secperfft;
         return df;
     }
 
@@ -613,7 +641,17 @@ public
         PageFormCheckbox logy = new PageFormCheckbox("sp_logy", "Range axis logarithmic", true);
         ptr = GUISupport.getObjRow(logy, "", "");
         product.addRow(ptr);
+        
+        PageFormCheckbox dnld = new PageFormCheckbox("sp_dnld", "Download spectrum as CSV", false);
+        ptr = GUISupport.getObjRow(dnld, "", "No plots will be produced and 1 series only can be selected");
+        product.addRow(ptr);
 
+        if (vuser.isTester())
+        {
+            PageFormCheckbox newPlt = new PageFormCheckbox("sp_newplt", "Use new plot functions", true);
+            ptr = GUISupport.getObjRow(newPlt, "", "Uncheck to use classic plots, leave for new routines");
+            product.addRow(ptr);
+        }
         ret.add(product);
 
         return ret;
@@ -685,6 +723,109 @@ public
     public boolean hasImages()
     {
         return true;
+    }
+
+    /**
+     * use the external program genPlot.py to generate the graph
+     * @param dbufs input spec
+     * @param compact minimize label because output image will be small
+     * @return 
+     */
+    private ArrayList<Integer> makeAddPlotFiles(ArrayList<ChanDataBuffer> dbufs, boolean compact) throws WebUtilException
+    {
+        ExternalProgramManager epm = new ExternalProgramManager();
+        ArrayList<Integer> ret = new ArrayList<>();
+        try
+        {
+            ArrayList<String> cmd = new ArrayList<>();
+            ArrayList<File> spectra = new ArrayList<>();
+            
+            File tempDir = epm.getTempDir("sp_");
+            File outFile = epm.getTempFile("sp_plot_", ".png");
+            
+            for (ChanDataBuffer buf : dbufs)
+            {
+                double[][] spectrum = calcSpectrum(buf);
+                File spFile = epm.writeTempCSV("Spectrum_", spectrum);
+                spectra.add(spFile);
+            }
+            File outImg=epm.getTempFile("spPlot_", ".png");
+            
+            cmd.add("/usr/local/ldvw/bin/genPlot.py");
+            // add input files
+            for (File f : spectra)
+            {
+                cmd.add("--infile");
+                cmd.add(f.getCanonicalPath());
+            }
+            // add and output file
+            cmd.add("--out");
+            cmd.add(outFile.getCanonicalPath());
+            // add options
+            if (parameterMap.containsKey("sp_logy"))
+            {
+                cmd.add("--logy");
+            }
+            if (parameterMap.containsKey("sp_logx"))
+            {
+                cmd.add("--logx");
+            }
+            // add text
+            String gtitle = getTitle(dbufs, compact);
+            String[] titleLines = gtitle.split("\n");
+            if (titleLines.length > 0)
+            {
+                
+                for (String t : titleLines)
+                {
+                    cmd.add("--title");
+                    cmd.add(t);
+                }
+            }
+            DecimalFormat dform = new DecimalFormat("0.0###");
+            float bw = 1/secperfft;
+            
+            cmd.add("--xlabel");
+            cmd.add(String.format("Frequency Hz,  bw: %1$s, "
+                    + "fft: %2$,d, s/fft: %3$.2f, ov: %4$.2f",
+                                   dform.format(bw), nfft,secperfft, overlap));
+            pwrScale.setTex(true);
+            cmd.add("--ylabel");
+            cmd.add(pwrScale.toString());
+            //cmd.add("--test");
+            if (epm.runExternalProgram(cmd))
+            {
+                int imgId = epm.addImg2Db(outFile, db, vuser.getCn());
+                ret.add(imgId);
+            }
+            else
+            {
+                vpage.add("Problem generating plot of spectrum.");
+                vpage.addBlankLines(2);
+                vpage.add("Command line: ");
+                vpage.addBlankLines(1);
+                vpage.add(new PageItemString(cmd.toString(), false));
+                vpage.addBlankLines(2);
+                vpage.add("Stderr:");
+                vpage.addBlankLines(1);
+                vpage.add(new PageItemString(epm.getStderr(),false));
+                vpage.addBlankLines(2);
+                vpage.add("Stdout:");
+                vpage.addBlankLines(1);
+                vpage.add(new PageItemString(epm.getStdout(),false));
+                vpage.addBlankLines(2);
+            }
+            
+        }
+        catch (IOException ex)
+        {
+            throw new WebUtilException("Spectrum plot (genPlot.py):", ex);
+        }
+        finally
+        {
+            epm.removeTemps();
+        }
+        return ret;
     }
 
 }

@@ -30,10 +30,11 @@ import edu.fullerton.viewerplugin.WindowGen.Window;
 public class SpectrumCalc
 {
     private int debugLevel=1;
-
+    
     
     public enum Scaling
     {
+        
         AS
         {
             @Override
@@ -47,7 +48,12 @@ public class SpectrumCalc
             @Override
             public String toString()
             {
-                return "Amplitude spectral density (Counts / \u221AHz)";
+                String ret = "Amplitude spectral density (Counts / \u221AHz)";
+                if (useTex)
+                {
+                    ret = "ASD $\\left( \\frac{\\mathrm{Counts}}{\\sqrt{\\mathrm{Hz}}}\\right)$";
+                }
+                return ret;
             }
         },
         PS
@@ -63,8 +69,18 @@ public class SpectrumCalc
             @Override
             public String toString()
             {
-                return "Power spectral density (Counts ^2 / \u221AHz)";
+                String ret = "Power spectral density (Counts ^2 / \u221AHz)";
+                if (useTex)
+                {
+                    ret = "PSD $\\left( \\frac{\\mathrm{Counts}^2}{\\sqrt{\\mathrm{Hz}}}\\right)$";
+                }
+                return ret;
             }
+        };
+        private static boolean useTex = false;
+        void setTex(boolean b)
+        {
+            useTex = b;
         }
     };
     
