@@ -129,9 +129,14 @@ public class ViewerConfig
      * Read the default config file if needed and create a Database object from spec
      * 
      * @return Database object or null if any problems
+     * @throws viewerconfig.ViewConfigException
      * @see Database
      */
     public Database getDb() throws ViewConfigException
+    {
+        return getDb("");
+    }
+    public Database getDb(String prefix) throws ViewConfigException
     {
         Database db=null;
         int tries = 0;
@@ -145,10 +150,15 @@ public class ViewerConfig
                 {
                     readConfig();
                 }
-                String host = get("host");
-                String user = get("user");
-                String password = get("password");
-                String dbName = get("database");
+                String host = get(prefix + "host");
+                String user = get(prefix + "user");
+                String password = get(prefix + "password");
+                String dbName = get(prefix + "database");
+                if (host.isEmpty() || user.isEmpty() || password.isEmpty() || dbName.isEmpty())
+                {
+                    String errMsg = String.format("Database for prefix (%1%s) is missing parameter(s)"
+                            + "in configuration file.", prefix);
+                }
                 db = new Database(dbName, user, password);
                 db.setHost(host);
                 db.makeConnection();
