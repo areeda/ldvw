@@ -16,6 +16,7 @@
  */
 package edu.fullerton.viewerplugin;
 
+import edu.fullerton.ldvjutils.TimeInterval;
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageItemList;
