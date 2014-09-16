@@ -1,24 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="7">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="12">
         <file>
             <url>src/edu/fullerton/viewerplugin/SpectrumPlot.java</url>
-            <bookmark id="7">
+            <bookmark id="12">
                 <name/>
-                <line>133</line>
+                <line>143</line>
                 <key/>
             </bookmark>
-            <bookmark id="6">
+            <bookmark id="9">
                 <name/>
-                <line>147</line>
-                <key/>
-            </bookmark>
-        </file>
-        <file>
-            <url>src/edu/fullerton/viewerplugin/GUISupport.java</url>
-            <bookmark id="5">
-                <name/>
-                <line>106</line>
+                <line>773</line>
                 <key/>
             </bookmark>
         </file>
