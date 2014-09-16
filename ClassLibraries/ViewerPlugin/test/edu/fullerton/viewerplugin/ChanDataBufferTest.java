@@ -22,7 +22,7 @@ import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ChannelTable;
-import edu.fullerton.ldvtables.TimeInterval;
+import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.ldvtables.ViewUser;
 import java.sql.SQLException;
 import java.util.ArrayList;
