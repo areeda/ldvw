@@ -168,11 +168,18 @@ public class TsPlot extends PluginSupport implements PlotProduct
                 r.setSeriesStroke(i, str);
             }
             plot.setBackgroundPaint(Color.WHITE);
+            // add 
+            plot.setDomainGridlinesVisible(true);
+            plot.setDomainGridlinePaint(Color.BLACK);
+            plot.setRangeGridlinesVisible(true);
+            plot.setRangeGridlinePaint(Color.BLACK);
+            
             r.setBaseFillPaint(Color.WHITE);
             if (compact)
             {
                 chart.removeLegend();
             }
+            
             chart.setBackgroundPaint(Color.WHITE);
 
             cpnl = new ChartPanel(chart);
