@@ -111,7 +111,7 @@ public class TrendPlot
     
     public final String fpRegex = "^[-+]?[0-9]*\\.?[0-9]+$";
     
-    private final String version = "0.0.2";
+    private final String version = "0.0.3";
     private final String programName = "TrendPlot";
     private Float tmin = null;
     private Float tmax = null;
@@ -705,7 +705,21 @@ public class TrendPlot
             }
             if (min != null && max != null)
             {
-                gnuCmds.append(String.format("set yrange [ %1$e:%2$e]\n", min,max));
+                double ymin=min,ymax=max;
+                double dy=ymax-ymin;
+                double ymean = (ymax + ymin) / 2;
+                if (dy == 0)
+                {
+                    ymax= ymean + 0.1;
+                    ymin= ymean - 0.1;
+                }
+                else if (dy/(ymin+ymax) < 1e5)
+                {
+                    
+                    ymax = ymean + dy/10;
+                    ymin = ymean - dy/10;
+                }
+                gnuCmds.append(String.format("set yrange [ %1$e:%2$e]\n", ymin,ymax));
             }
             gnuCmds.append("file=\"'").append(datFile).append("'\"\n");
             gnuCmds.append("plot @file @filespec @styleMin, ");
