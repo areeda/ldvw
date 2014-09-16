@@ -42,6 +42,7 @@ import java.awt.image.WritableRaster;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -51,7 +52,10 @@ import java.util.Date;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
+import org.apache.commons.io.input.SwappedDataInputStream;
 import viewerconfig.ViewConfigException;
 import viewerconfig.ViewerConfig;
 
@@ -67,7 +71,7 @@ public class Spectrogram
     private ChanInfo chanInfo;
     
     // program spec
-    private final String version = "0.0.2";
+    private final String version = "0.0.3";
     private final String programName = "Spectrogram.jar";
     private final int debugLevel = 2;
     
@@ -81,10 +85,11 @@ public class Spectrogram
     private double sampleRate=0.;
     private int startGPS;
     private int duration;
-    private boolean useTestData;
+    private boolean useAltData;
     
-    private String testDataFile;
-    private File testData;
+    private String testDataFilename;
+    private File testDataFile;
+    private File rawDataFile;
 
     // output image specs
     private int outX = 1024, outY = 550;        // final image size
@@ -147,6 +152,8 @@ public class Spectrogram
     private GDSFilter gdsfilt;
     private double start;
     private double binWidth;
+    private String rawDataFilename;
+    private SwappedDataInputStream inStream;
 
     public Spectrogram() throws SQLException
     {
@@ -158,7 +165,7 @@ public class Spectrogram
      *
      * @param args the command line arguments
      */
-    public static void main(String[] args)
+    public static void main(String[] args) throws WebUtilException, NDSException
     {
         int stat;
         try
@@ -190,7 +197,7 @@ public class Spectrogram
      * The controller of the process loop, init -> get data -> process -> make image
      * @return 
      */
-    public int doPlot() throws ViewConfigException
+    public int doPlot() throws ViewConfigException, WebUtilException, NDSException
     {
         int ret = 0;
         long xfernt=0;
@@ -228,21 +235,21 @@ public class Spectrogram
             bufn = 0;
             boolean wantsToCancel = false;
 
-            if (useTestData)
+            if (useAltData)
             {
                 int stopSample = (int) (duration * sampleRate);
-                if (testData == null )
+                
+                if (!testDataFilename.isEmpty())
                 {
-                    noData(0, stopSample);
+                    readAddTestData(testDataFile);
                 }
-                else if ( !testData.canRead())
+                else if (!rawDataFilename.isEmpty())
                 {
-                    throw new IllegalArgumentException("Can't open " + testData.getCanonicalPath() 
-                            + " for reading");
+                    readAddRawData();
                 }
                 else
                 {
-                    readAddTestData(testData);
+                    noData(0, stopSample);
                 }
             }
             else
@@ -380,9 +387,9 @@ public class Spectrogram
         closeProgress();
         return ret;
     }
-    private void initChanInfo() throws LdvTableException, SQLException, ViewConfigException
+    private void initChanInfo() throws LdvTableException, SQLException, ViewConfigException, WebUtilException
     {
-        if (!useTestData)
+        if (!useAltData)
         {
             setProgress("Getting Channel info.");
 
@@ -397,17 +404,33 @@ public class Spectrogram
         else
         {
             // test data can either be no data or input from a csv file
-            if (testDataFile == null || testDataFile.isEmpty())
+            testDataFile = null;
+            rawDataFile = null;
+            if (rawDataFilename.isEmpty() && testDataFilename.isEmpty())
             {
                 channelName = "No data (labels only)";
             }
-            else
+            else if (!testDataFilename.isEmpty())
             {
-                testData = new File(testDataFile);
-                channelName = testData.getName();
+                testDataFile = new File(testDataFilename);
+                channelName = testDataFile.getName();
+                bytesPerSample = Float.SIZE/8;
             }
-            sampleRate = 2048;
-            bytesPerSample = 8;
+            else if (!rawDataFilename.isEmpty())
+            {
+                Pattern fnPat = Pattern.compile("(.*/)?(.+)-(\\d+)-(\\d+).dat");
+                Matcher fnMat = fnPat.matcher(rawDataFilename);
+                if (!fnMat.find())
+                {
+                    throw new WebUtilException("Raw data file not named corrrectly.");
+                }
+                channelName = fnMat.group(2);
+                startGPS = Integer.parseInt(fnMat.group(3));
+                duration = Integer.parseInt(fnMat.group(4));
+                bytesPerSample = Float.SIZE/8;
+            }
+            
+            
         }
         setProgress("Starting transfer.");
         if (fmax == 0)
@@ -514,7 +537,7 @@ public class Spectrogram
     private int bufn = 0;
     private double[] rawData;
     /**
-     * Given a buffer of real data add it to our data table
+     * Given a NDS connection ready to transfer time series data add it to our freq domain cache
      * 
      * @param strtSampleNum - starting position in samples
      * @param len - number of samples in buffer
@@ -562,6 +585,35 @@ public class Spectrogram
         }
         
     }
+    /**
+     * Given a buffer of real data add it to our freq domain cache
+     * almost a duplicate of NDS2 version for efficiency
+     *
+     * @param rawBuf - array of time domain samples
+     * @param strtSampleNum - starting position in samples
+     * @param len - number of samples in buffer (it doesn't need to be full)
+     */
+    private void addBuf(double[] rawBuf, int strtSampleNum, int len) throws NDSException, WebUtilException
+    {
+        int cnt = 0;
+        start = strtSampleNum / sampleRate;
+        binWidth = 1. / secPerFFT;
+        rawData = new double[flen];
+
+        while (cnt < len)
+        {
+            bufn++;
+            // copy data for next fft and add it to cache
+            if (cnt + flen < len)
+            {
+                System.arraycopy(rawBuf, cnt, rawData, 0, flen);
+                filtAndSave();
+            }
+            cnt += flen - overlapSamples;
+        }
+
+    }
+
     private void filtAndSave() throws WebUtilException
     {
         writeRawBuffer(bufn, rawData);
@@ -637,13 +689,22 @@ public class Spectrogram
         
         String hrTime = TimeAndDate.hrTime(duration);
         String cname;
-        if (useTestData)
+        if (useAltData)
         {
             cname = "Test Data";
-            if (testDataFile != null && !testDataFile.isEmpty())
+            if (testDataFilename != null && !testDataFilename.isEmpty())
             {
-                File f = new File(testDataFile);
+                File f = new File(testDataFilename);
                 cname = f.getName();
+            }
+            if (rawDataFilename != null && !rawDataFilename.isEmpty())
+            {
+                File f = new File(rawDataFilename);
+                cname = f.getName();
+            }
+            if (channelName != null && !channelName.isEmpty())
+            {
+                cname = channelName;
             }
             if (startGPS == 0)
             {
@@ -1014,8 +1075,9 @@ public class Spectrogram
             
             startGPS = cmd.getStartGPS();
             
-            useTestData = cmd.isUseTestData();
-            testDataFile = cmd.getTestDataFile();
+            useAltData = cmd.isUseTestData();
+            testDataFilename = cmd.getTestDataFile();
+            rawDataFilename = cmd.getRawDataFile();
             showProgressBar = cmd.isShowProgressBar();
             smooth = cmd.isSmooth();
             interp = cmd.isInterp();
@@ -1383,7 +1445,7 @@ public class Spectrogram
         try
         {
             setProgress("Read and add test data.");
-            ArrayList<Double> data = new ArrayList<Double>();
+            ArrayList<Double> data = new ArrayList<>();
             // read the file
             CSVReader csvReader = new CSVReader(new InputStreamReader(new FileInputStream(testData)));
 
@@ -1418,23 +1480,23 @@ public class Spectrogram
                     }
                     writeRawBuffer(-1, dbgRaw);
                 }
-                int start = 0;
+                int startPos = 0;
                 duration = (int) (data.size()/sampleRate);
                 double[] fftdata = new double[flen];
-                double binWidth = 1.0 / secPerFFT;
-                while(start + flen <= data.size())
+                binWidth = 1.0 / secPerFFT;
+                while(startPos + flen <= data.size())
                 {
                     for(int idx = 0; idx < flen; idx++ )
                     {
-                        fftdata[idx] = data.get(idx+start);
+                        fftdata[idx] = data.get(idx+startPos);
                     }
                    
                     double[] temp = new double[fftdata.length];
                     System.arraycopy(fftdata, 0, temp, 0, fftdata.length);
-                    writeRawBuffer(start, temp);
+                    writeRawBuffer(startPos, temp);
                     double[] result = spectrumCalculator.doCalc(temp, sampleRate);
-                    spectraCache.add(start, result, sampleRate, fmax, fmin, binWidth);
-                    start += flen - overlapSamples;
+                    spectraCache.add(startPos, result, sampleRate, fmax, fmin, binWidth);
+                    startPos += flen - overlapSamples;
                 }
             }
             setProgress("All spectra calculated");
@@ -1443,6 +1505,48 @@ public class Spectrogram
         {
             Logger.getLogger(Spectrogram.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    private void readAddRawData() throws WebUtilException, NDSException
+    {
+        if (rawDataFilename != null && !rawDataFilename.isEmpty())
+        {
+            rawDataFile = new File(rawDataFilename);
+        }
+        if (rawDataFile == null || !rawDataFile.canRead())
+        {
+            throw new WebUtilException("Request for raw data but file cannot be read, or not set.");
+        }
+        long nSamples = rawDataFile.length() / (Float.SIZE/8)/2;
+        try
+        {
+            
+            inStream = new SwappedDataInputStream(new FileInputStream(rawDataFile));
+            int startPos = 0;
+            int blen = (int) Math.min(nSamples,1024*1024);
+            double[] rawDataBuffer = new double[blen];
+            
+            for(long n = 0; n<nSamples; n+= blen)
+            {
+                int dlen=blen;
+                if (n+blen > nSamples)
+                {
+                    dlen = (int) (nSamples - n);
+                }
+                for(int i=0; i< dlen; i++)
+                {
+                    Float t = inStream.readFloat();
+                    Float d = inStream.readFloat();
+                    rawDataBuffer[i] = d;
+                }
+                addBuf(rawDataBuffer,(int) n, dlen);
+            }
+        }
+        catch (IOException  ex)
+        {
+            throw new WebUtilException("Error reading raw data file", ex);
+        }
+        
     }
 
     /**
@@ -1523,6 +1627,54 @@ public class Spectrogram
             }
         }
 
+    }
+    /**
+     * For binary input files from our frame reader set up the input stream
+     *
+     * @return number of entries to read
+     * @throws WebUtilException
+     */
+    private long setupFileReads(String infilename) throws WebUtilException
+    {
+        setProgress("Scan input file for min/max GPS times.");
+        File inFile = new File(infilename);
+        long siz = inFile.length() / (Float.SIZE / 8) / 2;     // convert bytes to # entries (time, val)
+        if (!inFile.canRead())
+        {
+            throw new WebUtilException("Can't open " + infilename + " for reading");
+        }
+        try
+        {
+            inStream = new SwappedDataInputStream(new FileInputStream(inFile));
+            float minTime = Float.MAX_VALUE;
+            float maxTime = -Float.MAX_VALUE;
+
+            setProgress("Searhing for min/max time in input file.");
+            int opct = 0;
+            for (int i = 0; i < siz; i++)
+            {
+                int pct = (int) (100 * i / siz);
+                if (pct > opct)
+                {
+                    setProgress(pct, 100);
+                    opct = pct;
+                }
+                Float t = inStream.readFloat();
+                Float d = inStream.readFloat();
+                minTime = Math.min(minTime, t);
+                maxTime = Math.max(maxTime, t);
+            }
+            startGPS = (int) (minTime);
+            duration = (int) (maxTime - minTime);
+            inStream.close();
+            inStream = new SwappedDataInputStream(new FileInputStream(inFile));
+        }
+        catch (IOException ex)
+        {
+            throw new WebUtilException("Can't open " + infilename + " for reading");
+        }
+
+        return siz;
     }
 
 }

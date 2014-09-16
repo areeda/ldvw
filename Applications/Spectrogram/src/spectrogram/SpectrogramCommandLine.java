@@ -91,6 +91,7 @@ public class SpectrogramCommandLine
     private final String intpat = "^\\d+$";
     //@todo get a better regex for floats
     private final String fltpat = "^[\\d\\.]+$";
+    private String rawDataFile;
     
     public SpectrogramCommandLine()
     {
@@ -142,7 +143,9 @@ public class SpectrogramCommandLine
         options.addOption(OptionBuilder.withArgName("order").hasArg().withDescription("Order of butterworth [default=4").create("order"));
         
         options.addOption(OptionBuilder.withArgName("testdata").hasArg().withDescription("Use data from csv file <filename>").create("testdata"));
-        
+        options.addOption(OptionBuilder.withArgName("raw").hasArg().withDescription("Use data from raw binary file <filename>").create("raw"));        
+        options.addOption(OptionBuilder.withArgName("rate").hasArg().withDescription("Sample rate in Hz").create("rate"));
+
         CommandLineParser parser = new GnuParser();
         
         wantHelp = false;
@@ -300,6 +303,37 @@ public class SpectrogramCommandLine
             {
                 useTestData = true;
                 testDataFile = line.getOptionValue("testdata");
+            }
+            else
+            {
+                testDataFile = "";
+            }
+            
+            if (line.hasOption("raw"))
+            {
+                useTestData = true;
+                rawDataFile = line.getOptionValue("raw");
+            }
+            else
+            {
+                rawDataFile = "";
+            }
+
+            if (line.hasOption("rate"))
+            {
+                String rateStr = line.getOptionValue("rate");
+                Pattern fltPat = Pattern.compile("(([1-9][0-9]*\\.?[0-9]*)|(\\.[0-9]+))([Ee][+-]?[0-9]+)?");
+                Matcher fltMat = fltPat.matcher(rateStr);
+                if (fltMat.find())
+                {
+                    sampleRate = Float.parseFloat(rateStr);
+                }
+                else
+                {
+                    System.err.format("Can't parse rate parameter (%1$s) not a valid floating point number%n", 
+                                      rateStr);
+                    wantHelp = true;
+                }
             }
             
             // filter parameters
@@ -531,6 +565,11 @@ public class SpectrogramCommandLine
     public String getcType()
     {
         return cType;
+    }
+
+    public String getRawDataFile()
+    {
+        return rawDataFile;
     }
 
     
