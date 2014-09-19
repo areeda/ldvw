@@ -14,6 +14,7 @@ def getargs(args):
     parser.add_argument('--logx', action='store_true') 
     parser.add_argument('--nogrid', action='store_true') 
     parser.add_argument('--title', action='append' , help='One or more title lines')
+    parser.add_argument('--suptitle', help='1st title line (larger than the others)')
 
     parser.add_argument('--xlabel', help='X-axis label')
     parser.add_argument('--ylabel', help='Y-axis label')
@@ -30,10 +31,12 @@ def getargs(args):
     parser.add_argument('-V', '--version', action='version', 
                         version='%(prog)s %(__version__)')
     
-    # positional arguments are data files for ovlaid or subplots
+    # infiles are ascii csv files for overlaid or subplots
     parser.add_argument('--infile', nargs='+', action='append',
-                   help='path to data files 2xN array of doubles')
-
+                   help='path to ascii csv files 2xN array of doubles')
+    # legends match infiles in position are displayed if any are specified.
+    parser.add_argument('--legend', nargs='*', action='append',
+                  help='strings to match data files')
     result = parser.parse_args(args)
     
     return result

@@ -10,7 +10,12 @@ import os
 try:
     home = os.environ['HOME']
 except:
+    os.environ['HOME'] = ''
+if len(os.environ['HOME']) == 0:
     os.environ['HOME'] = '/usr/local/ldvw/.config/'
+
+
+import astropy
 from astropy.time import Time
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -19,6 +24,7 @@ from numpy import genfromtxt
 import plotArgs
 import sys
 import re
+import pylab as pyl
 
 argList = plotArgs.getargs(sys.argv[1:])  # parse command line arguments
 if argList.test:
@@ -32,9 +38,7 @@ if argList.test:
 mpl.rc('font', family='sans-serif')
 mpl.rcParams['font.size'] = '16.0'
 mpl.rcParams['font.weight'] = 'book'
-#mpl.rc("text", usetex = True)
-
-
+mpl.rcParams['legend.loc'] = 'best'
 
 # determine image dimensions (geometry)
 width = 12
@@ -72,16 +76,36 @@ if argList.logx:
 if argList.logy:
     ax.set_yscale('log')
 
-for fnl in argList.infile:
+doMinMax=True
+nfiles=argList.infile.__len__()
+
+if argList.legend is not None:
+    nlegends=argList.legend.__len__()
+else:
+    nlegends=0
+
+for fn in range(0, nfiles):
+    fnl = argList.infile[fn]
     filename = fnl[0]     #<--weird but we get a list of lists back
     if argList.verbose > 0:
         print "Adding: " + filename
     pdata = genfromtxt(filename, delimiter=',')
-    ax.plot(pdata[:, 0], pdata[:, 1])
+    leg = str(fn)
+    if fn < nlegends:
+       leg = argList.legend[fn][0]
+    ax.plot(pdata[:, 0], pdata[:, 1],label=leg,linewidth=1.5)
+    
+    if doMinMax:
+        # default range for plot is full range, but user can override any or all values
+        minmax = [np.min(pdata[:, 0]), np.max(pdata[:, 0]), np.min(pdata[:, 1]),
+                 np.max(pdata[:, 1])]
+        doMinMax=False;
+    else:
+       minmax[0] = np.min([minmax[0],np.min(pdata[:, 0])])
+       minmax[1] = np.max([minmax[1],np.max(pdata[:, 0])])
+       minmax[2] = np.min([minmax[2],np.min(pdata[:, 1])])
+       minmax[3] = np.max([minmax[3],np.max(pdata[:, 1])])
 
-# default range for plot is full range, but user can override any or all values
-minmax = [np.min(pdata[:, 0]), np.max(pdata[:, 0]), np.min(pdata[:, 1]),
-          np.max(pdata[:, 1])]
 if argList.xmin is not None:
     minmax[0] = float(argList.xmin)
 
@@ -95,6 +119,8 @@ if argList.ymax is not None:
     minmax[3] = float(argList.ymax)
 
 ax.axes.axis(minmax)
+if nlegends > 0:
+   pyl.legend(framealpha=0.5,fontsize='x-small')
 
 # if they didn't give us a title make one up
 clist = []
@@ -142,13 +168,16 @@ else:
             title += "\n"
         title += t
 
-plt.title(title)
+plt.title(r'%s' % title, fontsize=12)
+
+if argList.suptitle is not None:
+    plt.suptitle(r'%s' %argList.suptitle,fontsize=18)
 
 if argList.ylabel is None:
     if plottype == "Spectrum":
         plt.ylabel(r'ASD $\left( \frac{\mathrm{Counts}}{\sqrt{\mathrm{Hz}}}\right)$')
 else:
-    plt.ylabel(r'%s'%argList.ylabel)
+    plt.ylabel(r'%s' % argList.ylabel)
 
 if argList.xlabel is None:
     if plottype == "Spectrum":
@@ -162,9 +191,9 @@ if not argList.nogrid:
 
 plt.tight_layout(pad=1.4, w_pad=4.5, h_pad=3.0)
 
-if argList.interactive:
-    plt.show()
-
 if argList.out is not None:
     plt.savefig(argList.out, facecolor=fig.get_facecolor(), edgecolor='none')
+
+if argList.interactive:
+    plt.show()
 
