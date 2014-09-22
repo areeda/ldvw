@@ -1366,10 +1366,49 @@ public class OdcPlot
             "IM4 Trans High (Relative)",
             "IM4 Transmitted High"
         };
-        
+        String[] masterBitNames =
+        {
+            "Interferometer Status",
+            "Observation intent",
+            "Guardian top-level state OK",
+            "HPI Summary",
+            "ISI Summary",
+            "SUS Summary",
+            "PSL Summary",
+            "IMC Summary",
+            "ALS Summary",
+            "LSC Summary",
+            "ASC Summary",
+            "TCS Summary",
+            "EX Summary",
+            "IX Summary",
+            "EY Summary",
+            "IY Summary",
+            "BS Summary",
+            "HAM1 Summary",
+            "HAM2 Summary",
+            "HAM3 Summary",
+            "HAM4 Summary",
+            "HAM5 Summary",
+            "HAM6 Summary",
+            "",
+            "",
+            "",
+            "",
+            "ADC Overflow Summary",
+            "DAC Overflows Summary",
+            "Excitation Summary",
+            "Subsystem Parity Summary",
+            "Parity Bit "
+        };
         String cn = chan.toUpperCase();
         
-        if (cn.contains("PSL-ODC_CHANNEL_OUTPUT") || cn.contains("PSL-ODC_CHANNEL_OUT_DQ"))
+        if (cn.contains("ODC-MASTER_CHANNEL"))
+        {
+            checkParity = true;
+            bitNames = masterBitNames;
+        }
+        else if (cn.contains("PSL-ODC_CHANNEL_OUTPUT") || cn.contains("PSL-ODC_CHANNEL_OUT_DQ"))
         {
             checkParity = true;
             bitNames = pslOdcBitNames;
