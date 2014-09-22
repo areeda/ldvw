@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="18">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="20">
         <file>
             <url>src/java/edu/fullerton/ldvw/ChanSourceData.java</url>
             <bookmark id="15">
@@ -21,17 +21,22 @@
             <url>src/java/edu/fullerton/ldvw/BaseChannelSelector.java</url>
             <bookmark id="7">
                 <name/>
-                <line>298</line>
+                <line>313</line>
                 <key/>
             </bookmark>
             <bookmark id="13">
                 <name/>
-                <line>620</line>
+                <line>632</line>
                 <key/>
             </bookmark>
         </file>
         <file>
             <url>src/java/edu/fullerton/ldvw/TimeAndPlotSelector.java</url>
+            <bookmark id="17">
+                <name/>
+                <line>86</line>
+                <key/>
+            </bookmark>
             <bookmark id="6">
                 <name/>
                 <line>133</line>
@@ -39,7 +44,20 @@
             </bookmark>
             <bookmark id="12">
                 <name/>
-                <line>575</line>
+                <line>579</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>src/java/edu/fullerton/ldvservlet/SrcList.java</url>
+            <bookmark id="14">
+                <name/>
+                <line>147</line>
+                <key/>
+            </bookmark>
+            <bookmark id="16">
+                <name/>
+                <line>199</line>
                 <key/>
             </bookmark>
         </file>
@@ -68,27 +86,35 @@
             <url>src/java/edu/fullerton/ldvw/PluginManager.java</url>
             <bookmark id="4">
                 <name/>
-                <line>220</line>
+                <line>227</line>
                 <key/>
             </bookmark>
             <bookmark id="8">
                 <name/>
-                <line>277</line>
+                <line>284</line>
+                <key/>
+            </bookmark>
+            <bookmark id="20">
+                <name/>
+                <line>294</line>
                 <key/>
             </bookmark>
             <bookmark id="1">
                 <name/>
-                <line>298</line>
+                <line>305</line>
                 <key/>
             </bookmark>
             <bookmark id="2">
                 <name/>
-                <line>365</line>
+                <line>372</line>
                 <key/>
             </bookmark>
-            <bookmark id="18">
+        </file>
+        <file>
+            <url>src/java/edu/fullerton/ldvplugin/OdcPlotManager.java</url>
+            <bookmark id="19">
                 <name/>
-                <line>738</line>
+                <line>412</line>
                 <key/>
             </bookmark>
         </file>
