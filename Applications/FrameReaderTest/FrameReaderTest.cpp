@@ -75,8 +75,9 @@ int main( int argc, char** argv )
             dur += lexical_cast<int> (durString);
         }
     }
-    ostringstream timeStr;
-    timeStr << plotStart << "-" << dur;
+    ostringstream timeStrStrm;
+    timeStrStrm << plotStart << "-" << dur;
+    string timeStr = timeStrStrm.str();
     
     // create the output files
     int nChans = chanNames.size();
@@ -90,7 +91,7 @@ int main( int argc, char** argv )
         string oname = outDir + chanNames[c];
         if (addTimeToFilename)
         {
-            oname += "-" + timeStr.str();
+            oname += "-" + timeStr;
         }
         oname += string(".dat");
         oFiles[c] = new ofstream(oname.c_str(),ios::out | ios::binary);
@@ -296,7 +297,7 @@ void setup( int argc, char** argv )
         cout << "Empty channel list or frame file list" << endl;
         cout << "framereadertest [--help] [--verbose] [--raw] --frame <file> --chan <file>" << endl;
         cout << "                [--int (output value as long] [--unit <gsmhdw> (gps,sec, min, hr, day, week)]" << endl;
-        cout << "                [--outdir <path>] [--unit <gsmhdw> (gps,sec, min, hr, day, week)]" << endl;
+        cout << "                [--outdir <path>] [--time (add time to filenames)" << endl;
         cout << "   unit: s: sec, m: min, h: hr, d: day, w: week" << endl;
         exit(2);
     }
