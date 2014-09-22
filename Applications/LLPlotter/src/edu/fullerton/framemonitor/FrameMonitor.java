@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package llplotter;
+package edu.fullerton.framemonitor;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -31,7 +31,7 @@ import org.apache.commons.io.monitor.FileAlterationObserver;
  *
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
-public class LLPlotter
+public class FrameMonitor
 {
 
     /**
@@ -39,7 +39,7 @@ public class LLPlotter
      */
     public static void main(String[] args)
     {
-        LLPlotter me = new LLPlotter();
+        FrameMonitor me = new FrameMonitor();
         me.startTasks();
     }
 //===== non-static methods
@@ -51,7 +51,7 @@ public class LLPlotter
     private final int pollingInterval = 1000;
     private final FileAlterationMonitor monitor;
     
-    public LLPlotter()
+    public FrameMonitor()
     {
         // init the predefined queues and plots
         watchQueDefn = new ArrayList<>();
@@ -159,7 +159,7 @@ public class LLPlotter
         }
         catch (Exception ex)
         {
-            Logger.getLogger(LLPlotter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FrameMonitor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

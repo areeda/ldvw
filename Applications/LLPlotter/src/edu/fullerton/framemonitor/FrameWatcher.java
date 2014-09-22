@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package llplotter;
+package edu.fullerton.framemonitor;
 
 import edu.fullerton.ldvjutils.TimeAndDate;
 import java.io.File;
