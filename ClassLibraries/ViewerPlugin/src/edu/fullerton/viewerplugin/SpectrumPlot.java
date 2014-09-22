@@ -26,6 +26,8 @@ import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.ChanInfo;
+import edu.fullerton.ldvjutils.TimeAndDate;
+import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.viewerplugin.SpectrumCalc.Scaling;
 import edu.fullerton.viewerplugin.WindowGen.Window;
 import java.awt.BasicStroke;
@@ -36,9 +38,12 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -725,6 +730,19 @@ public
         return true;
     }
 
+    private class genPlotInfo
+    {
+        public File spFile;
+        public String title;
+        public String legend;
+        
+        genPlotInfo(File spFile, String title, String legend)
+        {
+            this.spFile = spFile;
+            this.title = title;
+            this.legend = legend;
+        }
+    }
     /**
      * use the external program genPlot.py to generate the graph
      * @param dbufs input spec
@@ -738,25 +756,81 @@ public
         try
         {
             ArrayList<String> cmd = new ArrayList<>();
-            ArrayList<File> spectra = new ArrayList<>();
+            ArrayList<genPlotInfo> spectra = new ArrayList<>();
             
             File tempDir = epm.getTempDir("sp_");
             File outFile = epm.getTempFile("sp_plot_", ".png");
+            
+            // we need to know for labeling
+            boolean sameChannel = true;
+            boolean sameTime = true;
+            boolean multiPlot = dbufs.size() > 1;
+            
+            Set<ChanInfo> cis = new TreeSet<>();
+            Set<TimeInterval> tis = new TreeSet<>();
+
+            if (multiPlot)
+            {
+                for (ChanDataBuffer buf : dbufs)
+                {
+                    cis.add(buf.getChanInfo());
+                    tis.add(buf.getTimeInterval());
+                }
+                sameChannel = cis.size() == 1;
+                sameTime = tis.size() == 1;
+            }
             
             for (ChanDataBuffer buf : dbufs)
             {
                 double[][] spectrum = calcSpectrum(buf);
                 File spFile = epm.writeTempCSV("Spectrum_", spectrum);
-                spectra.add(spFile);
+                String fTitle = "";
+                String fLegend = "";
+                if (sameChannel && !sameTime)
+                {
+                    long gps = buf.getTimeInterval().getStartGps();
+                    String utc = TimeAndDate.gpsAsUtcString(gps);
+                    fTitle = String.format("%1$s (%2$d)",utc, gps);
+                    fLegend = String.format("%1$s", gps);
+                }
+                else if (!sameChannel && sameTime)
+                {
+                    String chanName = buf.getChanInfo().getChanName();
+                    String chanFs;
+                    float fs = buf.getChanInfo().getRate();
+                    if (fs >= 1)
+                    {
+                        chanFs = String.format("%1$.0f Hz", fs);
+                    }
+                    else
+                    {
+                        chanFs = String.format("%1$.3f Hz", fs);
+                    }
+                    if (fTitle.length() > 0)
+                    {
+                        fTitle += ", ";
+                    }
+                    fTitle = String.format("%1$s at %2$s", chanName, chanFs);
+                    fLegend = chanName;
+                }
+                spectra.add(new genPlotInfo(spFile, fTitle, fLegend));
             }
             File outImg=epm.getTempFile("spPlot_", ".png");
             
             cmd.add("/usr/local/ldvw/bin/genPlot.py");
             // add input files
-            for (File f : spectra)
+            for (genPlotInfo gpi : spectra)
             {
+                File f = gpi.spFile;
                 cmd.add("--infile");
                 cmd.add(f.getCanonicalPath());
+                if (!sameChannel || !sameTime )
+                {
+                    cmd.add("--title");
+                    cmd.add(gpi.title);
+                    cmd.add("--legend");
+                    cmd.add(gpi.legend);
+                }
             }
             // add and output file
             cmd.add("--out");
@@ -770,18 +844,37 @@ public
             {
                 cmd.add("--logx");
             }
-            // add text
-            String gtitle = getTitle(dbufs, compact);
-            String[] titleLines = gtitle.split("\n");
-            if (titleLines.length > 0)
+            // add the super title
+            String supTitle = "Spectrum plot";
+            if (!multiPlot)
             {
-                
-                for (String t : titleLines)
-                {
-                    cmd.add("--title");
-                    cmd.add(t);
-                }
+                supTitle = getTitle(dbufs, false);
             }
+            else if (!sameChannel && sameTime)
+            {
+                long gps = dbufs.get(0).getTimeInterval().getStartGps();
+                long dur = dbufs.get(0).getTimeInterval().getDuration();
+                supTitle = String.format("%1$s (%2$d) t = %3$d",TimeAndDate.gpsAsUtcString(gps),
+                                         gps,dur);
+            }
+            else if (sameChannel && !sameTime)
+            {
+                String chanFs;
+                float fs = dbufs.get(0).getChanInfo().getRate();
+                if (fs > 1)
+                {
+                    chanFs = String.format("%1$.0f",fs);
+                }
+                else
+                {
+                    chanFs = String.format("%1$.3f", fs);
+                }
+                supTitle = String.format("%1$s at %2$s Hz", 
+                                         dbufs.get(0).getChanInfo().getChanName(), chanFs);
+            }
+            cmd.add("--suptitle");
+            cmd.add(supTitle);
+            // axis labels
             DecimalFormat dform = new DecimalFormat("0.0###");
             float bw = 1/secperfft;
             
