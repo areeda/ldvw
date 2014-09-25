@@ -19,6 +19,7 @@ import astropy
 from astropy.time import Time
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib import gridspec
 import numpy as np
 from numpy import genfromtxt
 import plotArgs
@@ -56,6 +57,9 @@ mpl.rcParams['figure.dpi'] = dpi
 
 # NB: make all mpl parameter changes before creating figure
 fig = plt.figure()
+#gs1 = gridspec.GridSpec(1, 1)
+#gs1.update(left=0.05, right=0.48, top=1.5, wspace=0.05)
+
 
 rect = fig.patch
 rect.set_facecolor('w')
@@ -63,6 +67,7 @@ rect.set_facecolor('w')
 if argList.interactive:
     plt.interactive(True)
 
+#ax = plt.subplot(gs1[0, 0])
 ax = fig.add_subplot(1, 1, 1)
 
 if argList.nogrid:
@@ -189,7 +194,10 @@ if not argList.nogrid:
     plt.grid(b=True, which='major', color='k', linestyle='solid')
     plt.grid(b=True, which='minor', color='0.06', linestyle='dotted')
 
+#gs1.tight_layout(pad=1.4, w_pad=4.5, h_pad=3.0)
+
 plt.tight_layout(pad=1.4, w_pad=4.5, h_pad=3.0)
+plt.subplots_adjust(top=0.85)
 
 if argList.out is not None:
     plt.savefig(argList.out, facecolor=fig.get_facecolor(), edgecolor='none')
