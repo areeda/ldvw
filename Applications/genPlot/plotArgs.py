@@ -9,10 +9,10 @@ def getargs(args):
     parser.add_argument('-g', '--geometry', 
         help='size of resulting image WxH eg 1200x600')
     
-    parser.add_argument('--interactive', action='store_true' )
-    parser.add_argument('--logy', action='store_true' )
-    parser.add_argument('--logx', action='store_true') 
-    parser.add_argument('--nogrid', action='store_true') 
+    parser.add_argument('--interactive', action='store_true', help='when running from ipython allows experimentation')
+    parser.add_argument('--logy', action='store_true', help='make x-axis logarithmic')
+    parser.add_argument('--logx', action='store_true', help='make y-axis logarithmic') 
+    parser.add_argument('--nogrid', action='store_true', help='do not display grid lines') 
     parser.add_argument('--title', action='append' , help='One or more title lines')
     parser.add_argument('--suptitle', help='1st title line (larger than the others)')
 
