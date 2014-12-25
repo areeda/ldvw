@@ -35,7 +35,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/_ext/1140831991/nds.o \
 	${OBJECTDIR}/Channels.o \
 	${OBJECTDIR}/NDSConnection.o \
 	${OBJECTDIR}/NDSData.o \
@@ -60,22 +59,17 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/lib/sasl2 -L/usr/lib/x86_64-linux-gnu -lboost_regex -lpthread -lrt -lsasl2 -lstdc++ /usr/local/lib/libndsclient.a
+LDLIBSOPTIONS=-L/usr/lib/sasl2 -L/usr/lib/x86_64-linux-gnu -lboost_regex -lpthread -lrt /usr/lib64/libndsclient.a -lsasl2 -lstdc++
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ndsproxyserver
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ndsproxyserver: /usr/local/lib/libndsclient.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ndsproxyserver: /usr/lib64/libndsclient.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ndsproxyserver: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ndsproxyserver ${OBJECTFILES} ${LDLIBSOPTIONS}
-
-${OBJECTDIR}/_ext/1140831991/nds.o: /home/joe/NetBeansProjects/ldvw/Applications/ndsProxyServer/nds.i 
-	${MKDIR} -p ${OBJECTDIR}/_ext/1140831991
-	${RM} "$@.d"
-	$(COMPILE.c) -O2 -Wall -I/usr/include/nds2-client -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1140831991/nds.o /home/joe/NetBeansProjects/ldvw/Applications/ndsProxyServer/nds.i
 
 ${OBJECTDIR}/Channels.o: Channels.cpp 
 	${MKDIR} -p ${OBJECTDIR}

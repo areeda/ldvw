@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="95">
+<configurationDescriptor version="96">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -27,7 +27,6 @@
       <itemPath>ServerThread.cpp</itemPath>
       <itemPath>Utils.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
-      <itemPath>/home/joe/NetBeansProjects/ldvw/Applications/ndsProxyServer/nds.i</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -72,29 +71,12 @@
             <linkerLibLibItem>boost_regex</linkerLibLibItem>
             <linkerLibLibItem>pthread</linkerLibLibItem>
             <linkerLibLibItem>rt</linkerLibLibItem>
-            <linkerLibLibItem>ndsclient</linkerLibLibItem>
+            <linkerLibFileItem>/usr/lib64/libndsclient.a</linkerLibFileItem>
             <linkerLibLibItem>sasl2</linkerLibLibItem>
             <linkerLibLibItem>stdc++</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
-        <requiredProjects>
-          <makeArtifact PL="/home/joe/ligo/nds2/client-svn"
-                        CT="0"
-                        CN="Default"
-                        AC="true"
-                        BL="false"
-                        WD="/home/joe/ligo/nds2/client-svn"
-                        BC="${MAKE} -f Makefile"
-                        CC="${MAKE} -f Makefile clean"
-                        OP="">
-          </makeArtifact>
-        </requiredProjects>
       </compileType>
-      <item path="/home/joe/NetBeansProjects/ldvw/Applications/ndsProxyServer/nds.i"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
       <item path="Channels.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Channels.h" ex="false" tool="3" flavor2="0">
@@ -162,17 +144,12 @@
             <linkerLibLibItem>boost_regex</linkerLibLibItem>
             <linkerLibLibItem>pthread</linkerLibLibItem>
             <linkerLibLibItem>rt</linkerLibLibItem>
+            <linkerLibFileItem>/usr/lib64/libndsclient.a</linkerLibFileItem>
             <linkerLibLibItem>sasl2</linkerLibLibItem>
             <linkerLibLibItem>stdc++</linkerLibLibItem>
-            <linkerLibFileItem>/usr/local/lib/libndsclient.a</linkerLibFileItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="/home/joe/NetBeansProjects/ldvw/Applications/ndsProxyServer/nds.i"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
       <item path="Channels.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Channels.h" ex="false" tool="3" flavor2="0">
@@ -238,24 +215,7 @@
             <linkerLibLibItem>stdc++</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
-        <requiredProjects>
-          <makeArtifact PL="../nds2-client-0.8.2"
-                        CT="0"
-                        CN="Default"
-                        AC="true"
-                        BL="false"
-                        WD="../nds2-client-0.8.2"
-                        BC="${MAKE} -f Makefile"
-                        CC="${MAKE} -f Makefile clean"
-                        OP="">
-          </makeArtifact>
-        </requiredProjects>
       </compileType>
-      <item path="/home/joe/NetBeansProjects/ldvw/Applications/ndsProxyServer/nds.i"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
       <item path="Channels.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Channels.h" ex="false" tool="3" flavor2="0">
@@ -327,11 +287,6 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="/home/joe/NetBeansProjects/ldvw/Applications/ndsProxyServer/nds.i"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
       <item path="Channels.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Channels.h" ex="false" tool="3" flavor2="0">
