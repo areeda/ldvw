@@ -138,7 +138,7 @@ public class ChannelTable extends Table
         ChanInfo ret = null;
         String q = "SELECT * FROM " + getName() + " WHERE ";
         q += "server ='" + server +"' AND name='" + ci.getChanName() + "' AND ";
-        q += "cType='" + ci.getcType() + "'";
+        q += "cType='" + ci.getcType() + "' AND dType='" + ci.getdType() + ";";
         
         ResultSet rs = db.executeQuery(q);
         if (rs.next())
