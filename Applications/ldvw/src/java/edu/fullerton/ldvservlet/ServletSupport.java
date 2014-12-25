@@ -299,7 +299,7 @@ public class ServletSupport
         String[][] commands =
         {
             {
-                "Home", "main"
+                "Home", "basechan"
             },
             {
                 "Saved Plots", "ImageHistory&amp;size=med"
