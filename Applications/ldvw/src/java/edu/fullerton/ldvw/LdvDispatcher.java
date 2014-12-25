@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import ndsmonitor.NdsMonitor;
@@ -94,7 +96,7 @@ public class LdvDispatcher extends GUISupport
         {
             String act;
             act = request.getParameter("act");
-            act = act == null ? "main" : act;
+            act = act == null ? "basechan" : act;
             act = act.toLowerCase();
             switch (act)
             {
@@ -140,8 +142,8 @@ public class LdvDispatcher extends GUISupport
                 case "imagehistory":
                     imageHistory();
                     break;
-                case "main":
-                    startPage();
+                case "singlechan":
+                    singleChan();
                     break;
                 case "ndshistory":
                     ndsHistory();
@@ -249,7 +251,7 @@ public class LdvDispatcher extends GUISupport
                 if (nmatch == 0)
                 {
                     vpage.add("No channel matches specifier: " + chanName);
-                    startPage();
+                    singleChan();
                 }
                 else 
                 {
@@ -331,10 +333,28 @@ public class LdvDispatcher extends GUISupport
         
         if (request.getParameter("selMore") != null)
         {
-            ChannelSelector clf = new ChannelSelector(request, response, db, vpage, vuser);
-            clf.setContextPath(contextPath);
-            clf.setServletPath(servletPath);
-            clf.selectChannels("selMore", false);
+            if (request.getParameter("baseSelector") != null)
+            {
+                try
+                {
+                    baseChan();
+                }
+                catch (SQLException ex)
+                {
+                    throw new WebUtilException("Attempting to select more base channels", ex);
+                }
+                catch (LdvTableException ex)
+                {
+                    Logger.getLogger(LdvDispatcher.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            else
+            {
+                ChannelSelector clf = new ChannelSelector(request, response, db, vpage, vuser);
+                clf.setContextPath(contextPath);
+                clf.setServletPath(servletPath);
+                clf.selectChannels("selMore", false);
+            }
         }
         else
         {
@@ -429,14 +449,14 @@ public class LdvDispatcher extends GUISupport
      * 
      * @throws WebUtilException probably a programming bug defining html
      */
-    private void startPage() throws WebUtilException, SQLException, LdvTableException
+    private void singleChan() throws WebUtilException, SQLException, LdvTableException
     {
         vpage.setTitle("Ligodv-web");
 
         
+        
         PageItemString genPlotIntro = new PageItemString(
-                "<b><u>General plots:</u></b><br/><br/>"
-                + "Start by narrowing down the list of channels.  "
+                "Start by narrowing down the list of channels.  "
                 + "All fields are optional but they speed the search and reduce the number of matches.  "
                 + "Then hit then \"Retrieve Channel List\" button.<br/>"
                 ,false);
@@ -450,12 +470,17 @@ public class LdvDispatcher extends GUISupport
         vpage.add(chanSel);
         vpage.addBlankLines(1);
         
+        PageItemTextLink useBaseClass = new PageItemTextLink(servletPath + "?act=baseChan", "Use Base Channels");
+        useBaseClass.setClassName("buttonLink");
+        vpage.add(useBaseClass);
+        vpage.addBlankLines(2);
+        
         vpage.addHorizontalRule();
         
-        PluginManager pmanage = new PluginManager( db, vpage, vuser, paramMap);
-        pmanage.setContextPath(contextPath);
-        pmanage.setServletPath(servletPath);
-        pmanage.specialPlotSelector(vpage);
+//        PluginManager pmanage = new PluginManager( db, vpage, vuser, paramMap);
+//        pmanage.setContextPath(contextPath);
+//        pmanage.setServletPath(servletPath);
+//        pmanage.specialPlotSelector(vpage);
     }
 
     private void userStats() throws WebUtilException
@@ -624,22 +649,37 @@ public class LdvDispatcher extends GUISupport
      */
     private void baseChan() throws WebUtilException, SQLException, LdvTableException
     {
-        BaseChannelSelector bsc = new BaseChannelSelector(request, response, db, vpage, vuser);
-        bsc.setContextPath(contextPath);
+        BaseChannelSelector bsc = new BaseChannelSelector(db, vpage, vuser, contextPath);
         bsc.setServletPath(servletPath);
-        String submitAct = request.getParameter("submitAct");
+        bsc.setParamMap(paramMap);
+        String submitAct = getParameter("submitAct");
         submitAct = submitAct == null ? "" : submitAct;
 
         if (submitAct.isEmpty())
         {
-            vpage.setTitle("LigoDV-web");
+            vpage.setTitle("LigoDV-web base channel selection");
+                 
+            vpage.add("Use the optional fields below to narrow down the list of base channels, ");
+            PageItem hlpBtn = helpManager.getHelpButton("baseChan");
+            vpage.add(hlpBtn);
+            vpage.add("then hit the Retrieve Channel List button.");
+            vpage.addBlankLines(2);
             PageForm chanSel = bsc.addSelector(true);
             vpage.add(chanSel);
             vpage.addBlankLines(1);
+            vpage.add("If you prefer the old way, click ");
+
+            PageItemTextLink singleChan = new PageItemTextLink(servletPath + "?act=singlechan", "here.");
+            vpage.add(singleChan);
+            vpage.addBlankLines(2);
         }
         else if (submitAct.toLowerCase().contains("retrieve"))
         {
             vpage.setTitle("LigoDV-web Select Base Channels");
+            PageForm chanSel = bsc.addSelector(true);
+            vpage.add(chanSel);
+            vpage.addBlankLines(1);
+            
             bsc.processFilterRequest();
         }
         else if (submitAct.toLowerCase().contains("continue"))
@@ -648,7 +688,7 @@ public class LdvDispatcher extends GUISupport
         }
         else
         {
-            vpage.setTitle("LigoDV-web select channels");
+            vpage.setTitle("LigoDV-web select  base channels");
             bsc.processFilterRequest();
         }
        
