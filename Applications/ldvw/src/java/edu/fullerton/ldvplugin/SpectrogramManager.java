@@ -151,16 +151,21 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
         product.addRow(ptr);
         
         // histogram operations on the intensity scale
-        ptr = GUISupport.getTxtRow("spg_lo", "Low:", "Min pixel (percentile 0 &lt;= low &lt; 1)", 16, "0.2");
+        ptr = GUISupport.getTxtRow("spg_lo", "Low:", "Min pixel (percentile 0 <= low < 1)", 16, "0.2");
         product.addRow(ptr);
         
-        ptr = GUISupport.getTxtRow("spg_up", "Up:", "Max pixel (percentile 0 &lt; up &lt;= 1)", 16, "1.0");
+        ptr = GUISupport.getTxtRow("spg_up", "Up:", "Max pixel (percentile 0 < up <= 1)", 16, "1.0");
         product.addRow(ptr);
 
         // Select a color scale
         PageFormSelect color = new PageFormSelect("spg_color", colorTableNames);
         ptr = GUISupport.getObjRow(color, "Color table:", "");
         product.addRow(ptr);
+        
+        // Allow them the choice of gwpy (new) or java (old) processor
+//        PageFormCheckbox useNew = new PageFormCheckbox("spg_gwpy", "Use new process", true);
+//        ptr = GUISupport.getObjRow(useNew, "", "");
+//        product.addRow(ptr);
         
         // add the option table and return the selector
         ret.add(product);
@@ -176,110 +181,119 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
      * @throws WebUtilException 
      */
     @Override
-    public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbuf, boolean compact) throws WebUtilException
+    public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbuf, boolean compact) 
+            throws WebUtilException
     {
-        int imageId = 0;    // error in setup
-        StringBuilder cmd = new StringBuilder();
-        cmd.append("java -Xmx3g -jar /usr/local/ldvw/Spectrogram/Spectrogram.jar ");
-        if (dbuf.size() != 1)
-        {
-            String ermsg = "Spectrogram: one and only one channel/time can be passed to makePlot. ";
-            ermsg += "We received " + Integer.toString(dbuf.size());
-            throw new WebUtilException(ermsg);
-        }
-        ChanDataBuffer cdb = dbuf.get(0);
-        ChanInfo ci = cdb.getChanInfo();
-        cmd.append(" --chan ").append(ci.getChanName());
-        cmd.append(" --server ").append(ci.getServer());
-        cmd.append(" --ctype ").append(ci.getcType());
-        float sampleRate = ci.getRate();
-        String rateStr;
-        if (sampleRate > 0.9999)
-        {
-            rateStr = String.format("%1$.0f", sampleRate);
-        }
-        else
-        {
-            rateStr = String.format("%1$.4f", sampleRate);
-        }
-        cmd.append(" --rate ").append(rateStr);
-        
-        TimeInterval ti = cdb.getTimeInterval();
-        long startGPS = ti.getStartGps();
-        long stopGPS = ti.getStopGps();
-        cmd.append(" --start ").append(Long.toString(startGPS));
-        cmd.append(" --dur ").append(Long.toString(stopGPS - startGPS));
-        
-        addParam(cmd, "spg_color", "color");
-        addParam(cmd, "spg_fmin", "fmin");
-        addParam(cmd, "spg_fmax", "fmax");
-        
-
-        if (width != null && height != null)
-        {
-            width = Math.max(width, 1280);
-            height = Math.max(height,700);
-            cmd.append(String.format(" --geom %1$dx%2$d ", width,height));
-        }
-
-        addParam(cmd, "spg_lo", "lo");
-        addParam(cmd, "spg_up", "up");
-        
-        addSwitch(cmd, "spg_logfreq", "logfreq");
-        addSwitch(cmd, "spg_logintensity","logintensity");
-        addSwitch(cmd, "spg_norm", "norm");
-        addSwitch(cmd, "spg_smooth", "smooth");
-        addSwitch(cmd, "spg_interp", "interp");
-        
-        addParam(cmd, "spg_scaling","scale");
-        addParam(cmd, "spg_window", "window");
-        addParam(cmd, "spg_secperfft", "secpfft");
-        
-        addParam(cmd, "spg_fftoverlap", "overlap");
-        
-        if (parameterMap.containsKey("prefilt"))
-        {
-            String filt = parameterMap.get("prefilt")[0];
-            if (!filt.equalsIgnoreCase("none"))
-            {
-                if (filt.equalsIgnoreCase("high pass"))
-                {
-                    filt = "high";
-                }
-                else if (filt.equalsIgnoreCase("low pass"))
-                {
-                    filt = "low";
-                }
-                else if (filt.equalsIgnoreCase("band pass"))
-                {
-                    filt = "band";
-                }
-                else if (filt.equalsIgnoreCase("band reject"))
-                {
-                    filt = "notch";
-                }
-                addParamLiteral(cmd, "filt", filt);
-                addParam(cmd,"Cutoff","cutoff");
-                addParam(cmd,"Order","order");
-            }
-        }
         try
         {
-            File tmpDir = new File("/tmp");
-            File outFile;
-            outFile = File.createTempFile("spg", ".png", tmpDir);
-            cmd.append(" --outfile ").append(outFile.getCanonicalPath());
+            int imageId = 0;    // error in setup
+            StringBuilder cmd = new StringBuilder();
+            cmd.append("java -Xmx3g -jar /usr/local/ldvw/Spectrogram/Spectrogram.jar ");
+            if (dbuf.size() != 1)
+            {
+                String ermsg = "Spectrogram: one and only one channel/time can be passed to makePlot. ";
+                ermsg += "We received " + Integer.toString(dbuf.size());
+                throw new WebUtilException(ermsg);
+            }
+            ChanDataBuffer cdb = dbuf.get(0);
+            ChanInfo ci;
+            ci = cdb.getChanInfo();
+            cmd.append(" --chan ").append(ci.getChanName());
+            cmd.append(" --server ").append(ci.getServer());
+            cmd.append(" --ctype ").append(ci.getcType());
+            float sampleRate = ci.getRate();
+            String rateStr;
+            if (sampleRate > 0.9999)
+            {
+                rateStr = String.format("%1$.0f", sampleRate);
+            }
+            else
+            {
+                rateStr = String.format("%1$.4f", sampleRate);
+            }
+            cmd.append(" --rate ").append(rateStr);
             
-            imageId = callProgramSaveOutput(cmd.toString(), outFile, "Spectrogram", ci.getChanName());
+            TimeInterval ti = cdb.getTimeInterval();
+            long startGPS = ti.getStartGps();
+            long stopGPS = ti.getStopGps();
+            cmd.append(" --start ").append(Long.toString(startGPS));
+            cmd.append(" --dur ").append(Long.toString(stopGPS - startGPS));
+            
+            addParam(cmd, "spg_color", "color");
+            addParam(cmd, "spg_fmin", "fmin");
+            addParam(cmd, "spg_fmax", "fmax");
+            
+            
+            if (width != null && height != null)
+            {
+                width = Math.max(width, 1280);
+                height = Math.max(height,700);
+                cmd.append(String.format(" --geom %1$dx%2$d ", width,height));
+            }
+            
+            addParam(cmd, "spg_lo", "lo");
+            addParam(cmd, "spg_up", "up");
+            
+            addSwitch(cmd, "spg_logfreq", "logfreq");
+            addSwitch(cmd, "spg_logintensity","logintensity");
+            addSwitch(cmd, "spg_norm", "norm");
+            addSwitch(cmd, "spg_smooth", "smooth");
+            addSwitch(cmd, "spg_interp", "interp");
+            
+            addParam(cmd, "spg_scaling","scale");
+            addParam(cmd, "spg_window", "window");
+            addParam(cmd, "spg_secperfft", "secpfft");
+            
+            addParam(cmd, "spg_fftoverlap", "overlap");
+            
+            if (parameterMap.containsKey("prefilt"))
+            {
+                String filt = parameterMap.get("prefilt")[0];
+                if (!filt.equalsIgnoreCase("none"))
+                {
+                    if (filt.equalsIgnoreCase("high pass"))
+                    {
+                        filt = "high";
+                    }
+                    else if (filt.equalsIgnoreCase("low pass"))
+                    {
+                        filt = "low";
+                    }
+                    else if (filt.equalsIgnoreCase("band pass"))
+                    {
+                        filt = "band";
+                    }
+                    else if (filt.equalsIgnoreCase("band reject"))
+                    {
+                        filt = "notch";
+                    }
+                    addParamLiteral(cmd, "filt", filt);
+                    addParam(cmd,"Cutoff","cutoff");
+                    addParam(cmd,"Order","order");
+                }
+            }
+            try
+            {
+                File tmpDir = new File("/tmp");
+                File outFile;
+                outFile = File.createTempFile("spg", ".png", tmpDir);
+                cmd.append(" --outfile ").append(outFile.getCanonicalPath());
+                
+                imageId = callProgramSaveOutput(cmd.toString(), outFile, "Spectrogram", ci.getChanName());
+            }
+            catch (IOException | WebUtilException | LdvTableException ex)
+            {
+                throw new WebUtilException("Spectrogram: " + ex.getLocalizedMessage());
+            }
+            
+            ArrayList<Integer> ret = new ArrayList<>();
+            ret.add(imageId);
+            return ret;
         }
-        catch (IOException | WebUtilException | LdvTableException ex)
+        catch (LdvTableException ex)
         {
-            throw new WebUtilException("Spectrogram: " + ex.getLocalizedMessage());
+            throw new WebUtilException("makePlot: ", ex);
         }
-        
-        ArrayList<Integer> ret = new ArrayList<>();
-        ret.add(imageId);
-        return ret;
     }
 
     private void addParam(StringBuilder cmd,String mapName, String cname)
