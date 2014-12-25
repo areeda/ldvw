@@ -337,6 +337,24 @@ public class NDSProxyClient
         updateTiming();
         return ret;
     }
+    public NDSBufferStatus getBufferStatus() throws NDSException
+    {
+        NDSBufferStatus ret = new NDSBufferStatus();
+        startMs = System.currentTimeMillis();
+        sendCmd("BSTS");
+        String[] nextLine;
+
+        nextLine = csvReadNext();
+        if (nextLine == null || nextLine.length < 5)
+        {
+            throw new NDSException("failed to read next buffer.");
+        }
+        ret.init(nextLine);
+        String ok=readLine();
+        
+        updateTiming();
+        return ret;
+    }
     public int getChanCount() throws NDSException
     {
         return getChanCount("unknown");
@@ -420,10 +438,11 @@ public class NDSProxyClient
      * 
      * @return a potentially long list of ChanInfo objects
      * @throws NDSException a command error or a network error
+     * @throws edu.fullerton.ldvjutils.LdvTableException
      */
     public ArrayList<ChanInfo> getChanList(String cType) throws NDSException, LdvTableException
     {
-        ArrayList<ChanInfo> ret = new ArrayList<ChanInfo>();
+        ArrayList<ChanInfo> ret = new ArrayList<>();
         String cmd = "CHLS";
         if (cType != null && cType.length() > 0)
         {
