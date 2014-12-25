@@ -96,6 +96,9 @@ public class TrendPlotDefinition extends PluginController
             p.setnDecimals(2);
             addParameter(p);
 
+            p = ParameterFactory.buildParam(PluginParameter.Type.SWITCH, "logy", "logy", "Log Y-axis");
+            p.setArgumentName("logy");
+            addParameter(p);
             
             inited = true;
         }
