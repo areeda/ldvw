@@ -18,6 +18,8 @@ package edu.fullerton.ldvw;
 
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.*;
+import edu.fullerton.ldvjutils.BaseChanSelection;
+import edu.fullerton.ldvjutils.ChanIndexInfo;
 import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvjutils.ImageCoordinate;
 import edu.fullerton.ldvjutils.LdvTableException;
@@ -39,6 +41,8 @@ import edu.fullerton.ldvtables.ImageGroupTable;
 import edu.fullerton.ldvtables.ImageTable;
 import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.ldvplugin.ExternalPlotManager;
+import edu.fullerton.ldvtables.ChanPointerTable;
+import edu.fullerton.ldvtables.ChannelIndex;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.viewerplugin.GDSFilter;
 import java.io.IOException;
@@ -46,6 +50,7 @@ import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -112,9 +117,9 @@ public class PluginManager extends GUISupport
      * @return - the thing to add to the page
      * @throws WebUtilException probably a bug in specifying html objects
      */
-    PageItemList getSelector(ArrayList<ChanInfo> selectedCInfo, Integer stepNo) throws WebUtilException
+    PageItemList getSelector(List<BaseChanSelection> baseChans, Integer stepNo) throws WebUtilException
     {
-        int nSel = selectedCInfo.size();
+        int nSel = baseChans.size();
         
         String[] multDisp =
         {
@@ -209,7 +214,7 @@ public class PluginManager extends GUISupport
         
         // add Coherence
         CoherenceManager chm = new CoherenceManager(db,vpage,vuser);
-        chm.setChanList(selectedCInfo);
+        chm.setChanList(baseChans);
         PageItemList chmPil = getSelectorContent(chm, "doCoherence", nSel, multDisp);
         chmPil.setUseDiv(false);
         pfDiv.add(chmPil);
@@ -252,7 +257,7 @@ public class PluginManager extends GUISupport
         vpage.addReadyJS(accScript);
 
         // Allow them to set the size of the plot
-        addProcStep(ret, String.format("%1$d. Select plot size",stepNo));
+        addProcStep(ret, String.format("%1$d. Select plot size.",stepNo));
         stepNo++;
         
         PageTable dispOptions = new PageTable();
@@ -266,6 +271,7 @@ public class PluginManager extends GUISupport
         pltSizeRow.add(pltSize);
         dispOptions.addRow(pltSizeRow);
         ret.add(dispOptions);
+        ret.addLine("Note: some plots have minimums and may ignore selected size if too small.");
 
         return ret;
     }
@@ -284,8 +290,12 @@ public class PluginManager extends GUISupport
 
         try
         {
+            // right now we handle both classic and base channel selections, only one of these
+            // will not be empty
+            HashSet<Integer> selectIds = getSelections();
+            Map<Integer, BaseChanSelection> baseSelections = getBaseSelections();
+            chanToBasechan(selectIds, baseSelections);
             
-            HashSet<Integer> selections = getSelections();
             boolean noxfer = false;     // if nobody needs data we won't transfer it
             
             //===========what do they want to do?  ie. which products============
@@ -296,7 +306,7 @@ public class PluginManager extends GUISupport
             };
             ArrayList<PlotProduct> selectedProducts = new ArrayList< >();
 
-            Integer nSel = selections.size();
+            Integer nSel = countBaseChannelSelections(baseSelections);
             Integer nProducts = 0;
 
             if (paramMap.containsKey("download"))
@@ -375,18 +385,18 @@ public class PluginManager extends GUISupport
                 {
                     if (paramMap.containsKey("sp_dnld"))
                     {   // calculate spectrum and send them the results
-                        ret = doSpectrumDownload(selections,times);
+                        ret = doSpectrumDownload(baseSelections,times);
                     }
                     else
                     {   // send them the raw data
                         String[] dwnFmt = paramMap.get("dwnFmt");
                         String format = dwnFmt[0];   // one of these days there will be more options
-                        ret = doDownload(selections,times,format);
+                        ret = doDownload(baseSelections,times,format);
                     }
                 }
                 else
                 {
-                    ret = callPlugins(selections, times, groupBy, selectedProducts, noxfer);
+                    ret = callPlugins(baseSelections, times, groupBy, selectedProducts, noxfer);
                     if (imageIDs.size()  >  0)
                     {
                         ImageGroupTable igt = new ImageGroupTable(db);
@@ -396,7 +406,7 @@ public class PluginManager extends GUISupport
                             igt.addToGroup(vuser.getCn(), "Last result", img);
                         }
                     }
-                    int rptCnt=checkRefresh(selections, times);
+                    int rptCnt=checkRefresh(baseSelections, times);
                     if (rptCnt > 0)
                     {
                         String url = getMyUrl(rptCnt) + "&noHeader=1";
@@ -422,7 +432,7 @@ public class PluginManager extends GUISupport
             String it = plotSizes[0];
             int idx = it.indexOf(" ");
             if (idx > 0)
-                {
+            {
                 String psiz = it.substring(0, idx);
 
                 if (psiz.equalsIgnoreCase("small"))
@@ -435,6 +445,11 @@ public class PluginManager extends GUISupport
                 {
                     width = 1280;
                     height = 960;
+                }
+                else if (psiz.equalsIgnoreCase("default"))
+                {
+                    width = 1200;
+                    height = 600;
                 }
                 else if (psiz.equalsIgnoreCase("wide"))
                 {
@@ -472,7 +487,8 @@ public class PluginManager extends GUISupport
     /**
      * products and datasets have been defined, so make the graphs and send them to their browser
      *
-     * @param selections set of channel #'s
+     * @param selections set of channel #'s, only one type of selections can be used
+     * @param baseSelections map of base channel selection objects, may be empty if selections is not
      * @param times List of start time, duration
      * @param groupBy How we want stacked plots
      * @param selectedProducts List of what products we want
@@ -483,7 +499,8 @@ public class PluginManager extends GUISupport
      * @throws WebUtilException
      * @throws LdvTableException
      */
-    private boolean callPlugins(HashSet<Integer> selections, ArrayList<TimeInterval> times, 
+    private boolean callPlugins(Map<Integer, BaseChanSelection> baseSelections, 
+                                ArrayList<TimeInterval> times, 
                                 String groupBy, ArrayList<PlotProduct> selectedProducts,
                                 boolean noxfer) 
             throws SQLException, IOException, NoSuchAlgorithmException, WebUtilException, LdvTableException
@@ -491,7 +508,18 @@ public class PluginManager extends GUISupport
         boolean ret = true;     // flag: if true viewer should send html
         int bufCount = 0;       // count of buffers we actually were able to obtain
         
-        int nBuf = selections.size() * times.size(); // # buffers we want to obtain
+        int nSel = countBaseChannelSelections(baseSelections);
+        int nTimes = times.size();
+        
+        if (nSel == 0)
+        {
+            throw new WebUtilException("callPlugins: no channels are selected.");
+        }
+        if (nTimes == 0)
+        {
+            throw new WebUtilException("callPlugins: no time intervals are selected");
+        }
+        int nBuf = nSel * nTimes; // # buffers we want to obtain
         boolean gotStackable = false;
         
         for(PlotProduct product : selectedProducts)
@@ -500,7 +528,7 @@ public class PluginManager extends GUISupport
         }
         if (!gotStackable || groupBy.equalsIgnoreCase("all"))
         {
-            ArrayList<ChanDataBuffer> data = getData(selections,times, noxfer);
+            ArrayList<ChanDataBuffer> data = getData(baseSelections,times, noxfer);
             bufCount += data.size();
             if (data.size() > 0)
             {
@@ -515,7 +543,7 @@ public class PluginManager extends GUISupport
             {
                 aTime.clear();
                 aTime.add(ti);
-                ArrayList<ChanDataBuffer> data = getData(selections, aTime, noxfer);
+                ArrayList<ChanDataBuffer> data = getData(baseSelections, aTime, noxfer);
                 bufCount += data.size();
                 if (data.size() > 0)
                 {
@@ -528,39 +556,12 @@ public class PluginManager extends GUISupport
             // Here we still want to group all trends on a single channel together
             ChannelTable chnTbl = new ChannelTable(db);
             
-            TreeMap<String,HashSet<Integer>> byNames = new TreeMap<>();
-            for(Integer sel : selections)
+            for( Entry<Integer, BaseChanSelection> ent : baseSelections.entrySet())
             {
-                ChanInfo ci = chnTbl.getChanInfo(sel);
-                if(ci.getcType().toLowerCase().contains("trend"))
-                {
-                    String name = ci.getChanName();
-                    int dotPos = name.indexOf(".");
-                    if (dotPos > 0)
-                    {
-                        String basename = name.substring(0, dotPos);
-                        HashSet<Integer> clist = byNames.get(basename);
-                        if (clist==null)
-                        {
-                            clist = new HashSet<>();
-                        }
-                        clist.add(sel);
-                        byNames.put(basename, clist);
-                    }
-                    
-                }
-                else
-                {
-                    HashSet<Integer> clist = new HashSet<>();
-                    clist.add(ci.getId());
-                    byNames.put(ci.getChanName(), clist);
-                }
-            }
-            
-            // go through the group by trend or other channel
-            for( Entry<String,HashSet<Integer>> ent : byNames.entrySet() )
-            {
-                ArrayList<ChanDataBuffer> data = getData(ent.getValue(), times, noxfer);
+                HashMap<Integer, BaseChanSelection> tSelections = new HashMap<>();
+                tSelections.put(ent.getKey(), ent.getValue());
+
+                ArrayList<ChanDataBuffer> data = getData(tSelections, times, noxfer);
                 bufCount += data.size();
                 if (data.size() > 0)
                 {
@@ -576,12 +577,11 @@ public class PluginManager extends GUISupport
             {
                 aTime.clear();
                 aTime.add(ti);
-                HashSet<Integer> aChan = new HashSet<>();
-                for (Integer sel : selections)
+                for (Entry<Integer, BaseChanSelection> ent : baseSelections.entrySet())
                 {
-                    aChan.clear();
-                    aChan.add(sel);
-                    ArrayList<ChanDataBuffer> data = getData(aChan, aTime, noxfer);
+                    HashMap<Integer, BaseChanSelection> tSelections = new HashMap<>();
+                    tSelections.put(ent.getKey(), ent.getValue());
+                    ArrayList<ChanDataBuffer> data = getData(tSelections, aTime, noxfer);
                     bufCount += data.size();
                     if (data.size() > 0)
                     {
@@ -670,9 +670,7 @@ public class PluginManager extends GUISupport
         intro.addBlankLines(1);
         for (ChanDataBuffer buf : bufList)
         {
-            intro.add(buf.getChanInfo().toString() + ". ");
-            String timeDescription = buf.getTimeInterval().getTimeDescription();
-            intro.add(timeDescription);
+            intro.add(buf.toString() + ". ");
             intro.addBlankLines(1);
         }
         
@@ -684,11 +682,11 @@ public class PluginManager extends GUISupport
      * @param times time intervals requested
      * @return true if we did not do it successfully and want the page sent instead
      */
-    private boolean doSpectrumDownload(HashSet<Integer> selections, ArrayList<TimeInterval> times) throws WebUtilException
+    private boolean doSpectrumDownload(Map<Integer, BaseChanSelection> baseSelections, ArrayList<TimeInterval> times) throws WebUtilException, LdvTableException
     {
         boolean ret = true;
 
-        ArrayList<ChanDataBuffer> bufList = getData(selections, times, false);
+        ArrayList<ChanDataBuffer> bufList = getData(baseSelections, times, false);
 
         try
         {
@@ -747,13 +745,13 @@ public class PluginManager extends GUISupport
      * @return true if we did not do it successfully and want the page sent instead
      * @throws WebUtilException 
      */
-    private boolean doDownload(Set<Integer> selections, List<TimeInterval> times, String format) 
-            throws WebUtilException
+    private boolean doDownload(Map<Integer, BaseChanSelection> baseSelections, List<TimeInterval> times, String format) 
+            throws WebUtilException, LdvTableException
     {
         boolean ret = true;
-        int n = selections.size() * times.size();
+        int n = countBaseChannelSelections(baseSelections) * times.size();
         
-        ArrayList<ChanDataBuffer> bufList = getData(selections,times, false);
+        ArrayList<ChanDataBuffer> bufList = getData(baseSelections,times, false);
         
         try
         {
@@ -812,7 +810,7 @@ public class PluginManager extends GUISupport
         return ret;
     }
     
-    private ArrayList<ChanDataBuffer> getData(Set<Integer> selections, 
+    private ArrayList<ChanDataBuffer> getData(Map<Integer, BaseChanSelection> baseSelections, 
                                               List<TimeInterval> times, boolean noxfer) 
             throws WebUtilException
     {
@@ -822,24 +820,34 @@ public class PluginManager extends GUISupport
             String[] testData = paramMap.get("testData");
             if (testData == null || testData[0].equalsIgnoreCase("none"))
             {
-                bufList = ChanDataBuffer.dataBufFactory(db, selections, times, vpage, vuser, noxfer);
+                try
+                {
+                    bufList = ChanDataBuffer.dataBufFactory(db, baseSelections, times, vpage, vuser, noxfer);
+                }
+                catch (SQLException ex)
+                {
+                    throw new WebUtilException("dataBufFactory failed:",ex);
+                }
             }
             else
             {
-                bufList = ChanDataBuffer.testDataFactory(testData[0], db, selections, times, vpage, vuser);
+                bufList = ChanDataBuffer.testDataFactory(testData[0], db, baseSelections, times, vpage, vuser);
             }
-            // is there any preprocessing to be done?
-            for (ChanDataBuffer dbuf : bufList)
+            if (!noxfer)
             {
-                if (doDetrend)
+                // is there any preprocessing to be done?
+                for (ChanDataBuffer dbuf : bufList)
                 {
-                    dbuf.detrend();
-                }
-                if (doPrefilter)
-                {
-                    
-                    GDSFilter filter = new GDSFilter();
-                    filter.apply(dbuf.getData(),dbuf.getChanInfo().getRate(),filtType, cutoff, order);
+                    if (doDetrend)
+                    {
+                        dbuf.detrend();
+                    }
+                    if (doPrefilter)
+                    {
+
+                        GDSFilter filter = new GDSFilter();
+                        filter.apply(dbuf.getData(),dbuf.getChanInfo().getRate(),filtType, cutoff, order);
+                    }
                 }
             }
         }
@@ -1036,16 +1044,16 @@ public class PluginManager extends GUISupport
         contentDiv1.add(pf);
         pfDiv.add(contentDiv1);
 
-        
-        //========== Live Plots
-        pfDiv.add(new PageItemHeader("Near Real Time Plots:", 3));
-        PageItemList contentDiv2 = new PageItemList();
-        contentDiv2.setClassName("plotSelector");
-        PageItemList livePlotSelector = LivePlotManager.getSelector();
-        livePlotSelector.setClassName("plotSelector");
-        contentDiv2.add(livePlotSelector);
-        pfDiv.add(contentDiv2);
-        // add to page
+//        //========== Live Plots
+//        pfDiv.add(new PageItemHeader("Near Real Time Plots:", 3));
+//        PageItemList contentDiv2 = new PageItemList();
+//        contentDiv2.setClassName("plotSelector");
+//        PageItemList livePlotSelector = LivePlotManager.getSelector();
+//        livePlotSelector.setClassName("plotSelector");
+//        contentDiv2.add(livePlotSelector);
+//        pfDiv.add(contentDiv2);
+
+        // add special plot selectors to page
         vpage.add(pfDiv);
         // make sure javascript we need is there
         String accScript = "jQuery( \"#accordion\").accordion({ collapsible: true, active: false });\n";
@@ -1138,7 +1146,7 @@ public class PluginManager extends GUISupport
      * @param selections
      * @param times 
      */
-    private int checkRefresh(HashSet<Integer> selections, ArrayList<TimeInterval> times) throws SQLException
+    private int checkRefresh(Map<Integer, BaseChanSelection> baseSelections, ArrayList<TimeInterval> times) throws SQLException
     {
         int rptCnt = -1;    // assume we are not going to redo this plot on a schedule
         if (paramMap.containsKey("autoRefresh"))
@@ -1147,10 +1155,10 @@ public class PluginManager extends GUISupport
             String[] arCnt = paramMap.get(arKey);
 
             ChannelTable ct = new ChannelTable(db);
-            for (Integer sel : selections)
+            for (Entry<Integer, BaseChanSelection> ent : baseSelections.entrySet())
             {
-                ChanInfo ci = ct.getChanInfo(sel);
-                boolean isOnline = ci.getcType().equalsIgnoreCase("online");
+                BaseChanSelection bcs = ent.getValue();
+                boolean isOnline = bcs.hasOnline() && bcs.getNsel() == 1;
                 allOnline &= isOnline;
             }
 
@@ -1263,6 +1271,53 @@ public class PluginManager extends GUISupport
         ret.add(spPI);
         
         return ret;
+    }
+
+    /**
+     * A single base channel can have multiple subchannels selected.  This routine counts all 
+     * the subchannels.
+     * 
+     * @param baseSelections - current selections
+     * @return sum of the count of subchannels selected in each base channel
+     */
+    private Integer countBaseChannelSelections(Map<Integer, BaseChanSelection> baseSelections)
+    {
+        int nSel = 0;
+        for (BaseChanSelection bc : baseSelections.values())
+        {
+            nSel += bc.getNsel();
+        }
+        return nSel;
+    }
+    /**
+     * Convert old single channel selections to base channel selections
+     * @param selectIds set of id numbers (keys) to channel table
+     * @param baseSelections - currently selected base channels
+     */
+    private void chanToBasechan(Set<Integer> selectIds, Map<Integer, BaseChanSelection> baseSelections) throws LdvTableException, SQLException
+    {
+        if (selectIds.size() > 0)
+        {
+            ChanPointerTable cpt = new ChanPointerTable(db);
+            ChannelIndex cidx = new ChannelIndex(db);
+            ChannelTable ct = new ChannelTable(db);
+            
+            for (int chanId : selectIds)
+            {
+                int baseId = cpt.getBaseId(chanId);
+                BaseChanSelection bsel = baseSelections.get(baseId);
+
+                if (bsel == null)
+                {
+                    ChanIndexInfo cii = cidx.getInfo(baseId);
+                    bsel = new BaseChanSelection();
+                    bsel.init(cii);
+                }
+                ChanInfo ci = ct.getChanInfo(chanId);
+                bsel.addSingleChan(ci);
+                baseSelections.put(chanId, bsel);
+            }
+        }
     }
 
     
