@@ -28,11 +28,11 @@ import java.util.ArrayList;
  */
 public class ChanIndexInfo
 {
-    private int indexID;
-    private String name;        // base name of channel
+    protected int indexID;
+    protected String name;        // base name of channel
     private int nameHash;
-    private String ifo;
-    private String subsys;
+    protected String ifo;
+    protected String subsys;
     private float minRawRate;
     private float maxRawRate;
     private float minRdsRate;
@@ -45,8 +45,8 @@ public class ChanIndexInfo
     private boolean hasTstPnt;
     private boolean hasStatic;
     private String cisAvail;
-    private int nServers;
-    private ArrayList<Integer> chanIDs;
+    protected int nServers;
+    protected ArrayList<Integer> chanIDs;
     
     private final static String fldnames = "( name, nameHash, ifo, subsys, "
                                         + "minRawRate, maxRawRate, minRdsRate, maxRdsRate, "
@@ -54,12 +54,39 @@ public class ChanIndexInfo
                                         + "hasStatic, hasOnline, hasRds, "
                                         + "cisAvail, nServers"
                                         + ")";
+    private boolean inited;
     
     public ChanIndexInfo()
     {
-        chanIDs = new ArrayList<Integer>();
+        chanIDs = new ArrayList<>();
+        inited = false;
     }
 
+    /**
+     * Copy fields usually from a derived object
+     * @param cii other object
+     */
+    protected void init(ChanIndexInfo cii)
+    {
+        indexID = cii.indexID;
+        name = cii.name;
+        nameHash = cii.nameHash;
+        ifo = cii.ifo;
+        subsys = cii.subsys;
+        minRawRate = cii.minRawRate;
+        maxRawRate = cii.maxRawRate;
+        minRdsRate = cii.minRdsRate;
+        maxRdsRate = cii.maxRdsRate;
+        hasMtrends = cii.hasMtrends;
+        hasOnline = cii.hasOnline;
+        hasRaw = cii.hasRaw;
+        hasRds = cii.hasRds;
+        hasStatic = cii.hasStatic;
+        hasTstPnt = cii.hasTstPnt;
+        nServers = cii.nServers;
+        chanIDs = new ArrayList<>(cii.chanIDs);
+        inited = cii.inited;
+    }
     /**
      * Short summary of object with name and types
      * @return
@@ -96,6 +123,7 @@ public class ChanIndexInfo
                 );
         return ret;
     }
+   
     /**
      * Initialize the object from a database row.
      * Note if the ResultSet contains more than one row only the current row is used
@@ -122,6 +150,29 @@ public class ChanIndexInfo
         hasTstPnt = rs.getString("hasTstPnt").equalsIgnoreCase("t");
         cisAvail = rs.getString("cisAvail");
         nServers = rs.getInt("nServers");
+        inited = true;
+    }
+    public void fill (ChanIndexInfo cii)
+    {
+        indexID = cii.indexID;
+        name = cii.name;
+        nameHash = cii.nameHash;
+        ifo = cii.ifo;
+        subsys=cii.subsys;
+        minRawRate = cii.minRawRate;
+        maxRawRate = cii.maxRawRate;
+        minRdsRate = cii.minRdsRate;
+        maxRdsRate = cii.maxRdsRate;
+        hasRaw = cii.hasRaw;
+        hasRds = cii.hasRds;
+        hasOnline = cii.hasOnline;
+        hasMtrends = cii.hasMtrends;
+        hasStrends = cii.hasStrends;
+        hasStatic = cii.hasStatic;
+        hasTstPnt = cii.hasTstPnt;
+        cisAvail = cii.cisAvail;
+        nServers = cii.nServers;
+        inited = true;
     }
     public ArrayList<String> getTypeList()
     {
@@ -140,6 +191,11 @@ public class ChanIndexInfo
     public int getIndexID()
     {
         return indexID;
+    }
+
+    public boolean isInited()
+    {
+        return inited;
     }
 
     public void setIndexID(int indexID)
@@ -165,6 +221,10 @@ public class ChanIndexInfo
 
     public String getIfo()
     {
+        if (ifo == null)
+        {
+            ifo = "";
+        }
         return ifo;
     }
 
@@ -266,6 +326,10 @@ public class ChanIndexInfo
 
     public String getCisAvail()
     {
+        if (cisAvail == null)
+        {
+            cisAvail = "";
+        }
         return cisAvail;
     }
 
