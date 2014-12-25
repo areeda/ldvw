@@ -120,6 +120,11 @@ public class TimeInterval implements Comparable<TimeInterval>
         checkTimes();
     }
 
+    public long getAge()
+    {
+        long now = TimeAndDate.nowAsGPS();
+        return now - stopGps;
+    }
     /**
      * get the row id of this record in database
      * @return row id
