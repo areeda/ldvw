@@ -46,6 +46,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -402,12 +404,19 @@ public class OdcPlotManager extends ExternalPlotManager implements PlotProduct
         ArrayList<Integer> ret = new ArrayList<>();
         for(ChanDataBuffer buf : dbuf)
         {
-            ArrayList<TimeInterval> tis = new ArrayList<>();
-            tis.add(buf.getTimeInterval());
-            int imgId = doPlot(buf.getChanInfo().getChanName(), buf.getChanInfo().getServer(), tis);
-            if (imgId > 0)
+            try
             {
-                ret.add(imgId);
+                ArrayList<TimeInterval> tis = new ArrayList<>();
+                tis.add(buf.getTimeInterval());
+                int imgId = doPlot(buf.getChanInfo().getChanName(), buf.getChanInfo().getServer(), tis);
+                if (imgId > 0)
+                {
+                    ret.add(imgId);
+                }
+            }
+            catch (LdvTableException ex)
+            {
+                throw new WebUtilException("Making ODC plot: ", ex);
             }
         }
         return ret;
