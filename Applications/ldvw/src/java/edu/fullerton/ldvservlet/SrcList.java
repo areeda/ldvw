@@ -100,6 +100,7 @@ public class SrcList extends HttpServlet
             "edu.fullerton.ldvtables.ErrorLog",
             "edu.fullerton.ldvtables.HelpTextTable",
             "edu.fullerton.ldvtables.ChannelTable",
+            "edu.fullerton.ldvtables.ChannelIndex",
             "edu.fullerton.ldvtables.UseLog",
             "edu.fullerton.ldvtables.ViewUser"
         };
