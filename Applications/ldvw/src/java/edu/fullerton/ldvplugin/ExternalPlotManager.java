@@ -19,6 +19,7 @@ package edu.fullerton.ldvplugin;
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageItem;
+import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.ImageCoordinate;
@@ -45,6 +46,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -428,4 +430,38 @@ public class ExternalPlotManager extends ExternalProgramManager
         return imgId;
     }
 
+    public PageItem getErrorMessage(String product,List<String> cmd)
+    {
+        PageItemList ret = new PageItemList();
+
+        String stderr = getStderr();
+        String stdout = getStdout();
+        StringBuilder cmdStr = new StringBuilder();
+
+        for (String s : cmd)
+        {
+            if (s.contains(" "))
+            {
+                s = "'" + s + "'";
+            }
+            cmdStr.append(s).append(" ");
+        }
+        ret.add("There was an error in generating coherence plot.");
+        ret.addBlankLines(2);
+        ret.add("Command:");
+        ret.addBlankLines(1);
+        ret.add(cmdStr.toString());
+        ret.addBlankLines(2);
+        ret.add(String.format("Returned status: %1$d", getStatus()));
+        ret.addBlankLines(2);
+        ret.addLine("Stdout:");
+        PageItemString out = new PageItemString(stdout.replace("\n", "<br>"), false);
+        ret.add(out);
+        ret.addBlankLines(2);
+        ret.addLine("Stderr:");
+        PageItemString err = new PageItemString(stderr.replace("\n", "<br>"), false);
+        ret.add(err);
+        
+        return ret;
+    }
 }
