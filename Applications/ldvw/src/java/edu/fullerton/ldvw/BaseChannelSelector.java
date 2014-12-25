@@ -34,6 +34,7 @@ import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableColumn;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.BaseChanSelection;
 import edu.fullerton.ldvjutils.ChanIndexInfo;
 import edu.fullerton.ldvjutils.ChanParts;
 import edu.fullerton.ldvjutils.LdvTableException;
@@ -47,6 +48,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
@@ -91,25 +94,21 @@ public class BaseChannelSelector extends GUISupport
     private PageTableRow selRow;
     private PageTableRow selRow2;
     private PageTableColumn cTypeCol;
+    private ChannelIndex cidx;
 
-    private final HttpServletRequest request;
 
     /**
      * Constructor assumes we're a servlet facility
      * 
-     * @param request from the servlet
-     * @param response
      * @param db ldvw database
      * @param vpage output page
      * @param vuser current user
      */
-    public BaseChannelSelector(HttpServletRequest request, HttpServletResponse response, 
-                               Database db, Page vpage, ViewUser vuser)
+    public BaseChannelSelector(Database db, Page vpage, ViewUser vuser, String contextPath)
     {
         super(db, vpage, vuser);
-        setParamMap(request.getParameterMap());
-        setContextPath(request.getContextPath());
-        this.request = request;
+        setContextPath(contextPath);
+        
         infoIconDescUrl = getContextPath() + "/infoicon3.png";
         infoIconNoDescUrl = getContextPath() + "/infoicon4.png";
         pemIcon = new PageItemImage(getContextPath() + "/pemIcon.png", "pem icon", "PEM diagram containing channel");
@@ -137,12 +136,18 @@ public class BaseChannelSelector extends GUISupport
         pf.setMethod("get");
         pf.setAction(getServletPath());
         pf.addHidden("act", "baseChan");
+        pf.addHidden("baseSelector", "true");
         
         // if we're on a "select more" command, save all previous selections
-        if (request.getParameter("selMore") != null)
+        if (paramMap.containsKey("selMore"))
         {
             selections = getBaseChanSelections();
             addSelections(pf);
+            int selCnt = selections.size();
+            String selCount = String.format("%d %s selected.", selCnt, selCnt > 1 ? "channels are" :
+                    "channel is");
+            vpage.add(selCount);
+            vpage.addBlankLines(2);
         }
 
         pf.setNoSubmit(true);
@@ -152,18 +157,18 @@ public class BaseChannelSelector extends GUISupport
 
         chanFiltSpec.setClassName("SelectorTable");
 
-        addListSelector(chanFiltSpec, null, "IFO: ", "ifo", ChanParts.getIFOList(),
-                        multipleSelections, request.getParameter("ifo"), true);
-        addListSelector(chanFiltSpec, null, "Subsys: ", "subsys", ChanParts.getSubSystems(), multipleSelections, request.getParameter("subsys"), true);
+        addListSelector(chanFiltSpec, null, "Interferometer: ", "ifo", ChanParts.getIFOList(),
+                        multipleSelections, getParameter("ifo"), true);
+        addListSelector(chanFiltSpec, null, "Subsystem: ", "subsys", ChanParts.getSubSystems(), multipleSelections, getParameter("subsys"), true);
 
         PageItemList compare = (PageItemList) PageItemList.getListSelector("", "fsCmp", ChanParts.getSampleRateCmp(),
-                                                                           false, request.getParameter("fsCmp"), false, 0);
+                                                                           false, getParameter("fsCmp"), false, 0);
         compare.setUseDiv(false);
         addListSelector(chanFiltSpec, compare, "Sample Frequency: ", "fs", ChanParts.getSampleRates(),
-                        multipleSelections, request.getParameter("fs"), true);
+                        multipleSelections, getParameter("fs"), true);
 
-        addListSelector(chanFiltSpec, null, "Channel Type: ", "ctype", ChanParts.getChanTypes(),
-                        multipleSelections, request.getParameter("ctype"), true);
+//        addListSelector(chanFiltSpec, null, "Channel Type: ", "ctype", ChanParts.getChanTypes(),
+//                        multipleSelections, getParameter("ctype"), true);
         
         PageTableRow row = new PageTableRow();
         // first column is a label for this parameter(s)
@@ -171,7 +176,7 @@ public class BaseChannelSelector extends GUISupport
         lbl.setAlign(PageItem.Alignment.RIGHT);
         row.add(lbl);
 
-        PageFormText filt = new PageFormText("chnamefilt", request.getParameter("chnamefilt"));
+        PageFormText filt = new PageFormText("chnamefilt", getParameter("chnamefilt"));
         filt.setMaxLen(255);
         filt.setSize(32);
         row.add(filt);
@@ -303,7 +308,7 @@ public class BaseChannelSelector extends GUISupport
             for (String var : partsVariables)
             {
             
-                String val = request.getParameter(var);
+                String val = getParameter(var);
                 if (val != null && !val.isEmpty())
                 {
                     pf.addHidden(var, val);
@@ -311,7 +316,6 @@ public class BaseChannelSelector extends GUISupport
                 }
             }
             pf.setNoSubmit(true);
-
 
             PageTable pgCntrlBar = getPageControlBar(last, nMatch, nPages, curPage, false);
             pf.add(pgCntrlBar);
@@ -369,7 +373,7 @@ public class BaseChannelSelector extends GUISupport
      */
     private String getParam(String name)
     {
-        String p = request.getParameter(name);
+        String p = getParameter(name);
         if (p == null || p.equalsIgnoreCase("any"))
         {
             p = "";
@@ -387,8 +391,8 @@ public class BaseChannelSelector extends GUISupport
         Pattern singlePat = Pattern.compile("(raw|online|static|testpoint|rds)_(\\d+)");
 
         HashMap<String,String> sels = new HashMap<>();
-        Map<String, String[]> parameterMap = request.getParameterMap();
-        for (Entry<String,String[]> ent : parameterMap.entrySet())
+        
+        for (Entry<String,String[]> ent : paramMap.entrySet())
         {
             String pname = ent.getKey();
             String[] val = ent.getValue();
@@ -412,9 +416,9 @@ public class BaseChannelSelector extends GUISupport
     }
     private void getPagingParams()
     {
-        submitAct = request.getParameter("submitAct");
+        submitAct = getParameter("submitAct");
         
-        String strtStr = request.getParameter("strt");
+        String strtStr = getParameter("strt");
         if (strtStr != null && strtStr.length() > 0)
         {
             strt = Integer.parseInt(strtStr);
@@ -434,7 +438,7 @@ public class BaseChannelSelector extends GUISupport
         }
         else if (submitAct.toLowerCase().equals("go"))
         {
-            String pageNum = request.getParameter("pageNum");
+            String pageNum = getParameter("pageNum");
             if (pageNum.matches("^\\d+$"))
             {
                 strt = (Integer.parseInt(pageNum) - 1) * cnt;
@@ -443,7 +447,7 @@ public class BaseChannelSelector extends GUISupport
         }
         else if (submitAct.toLowerCase().equals("go2"))
         {
-            String pageNum = request.getParameter("pageNum2");
+            String pageNum = getParameter("pageNum2");
             if (pageNum.matches("^\\d+$"))
             {
                 strt = (Integer.parseInt(pageNum) - 1) * cnt;
@@ -501,33 +505,40 @@ public class BaseChannelSelector extends GUISupport
         return pgCntrlBar;
     }
 
+    public PageTable getSelectTable(ArrayList<Integer> chanIndxes) throws WebUtilException
+    {
+        ArrayList<ChanIndexInfo> matches = new ArrayList<>();
+        try
+        {
+            ChannelIndex cidx = new ChannelIndex(db);
+            for(int chanIdx : chanIndxes)
+            {
+                ChanIndexInfo cii = cidx.getInfo(chanIdx);
+                matches.add(cii);
+            }
+            return getSelectTable(matches, "any");
+        }
+        catch (LdvTableException | SQLException ex)
+        {
+            throw new WebUtilException("Creating selector table", ex);
+        }
+        
+    }
+    /**
+     * Table to add to the original select form, matching from database
+     * @param matches IndexInfo entries to display
+     * @param cType limit selections to those having this channel type
+     * @return table with form entries for selection
+     * 
+     * @throws WebUtilException 
+     */
     private PageTable getSelectTable( ArrayList<ChanIndexInfo> matches, String cType) 
             throws WebUtilException
     {
-        String[] hdrAll=     { "Name", "Raw rate(s)", "RDS rate(s)", "Info links"};
-        String[] hdrRawRds = { "Sel", "Name","Type", "Rate(s)", "Info links" };
-        String[] hdrTrend =  { "Name","Type", "Trends", "Info links" };
         
         PageTable selTbl = new PageTable();
-        PageTableRow hdr;
-        if (cType.isEmpty())
-        {
-            hdr = getHdrRow(hdrAll);
-        }
-        else if (cType.equalsIgnoreCase("Raw") || cType.equalsIgnoreCase("rds"))
-        {
-            hdr = getHdrRow(hdrRawRds);
-        }
-        else if (cType.toLowerCase().contains("trend"))
-        {
-            hdr = getHdrRow(hdrTrend);
-        }
-        else
-        {
-            hdr = getHdrRow(hdrRawRds);
-        }
-        hdr.addStyleAll("text-align", "center");
-        selTbl.addRow(hdr);
+        
+        selTbl.addRow(getHdrRow(cType));
         
         
         for(ChanIndexInfo cii : matches )
@@ -571,8 +582,39 @@ public class BaseChannelSelector extends GUISupport
         }
         return selTbl;
     }
-    private PageTableRow getHdrRow(String[] hdr) throws WebUtilException
+    private PageTableRow getHdrRow(String cType) throws WebUtilException
     {
+        String[] hdrAll =
+        {
+            "Name", "Raw rate(s)", "RDS rate(s)", "Info links"
+        };
+        String[] hdrRawRds =
+        {
+            "Sel", "Name", "Type", "Rate(s)", "Info links"
+        };
+        String[] hdrTrend =
+        {
+            "Name", "Type", "Trends", "Info links"
+        };
+
+        String[] hdr;
+        if (cType.isEmpty() || cType.equalsIgnoreCase("any"))
+        {
+            hdr = hdrAll;
+        }
+        else if (cType.equalsIgnoreCase("raw") || cType.equalsIgnoreCase("rds"))
+        {
+            hdr = hdrRawRds;
+        }
+        else if (cType.toLowerCase().contains("trend"))
+        {
+            hdr = hdrTrend;
+        }
+        else
+        {
+            hdr = hdrRawRds;
+        }
+
         PageTableRow r = new PageTableRow();
         for (String h : hdr)
         {
@@ -583,13 +625,10 @@ public class BaseChannelSelector extends GUISupport
             r.add(new PageItemString(h, false));
         }
         r.setRowType(PageTableRow.RowType.HEAD);
-
+        r.addStyleAll("text-align", "center");
         return r;
     }
 
-
-    private final String[] trendSelChoices = // NB: item 0 is used by clear all, item 1 by select all
-                            { "none", "min, mean, max", "mean only", "min only", "max only" };
     /**
      * Generate all the possible columns for this Channel Index entry, we decide later which ones to add
      * @param cii Channel index entry info
@@ -602,7 +641,7 @@ public class BaseChannelSelector extends GUISupport
         String selName = String.format("selbchan_%1$d", indexID);
         PageFormCheckbox selcb = new PageFormCheckbox(selName, "");
         selcb.setClassName("selBox");
-        if (selections.containsKey(selName))
+        if (selections != null && selections.containsKey(selName))
         {
             selcb.setChecked(true);
             selections.remove(selName);
@@ -611,11 +650,11 @@ public class BaseChannelSelector extends GUISupport
         selcbCol = new PageTableColumn(selcb);
         cnameCol = new PageTableColumn(cname);
         cTypeCol = new PageTableColumn(cType);
-        
+        String[] trendSelChoices = new BaseChanSelection().getTrendSelChoices();
         String trndSelName = String.format("seltrnd_%1$d", indexID);
         PageFormSelect trndChoice = new PageFormSelect(trndSelName, trendSelChoices);
         trndChoice.setClassName("trendChoice");
-        if (selections.containsKey(trndSelName))
+        if (selections != null && selections.containsKey(trndSelName))
         {
             trndChoice.setSelected(selections.get(trndSelName));
             selections.remove(trndSelName);
@@ -808,7 +847,7 @@ public class BaseChannelSelector extends GUISupport
      */
     private void processPageControls()
     {
-        String strtStr = request.getParameter("strt");
+        String strtStr = getParameter("strt");
         if (strtStr != null && strtStr.length() > 0)
         {
             strt = Integer.parseInt(strtStr);
@@ -828,7 +867,7 @@ public class BaseChannelSelector extends GUISupport
         }
         else if (submitAct.toLowerCase().equals("go"))
         {
-            String pageNum = request.getParameter("pageNum");
+            String pageNum = getParameter("pageNum");
             if (pageNum.matches("^\\d+$"))
             {
                 strt = (Integer.parseInt(pageNum) - 1) * cnt;
@@ -837,7 +876,7 @@ public class BaseChannelSelector extends GUISupport
         }
         else if (submitAct.toLowerCase().equals("go2"))
         {
-            String pageNum = request.getParameter("pageNum2");
+            String pageNum = getParameter("pageNum2");
             if (pageNum.matches("^\\d+$"))
             {
                 strt = (Integer.parseInt(pageNum) - 1) * cnt;
@@ -881,6 +920,173 @@ public class BaseChannelSelector extends GUISupport
         String url = String.format("%1$s?baseid=%2$d", baseSrcUrl, cii.getIndexID());
         ret = new PageItemImageLink(url, srcIcon, "_blank");
         return ret;
+    }
+
+    PageItem getSelector(Map<Integer, BaseChanSelection> baseSelections) throws WebUtilException
+    {
+        PageTable ret = new PageTable();
+        
+        boolean hasSingle = false;
+        boolean hasTrend = false;
+        for(BaseChanSelection bcs : baseSelections.values())
+        {
+            hasSingle |= bcs.hasSingle();
+            hasTrend |= bcs.hasTrends();
+        }
+        String cType;
+        if (hasSingle && hasTrend)
+        {
+            cType = "any";
+        }
+        else if (hasSingle)
+        {
+            cType = "raw";       // raw or rds doesn't matter for header
+        }
+        else if (hasTrend)
+        {
+            cType = "minute-trend"; // trend type doesn't matter for header
+        }
+        else
+        {
+            throw new WebUtilException("Create base channel selection table without any selectionss");
+        }
+        ret.addRow(getHdrRow(""));
+        boolean odd = true;
+        for (BaseChanSelection bcs : baseSelections.values())
+        {
+            try
+            {
+                addBCSSelectRow(ret, bcs, odd);
+            }
+            catch (LdvTableException ex)
+            {
+                throw new WebUtilException("Base channel get selector", ex);
+            }
+        }
+        
+        return ret;
+    }
+    /**
+     * Generate all the possible columns for this Channel Index entry, we decide later which ones to
+     * add
+     *
+     * @param bcs Channel index entry info
+     * @param cType Type of channel they selected if any
+     * @param odd Used to set class of row(s) for the zebra table
+     * @throws WebUtilException
+     */
+    private void addBCSSelectRow(PageTable tbl, BaseChanSelection bcs, boolean odd) throws WebUtilException, LdvTableException
+    {
+        if (cidx == null)
+        {
+            try
+            {
+                cidx = new ChannelIndex(db);
+            }
+            catch (SQLException ex)
+            {
+                throw new WebUtilException("Unable to create channel index table",ex);
+            }
+        }
+        int indexID = bcs.getIndexID();
+        if (!bcs.isInited())
+        {
+            try 
+            {
+                ChanIndexInfo cii = cidx.getInfo(bcs.getIndexID());
+                bcs.fill(cii);
+            }
+            catch (SQLException | LdvTableException ex) 
+            {
+                throw new WebUtilException("Unable to retrieve channel index", ex);
+            }
+        }
+        String trndSelName = String.format("seltrnd_%1$d", indexID);
+
+//        PageFormSelect trndChoice = new PageFormSelect(trndSelName, bcs.getTrendSelChoices());
+//        trndChoice.setClassName("trendChoice");
+//        trndChoice.setSelected(bcs.getTrendSelectString(trndSelName));
+
+//        trendSel = new PageTableColumn(trndChoice);
+
+        rawRates = getRateCol(bcs.getMinRawRate(), bcs.getMaxRawRate());
+        rdsRates = getRateCol(bcs.getMinRdsRate(), bcs.getMaxRdsRate());
+
+        PageItem cisInfo;
+        if (bcs.getCisAvail().equalsIgnoreCase("a") || bcs.getCisAvail().equalsIgnoreCase("d"))
+        {
+            cisInfo = getCisLink(bcs);
+        }
+        else
+        {
+            cisInfo = new PageItemString("&nbsp;", false);
+        }
+        PageItem pemInfo = getPemLink(bcs);
+        PageItem csrcInfo = getSrcInfoLink(bcs);
+
+        PageItemList infoLinks = new PageItemList();
+        infoLinks.add(cisInfo);
+        infoLinks.add(new PageItemString("&nbsp;", false));
+        infoLinks.add(csrcInfo);
+        infoLinks.add(new PageItemString("&nbsp;", false));
+        if (pemInfo != null)
+        {
+            infoLinks.add(pemInfo);
+        }
+        infoLink = new PageTableColumn(infoLinks);
+
+        PageItemList typSelList = new PageItemList();
+        for (String type : bcs.getTypeList())
+        {
+            String typSelName = String.format("%1$s_%2$d", type, indexID);
+
+            if (type.toLowerCase().contains("trend"))
+            {
+                PageFormSelect trndLst = new PageFormSelect(typSelName, bcs.getTrendSelChoices());
+                trndLst.setClassName("trendChoice");
+                trndLst.setSelected(bcs.getTrendSelectString(type));
+                typSelList.add(type + ": ");
+                typSelList.add(trndLst);
+            }
+            else
+            {
+                PageFormCheckbox cb = new PageFormCheckbox(typSelName, type + ". ");
+                cb.setClassName("selBox");
+                cb.setChecked(bcs.isSelected(type));
+                    
+                typSelList.add(cb);
+            }
+        }
+        typeChoices = new PageTableColumn(typSelList);
+        PageTableRow r1 = new PageTableRow();
+        cnameCol = new PageTableColumn(bcs.getName());
+        r1.add(cnameCol);
+        
+        rawRates = getRateCol(bcs.getMinRawRate(), bcs.getMaxRawRate());
+        rdsRates = getRateCol(bcs.getMinRdsRate(), bcs.getMaxRdsRate());
+        r1.add(rawRates);
+        r1.add(rdsRates);
+        infoLink.setRowSpan(2);
+        r1.add(infoLink);
+
+        typeChoices.setSpan(r1.getColumnCount() - 1);
+        
+        PageTableRow r2 = new PageTableRow();
+        r2.add(typeChoices);
+
+        if (odd)
+        {
+            r1.setClassAll("odd");
+            r2.setClassAll("odd");
+        }
+        else
+        {
+            r1.setClassAll("odd");
+            r2.setClassAll("odd");
+        }
+        tbl.addRow(r1);
+        tbl.addRow(r2);
+
     }
     
 }
