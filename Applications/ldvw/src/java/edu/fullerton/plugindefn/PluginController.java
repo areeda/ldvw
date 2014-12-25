@@ -23,6 +23,7 @@ import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.viewerplugin.ChanDataBuffer;
 import java.io.File;
@@ -125,7 +126,7 @@ public abstract class PluginController
      * @return the command to run
      * @throws edu.fullerton.jspWebUtils.WebUtilException
      */
-    public String getCommandLine(ArrayList<ChanDataBuffer> dbuf, Map<String, String[]> paramMap) throws WebUtilException
+    public String getCommandLine(ArrayList<ChanDataBuffer> dbuf, Map<String, String[]> paramMap) throws WebUtilException, LdvTableException
     {
         if (!inited)
         {
@@ -150,7 +151,10 @@ public abstract class PluginController
                     cmd.append(lparam);
                     break;
                 case SWITCH:
-                    unimplemented("swith parameters not available yet");
+                    if (hasParam(p))
+                    {
+                        cmd.append("--").append(p.getArgumentName()).append(" ");
+                    }
                     break;
                 case NUMBER:
                     String singleParam=getSingleParam(p);
@@ -295,7 +299,7 @@ public abstract class PluginController
         }
         return ret;
     }
-    private String getStandardParameter(PluginParameter p, ArrayList<ChanDataBuffer> dbuf) throws WebUtilException
+    private String getStandardParameter(PluginParameter p, ArrayList<ChanDataBuffer> dbuf) throws WebUtilException, LdvTableException
     {
         String ret = "";
         String pname = p.getFormLabel();
@@ -508,6 +512,12 @@ public abstract class PluginController
         return getCmdArg(p.getArgumentName(), val);
     }
 
+    private boolean hasParam(PluginParameter p)
+    {
+        String formName = getNamespace() + "_" + p.getFormName();
+        String[] vals = paramMap.get(formName);
+        return vals != null;
+    }
     private String getSingleParam(PluginParameter p)
     {
         String formName = getNamespace() + "_" + p.getFormName();
