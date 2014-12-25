@@ -20,19 +20,25 @@ import edu.fullerton.viewerplugin.GUISupport;
 import com.areeda.jaDatabaseSupport.Database;
 import commonUI.ChannelsUI;
 import edu.fullerton.jspWebUtils.*;
+import edu.fullerton.ldvjutils.BaseChanSelection;
+import edu.fullerton.ldvjutils.BaseChanSingle;
+import edu.fullerton.ldvjutils.ChanIndexInfo;
 import edu.fullerton.ldvjutils.ChanInfo;
 
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.TimeAndDate;
 import edu.fullerton.ldvplugin.HelpManager;
-import edu.fullerton.ldvtables.ChanDataAvailability;
 import edu.fullerton.ldvtables.ChannelTable;
 import edu.fullerton.ldvjutils.TimeInterval;
+import edu.fullerton.ldvtables.ChanPointerTable;
+import edu.fullerton.ldvtables.ChannelIndex;
 import edu.fullerton.ldvtables.ViewUser;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,8 +54,10 @@ public class TimeAndPlotSelector extends GUISupport
     private final String[] pltGroups = { "time", "channel", "all","none" };
     private final String[] dwnldFmts = { "LigoDV export", "CSV - 1 dataset only", "WAV - 1 dataset only" };
     private HashSet<Integer> selections;
+    private Map<Integer, BaseChanSelection> baseSelections;
     private boolean goterr;
     private ChannelTable ct;
+    private int nSel;       // number of channels selected (base or classic)
     
     /**
      * Constructs a new Time and Plot selector
@@ -63,7 +71,9 @@ public class TimeAndPlotSelector extends GUISupport
         selections = new HashSet<>();
     }
     /**
-     * add a collection of selected channels
+     * add a collection of selected channels, used by features like reference plot to add
+     * channels not selected by the user to a plot
+     * 
      * @param sels table ids of channels to add
      */
     public void addSelections(Collection<Integer> sels)
@@ -84,78 +94,65 @@ public class TimeAndPlotSelector extends GUISupport
     public void showForm(String selType) throws SQLException, WebUtilException, LdvTableException
     {
         Integer stepNo = 1;     /// numbering for what to do
-        
-        selections = getSelections(selType);
-        
-        if (selections.isEmpty())
+
+        PluginManager pmanage = new PluginManager(db, vpage, vuser, paramMap);
+        pmanage.setContextPath(contextPath);
+        pmanage.setServletPath(servletPath);
+
+        PageItem chanSelector;
+        if (selType.equalsIgnoreCase("selchan"))
         {
-            vpage.addBlankLines(3);
-            vpage.add("No Channels are selected.  Please use back button.");
+            chanSelector = getClassicChanSelector();
         }
         else
         {
-            ct = new ChannelTable(db);
-            int nSel = selections.size();
-            vpage.add(String.format("%1$d channel%2$s selected.", nSel, nSel > 1 ? "s are" : " is" ));
-            vpage.addBlankLines(2);
-
-            if (nSel > 2)
-            {
-                vpage.includeJS("setChkBoxByClass.js");
-            }
-
-            PageTable selClrBar = new PageTable();
-            PageTableRow selClrRow = new PageTableRow();
+            chanSelector = getBaseChanSelector();
+        }
+        if (chanSelector == null)
+        {
+            vpage.addBlankLines(3);
+            vpage.add("No Channels are selected.  Please use back button.");            
+        }
+        else
+        {
             PageForm pf = new PageForm();
-            pf.setName("chanFilter");
+            pf.setName("timePlotSelect");
             pf.setMethod("get");
             pf.setAction(getServletPath());
             pf.addHidden("act", "doplot");
             pf.setNoSubmit(true);
 
-            PageFormButton selAll = new PageFormButton("selAll", "Select all", "selall");
-            selAll.setType("button");
-            selAll.addEvent("onclick", "setChkBoxByClass('selBox',true)");
-            selClrRow.add(selAll);
+            if (selType.equalsIgnoreCase("selbchan"))
+            {
+                pf.addHidden("baseSelector", "true");
+            }
+            
+            vpage.add(String.format("%1$d channel%2$s selected.", nSel, nSel > 1 ? "s are" : " is"));
+            vpage.addBlankLines(2);
 
-            PageFormButton clrAll = new PageFormButton("selAll", "Clear all", "clrall");
-            clrAll.setType("button");
-            clrAll.addEvent("onclick", "setChkBoxByClass('selBox', false)");
-            selClrRow.add(clrAll);
-            
-            
-            PageFormButton selMore = new PageFormButton("selMore", "Select more", "selMore");
-            selMore.setType("submit");
-            selClrRow.add(selMore);
-            
-
-            selClrRow.setClassAll("noborder");
-            selClrBar.addRow(selClrRow);
+            PageItem selClrBar = getChanSelBar(nSel);
             pf.add(selClrBar);
-            
-            pf.add(getChannelSelectTable(selections));
+
+            pf.add(chanSelector);
             
             if (selections.size() > 10)
             {
                 pf.add(selClrBar);
             }
-            
-            addProcStep(pf,String.format("%1$d. Select time(s)",stepNo));
+
+            addProcStep(pf, String.format("%1$d. Select time(s)", stepNo));
             stepNo++;
-            
+
             PageTable timeSpecTbl = getTimeSpecTable();
 
             PageTableRow tsRow = new PageTableRow();
-            
+
             // if all channels are on-line we can auto refresh
-            boolean allOnline=true;
-            ArrayList<ChanInfo> selectedCInfo = new ArrayList<>();
-            
-            for (Integer sel : selections)
+            boolean allOnline = true;
+
+            for (BaseChanSelection bcs : baseSelections.values())
             {
-                ChanInfo ci = ct.getChanInfo(sel);
-                selectedCInfo.add(ci);
-                boolean isOnline = ci.getcType().equalsIgnoreCase("online");
+                boolean isOnline = bcs.isOnline();
                 allOnline &= isOnline;
             }
             if (allOnline)
@@ -167,12 +164,12 @@ public class TimeAndPlotSelector extends GUISupport
                 arRow.setClassAll("noborder");
                 timeSpecTbl.addRow(arRow);
             }
-            
+
             tsRow.add("Group by:  ");
             PageFormSelect pltGroup = new PageFormSelect("plotGroup");
             pltGroup.add(pltGroups);
             tsRow.add(pltGroup);
-            
+
             HelpManager helpManager = new HelpManager(db, vpage, vuser);
             helpManager.setContextPath(contextPath);
             helpManager.setParamMap(paramMap);
@@ -181,15 +178,13 @@ public class TimeAndPlotSelector extends GUISupport
             tsRow.add(hlpBtn);
             tsRow.setClassAll("noborder");
             timeSpecTbl.addRow(tsRow);
-            
+
             pf.add(timeSpecTbl);
             pf.add(new PageItemBlanks(2));
 
-            PluginManager pmanage = new PluginManager(db, vpage, vuser,paramMap);
-            pmanage.setContextPath(contextPath);
-            pmanage.setServletPath(servletPath);
-            pf.add(pmanage.getSelector(selectedCInfo,stepNo));
-            
+            ArrayList<BaseChanSelection> baseChans = new ArrayList<>(baseSelections.values());
+            pf.add(pmanage.getSelector(baseChans, stepNo));
+
             addProcStep(pf, String.format("To proceed, click on plot or download"));
             stepNo++;
 
@@ -208,6 +203,63 @@ public class TimeAndPlotSelector extends GUISupport
             vpage.add(pf);
             vpage.addBlankLines(2);
         }
+    }
+    private PageItem getClassicChanSelector() throws SQLException, WebUtilException, LdvTableException
+    {
+        PageItem ret;
+        nSel = 0;
+        selections = getSelections();
+        
+        if (selections.isEmpty())
+        {
+            ret = null;
+        }
+        else
+        {
+            nSel = selections.size();
+
+            ct = new ChannelTable(db);
+            ChannelIndex chanIndex = new ChannelIndex(db);
+            ChanPointerTable cpt = new ChanPointerTable(db);
+            if (baseSelections == null)
+            {
+                baseSelections = new HashMap<>();
+            }
+            for(int cidx : selections)
+            {
+                BaseChanSelection bcs = new BaseChanSelection();
+                ChanInfo ci = ct.getChanInfo(cidx);
+                int baseId = cpt.getBaseId(cidx);
+                ChanIndexInfo baseInfo = chanIndex.getInfo(baseId);
+                bcs.init(baseInfo);
+                bcs.addSingleChan(ci);
+                baseSelections.put(baseId, bcs);
+            }
+            ret = getChannelSelectTable(selections);
+        }
+        return ret;
+    }
+    private PageItem getBaseChanSelector() throws SQLException, WebUtilException, LdvTableException
+    {
+        PageItem ret;
+        nSel = 0;
+        baseSelections = getBaseSelections();
+        BaseChannelSelector bcs = new BaseChannelSelector( db, vpage, vuser, getContextPath());
+        bcs.setParamMap(paramMap);
+        if (baseSelections.isEmpty())
+        {
+            ret = new PageItemString("No channels were selected.");
+        }
+        else
+        {
+            ret = bcs.getSelector(baseSelections);
+        }
+        nSel = 0;
+        for (BaseChanSelection bc : baseSelections.values())
+        {
+            nSel += bc.getNsel();
+        }
+        return ret;
     }
 
     /**
@@ -527,9 +579,18 @@ public class TimeAndPlotSelector extends GUISupport
     {
         this.vpage = vpage;
     }
+
+    /**
+     * Add the table of preselected channels allowing another chance to limit what gets plotted
+     * 
+     * @param selections
+     * @return a formatted list of selects ready to add to the form
+     * @throws SQLException
+     * @throws WebUtilException
+     */
     public PageTable getChannelSelectTable(Set<Integer> selections) throws SQLException, WebUtilException
     {
-        PageTable ret = new PageTable();
+        PageTable ret;
         Set<ChanInfo> cList = ct.getAsSet(selections);
         ChannelsUI cs = new ChannelsUI(contextPath);
         ret = cs.getSelector(cList, selections);
@@ -571,5 +632,30 @@ public class TimeAndPlotSelector extends GUISupport
         fsc.setAlign(PageItem.Alignment.RIGHT);
         return fsc;
     }
+    private PageItem getChanSelBar(int nSel) throws WebUtilException
+    {
+        vpage.includeJS("setChkBoxByClass.js");
 
+        PageTable selClrBar = new PageTable();
+        PageTableRow selClrRow = new PageTableRow();
+
+        PageFormButton selAll = new PageFormButton("selAll", "Select all", "selall");
+        selAll.setType("button");
+        selAll.addEvent("onclick", "setSelByClasses('selBox', true, '.trendChoice', 1)");
+        selClrRow.add(selAll);
+
+        PageFormButton clrAll = new PageFormButton("selAll", "Clear all", "clrall");
+        clrAll.setType("button");
+        clrAll.addEvent("onclick", "setSelByClasses('selBox', false, '.trendChoice', 0)");
+        selClrRow.add(clrAll);
+
+        PageFormButton selMore = new PageFormButton("selMore", "Select more", "selMore");
+        selMore.setType("submit");
+        selClrRow.add(selMore);
+
+        selClrRow.setClassAll("noborder");
+        selClrBar.addRow(selClrRow);
+
+        return selClrBar;
+    }
 }
