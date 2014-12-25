@@ -90,6 +90,7 @@ public class ChanInfo implements Comparable
     private Timestamp lastMod;
     private String cisAvail;
     private Integer availId;
+    private Integer rank;
 
     // Field names for bulk insert statement
     private static final String fldNames = "(name, server, sampleRate, tstPnt, cType, bytesPerSam, dType, gain, offset, slope, "
@@ -768,5 +769,16 @@ public class ChanInfo implements Comparable
         }
         return basename;
     }
+
+    public Integer getRank()
+    {
+        return rank;
+    }
+
+    public void setRank(Integer rank)
+    {
+        this.rank = rank;
+    }
+    
 }
         
