@@ -21,6 +21,7 @@ import edu.fullerton.viewerplugin.ChanDataBuffer;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.ChanInfo;
+import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.TimeInterval;
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,7 +62,7 @@ class DataExporter
      * @return true if caller should send hmtl (error message) false if we sent a file
      * @throws IOException 
      */
-    boolean sendMfile(ArrayList<ChanDataBuffer> bufList) throws IOException
+    boolean sendMfile(ArrayList<ChanDataBuffer> bufList) throws IOException, LdvTableException
     {
         boolean ret = false;
         mainFn = new StringBuilder();
@@ -95,7 +96,7 @@ class DataExporter
         return ret;
     }
     
-    private void getMainFn(ArrayList<ChanDataBuffer> bufList,String fnName)
+    private void getMainFn(ArrayList<ChanDataBuffer> bufList,String fnName) throws LdvTableException
     {
         
         mainFn.append("function newobjs = ").append(fnName).append("()\n"
@@ -188,7 +189,7 @@ class DataExporter
         return ret;
     }
 
-    boolean sendCSVfile(ArrayList<ChanDataBuffer> bufList) throws IOException
+    boolean sendCSVfile(ArrayList<ChanDataBuffer> bufList) throws IOException, LdvTableException
     {
         ChanDataBuffer buf = bufList.get(0);
         ChanInfo chanInfo = buf.getChanInfo();
@@ -223,7 +224,7 @@ class DataExporter
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    boolean sendWAVfile(ArrayList<ChanDataBuffer> bufList) throws IOException, WebUtilException
+    boolean sendWAVfile(ArrayList<ChanDataBuffer> bufList) throws IOException, WebUtilException, LdvTableException
     {
         boolean ret = false;
         ChanDataBuffer buf = bufList.get(0);
