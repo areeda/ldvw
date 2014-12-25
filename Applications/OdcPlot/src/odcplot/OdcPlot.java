@@ -23,6 +23,7 @@ import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.Progress;
 import edu.fullerton.ldvjutils.TimeAndDate;
 import edu.fullerton.ldvtables.ChannelTable;
+import edu.fullerton.ndsproxyclient.NDSBufferStatus;
 import edu.fullerton.ndsproxyclient.NDSException;
 import edu.fullerton.ndsproxyclient.NDSProxyClient;
 import java.awt.Color;
@@ -244,6 +245,10 @@ public class OdcPlot
                     fullStride = Math.max(fullStride, minStride);
 
                     ret = ndsClient.requestData(channelName, chanInfo.getcType(), startGPS, startGPS+duration, fullStride);
+                    NDSBufferStatus bufferStatus = ndsClient.getBufferStatus();
+                    chanInfo.setdType(bufferStatus.getType());
+                    chanInfo.setRate(bufferStatus.getFs());
+                    sampleRate = bufferStatus.getFs();
                     if (ret)
                     {
                         int nsample = (int) (duration * sampleRate);
@@ -403,11 +408,7 @@ public class OdcPlot
             else
             {
                 TreeSet<ChanInfo> chSet = chanTbl.getAsSet(server, channelName, "raw", 10);
-                if (chSet.size() > 1)
-                {
-                    System.err.println("Warning: more than one raw channel matches: " + channelName);
-                }
-                else if (chSet.size() == 1)
+                if (!chSet.isEmpty())
                 {
                     chanInfo = chSet.first();
                 }
@@ -423,7 +424,7 @@ public class OdcPlot
             {
                 bytesPerSample = 2;
             }
-            else if (dtyp.equalsIgnoreCase("INT-32"))
+            else if (dtyp.equalsIgnoreCase("INT-32") || dtyp.equalsIgnoreCase("UINT-32"))
             {
                 bytesPerSample = 4;
             }
