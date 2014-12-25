@@ -22,10 +22,14 @@ import com.areeda.jaDatabaseSupport.Database;
 import com.areeda.jaDatabaseSupport.Table;
 import edu.fullerton.ldvjutils.ChanPointer;
 import edu.fullerton.ldvjutils.LdvTableException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -211,6 +215,32 @@ public class ChanPointerTable extends Table
         catch (SQLException ex)
         {
             throw new LdvTableException("Getting list of all channel poitners", ex);
+        }
+        return ret;
+    }
+    /**
+     * Given the id of an entry in the channel table return its base channel id
+     * @param chanId channel table key
+     * @return base channel table (ChannelIndex) key
+     * @throws edu.fullerton.ldvjutils.LdvTableException
+     */
+    public int getBaseId(int chanId) throws LdvTableException
+    {
+        int ret =0;
+        try
+        {
+            String psTemplate="Select indexID from ChannelPointers where myId=?";
+            PreparedStatement ps = db.prepareStatement(psTemplate, Statement.NO_GENERATED_KEYS);
+            ps.setInt(1, chanId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+            {
+                ret = rs.getInt("indexID");
+            }
+        }
+        catch (SQLException ex)
+        {
+            throw new LdvTableException("Getting base channel Id", ex);
         }
         return ret;
     }
