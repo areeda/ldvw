@@ -35,6 +35,8 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+
 
 #include <iostream>
 #include <channel.h>
@@ -61,6 +63,7 @@ ServerThread::ServerThread()
     prompt = "> ";
     hello = "NDS proxy, help works\n";
     cmdList["atim"] = ATIM;         // available data
+    cmdList["bsts"] = BSTS;         // buffer status
     cmdList["bye"]  = BYE;          // close connection to server and client
     cmdList["chls"] = CHLIST;       // list of channels
     cmdList["chsh"] = CHHASH;       // get hash of channel list
@@ -198,6 +201,13 @@ void ServerThread::dispatcher(void* id)
                             {
                                 getAvailableTimes(args);
                                 sendStr("OK\n");
+                            }
+                            break;
+                            
+                        case BSTS:
+                            if (checkConn())
+                            {
+                                sendBufStatus(args);
                             }
                             break;
 
@@ -858,6 +868,22 @@ void ServerThread::sendChanList( vector<string> args )
         sendStr( result.c_str( ) );
     }
 }
+void ServerThread::sendBufStatus(vector<string> args)
+{
+    if ( data == NULL )
+    {
+        cmdErr( "Invalid request for Buffer Status.  Did you call DATA before BSTS?" );
+        return;
+    }
+    string status = data->recvNextBufferInfo();
+    sendSuccess();
+    sendStr(status);
+    if (!boost::starts_with(status, "Error"))
+    {
+        sendStr("OK\n");
+    }
+        
+}
 void ServerThread::nextBuf(vector<string> args)
 {
     bool isAlpha = true;
@@ -867,7 +893,7 @@ void ServerThread::nextBuf(vector<string> args)
     }
     if (data == NULL)
     {
-        cmdErr("Invalid call to nextBuf.  Did you call DATA before NEXT?");
+        cmdErr("Invalid request for Next Buffer.  Did you call DATA before NEXT?");
         return;
     }
     double *buf=NULL;
@@ -995,6 +1021,7 @@ void ServerThread::sendHelp()
     helpMsg += "Quotes (\"), and commas (,) should be escaped with a backslash(\\)\n";
     helpMsg += "\n";
     helpMsg += "ATIM, <channel name>, [<channel name>...] - get times of available data\n";
+    helpMsg += "BSTS - buffer status info (after DATA command): name, gps start, rate(Hz), size (bytes), data type\n";
     helpMsg += "BYE or EXIT or QUIT - close this connection, disconnect from NDS server if necessary\n";
     helpMsg += "CONN, <server name or ip address>[,<port>] - connect to a NDS server, must have valid ticket\n";
     helpMsg += "CHLS, [<channel type>] - return all channels of that type as a CSV list, default=all\n";

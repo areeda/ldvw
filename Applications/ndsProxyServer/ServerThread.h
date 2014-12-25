@@ -34,7 +34,7 @@ private:
     string version;
     int fd;
     
-    enum Command {UNKNOWN, ATIM, CHCOUNT, CHHASH, CHLIST, CONNECT, DATA, DISCONNECT, 
+    enum Command {UNKNOWN, ATIM, BSTS, CHCOUNT, CHHASH, CHLIST, CONNECT, DATA, DISCONNECT, 
                   EMPTY, HELP, NEXT, SOURCEDATA, SOURCELIST, VERSION, BYE};
     map<string, Command> cmdList;
     
@@ -64,6 +64,7 @@ private:
     void disconnect(vector<string> args);           ///< close connection to server but not client
     void nextBuf(vector<string> args);              ///< send next buffer of data previously requested
     void reqData(vector<string> args);              ///< set up a data request
+    void sendBufStatus(vector<string> args);       ///< send information on the status of received data
     void sendChanCount(vector<string> args);        ///< send list of channels matching spec
     void sendChanHash(vector<string> args);         ///< send hash of channel list of an optional type
     void sendChanList(vector<string> args);         ///< send list of channels matching spec

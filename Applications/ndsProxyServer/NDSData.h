@@ -23,8 +23,10 @@ public:
     
     int reqChanData(const char *name, chantype_t ctype, double rate, time_t start, time_t end, time_t dt );
     int recvNextBufferDouble(double **buf, int *n, time_t *start);
+    string recvNextBufferInfo();
     void setConnection(NDSConnection *c);
     void setVerbose(bool v){verbose = v;};
+    string dataType2Str(int type);
     
 private:
     NDSConnection *conn;
@@ -35,7 +37,7 @@ private:
     daq_data_t dtype;
     chan_req_t* req;
     bool verbose;
-
+    bool hasBuffer;
 };
 
 #endif	/* NDSDATA_H */
