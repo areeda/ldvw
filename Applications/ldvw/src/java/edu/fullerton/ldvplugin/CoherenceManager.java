@@ -27,7 +27,10 @@ import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.BaseChanSelection;
 import edu.fullerton.ldvjutils.ChanInfo;
+import edu.fullerton.ldvjutils.LdvTableException;
+import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.viewerplugin.GUISupport;
 import edu.fullerton.viewerplugin.XYPlotter;
@@ -37,9 +40,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import sun.security.krb5.internal.Krb5;
 
 /**
  * Calculate and plot the coherence of 2 time series
@@ -53,8 +58,8 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
     private Integer height;
     private boolean logXaxis=true, logYaxis=false;
     private String dispFormat;
-    private final String prog = "/usr/local/ldvw/Coherence/run_coherence.sh /usr/local/MATLAB/MATLAB_Compiler_Runtime/v81 ";
-    private ArrayList<ChanInfo> selectedCInfo;
+    private final String prog = "/usr/local/ldvw/bin/gw_coher.py";
+
     private String ref_name;
     private String ref_server;
     private String scale;
@@ -65,6 +70,7 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
     private Float fmax;
     private String yLabel="Coherence";
     private int lineThickness;
+    private List<BaseChanSelection> baseChans;
     /**
      * Manage the external program that calculates coherence of two series
      * @param db
@@ -77,7 +83,7 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
         fltPat = Pattern.compile("(([1-9][0-9]*\\.?[0-9]*)|(\\.[0-9]+))([Ee][+-]?[0-9]+)?");
     }
     /**
-     * Create a coherence plot of the reference image vs. each of the others
+     * Create a coherence plot of the reference series vs. each of the others
      * @param dbuf data buffers to plot
      * @param compact if we should make text as short as possible
      * @return always returns zero because we save the images ourselves
@@ -86,93 +92,133 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
     @Override
     public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbuf, boolean compact) throws WebUtilException
     {
-        int imageId;
-        getParameters();
-        
-        ArrayList<Integer> imageIds = new ArrayList<>();
-        if (dbuf.size() < 2)
-        {
-            throw new WebUtilException("Coherence calculations need at least 2 datasets");
-        }
-        ChanDataBuffer ref = getRefBuf(dbuf);
-        
-        int len= ref.getDataLength();
-        Float refRate = ref.getChanInfo().getRate();
-        
-        HashSet<File> files = new HashSet<>();
-        
         try
         {
-            File refFile = mkTempBinInputFile(ref);
-            files.add(refFile);
-            String refChanName = ref.getChanInfo().getChanName();
+            int imageId;
+            ArrayList<File> files = new ArrayList<>();
+
+            getParameters();
             
-            for (ChanDataBuffer b : dbuf)
+            ArrayList<Integer> imageIds = new ArrayList<>();
+            if (dbuf.size() < 2)
             {
-                if (b != ref)
+                throw new WebUtilException("Coherence calculations need at least 2 datasets");
+            }
+            ChanDataBuffer ref = getRefBuf(dbuf);
+            
+            int len= ref.getDataLength();
+            Float refRate = ref.getChanInfo().getRate();
+            
+            
+            try
+            {
+                String refChanName = ref.getChanName();
+                String otherChanNames = "";
+                ArrayList<String> cmd = new ArrayList<>();
+                cmd.add(prog);
+                cmd.add("--chan");
+                cmd.add(refChanName);
+                
+                for (ChanDataBuffer b : dbuf)
                 {
-                    Float bRate = b.getChanInfo().getRate();
-                    File compFile = mkTempBinInputFile(b);
-                    files.add(compFile);
-                    File resultsFile = File.createTempFile("ldvw-", ".dat",new File("/tmp"));
-                    files.add(resultsFile);
-                    String cmd = prog + refFile.getCanonicalPath();
-                    cmd += " " + compFile.getCanonicalPath();
-                    cmd += " " + Double.toString(refRate);
-                    cmd += " " + Double.toString(bRate);
-                    cmd += " " + resultsFile.getCanonicalPath();
-                    cmd += " " + Double.toString(secpfft);
-                    cmd += " " + Double.toString(ovlap);
-                    
-                    if (runExternalProgram(cmd))
+                    if (b != ref)
                     {
-                        double[][] res = rdBinXYFile(resultsFile);
-                        scaleRes(res);
-                        
-                        String chanName = b.getChanInfo().getChanName();
-                        XYPlotter xyp = new XYPlotter();
-                        xyp.setup(db, vpage, vuser);
-                        xyp.setSize(width, height);
-                        xyp.setLogXaxis(logXaxis);
-                        xyp.setLogYaxis(logYaxis);
-                        if (fmin > 0 || fmax > 0)
+                        cmd.add("--chan");
+                        cmd.add(b.getChanName());
+                        if (! otherChanNames.isEmpty())
                         {
-                            xyp.setXrange(fmin,fmax);
+                            otherChanNames += ", ";
                         }
-                        xyp.setLineThickness(lineThickness);
-                        
-                        String title = String.format("Coherence:  %1$s vs %2$s", refChanName,chanName);
-                        float nfft = b.getTimeInterval().getStopGps() - b.getTimeInterval().getStartGps();
-                        nfft = (float) Math.floor(nfft/(secpfft*(1-ovlap)) - 1);
-                        String xLabel = String.format("Frequency (Hz) sec/fft: %1$.1f "
-                                + "bin-width: %2$.3f, #-fft: %3$.0f", secpfft, 1/secpfft,
-                                nfft);
-                        imageId = xyp.plotAndSave(title, "", xLabel, yLabel, res);
-                        imageIds.add(imageId);
-                        
-                        ArrayList<ChanDataBuffer> lblbuf = new ArrayList<>();
-                        lblbuf.add(ref);
-                        lblbuf.add(b);
-                        PageItem descItem = makeDescription(this, lblbuf);
+                        otherChanNames += b.getChanName();
+                    }
+                }
+                cmd.add("--start");
+                cmd.add(String.format("%1$d", ref.getTimeInterval().getStartGps()));
+                cmd.add("--duration");
+                cmd.add(String.format("%1$d", ref.getTimeInterval().getDuration()));
+                cmd.add("--fftlen");
+                cmd.add(String.format("%1$.2f",secpfft));
+                cmd.add("--geometry");
+                cmd.add(String.format("%1$dx%2$d", width,height));
+                if (logXaxis)
+                {
+                    cmd.add("--logf");
+                }
+                if (logYaxis)
+                {
+                    cmd.add("--logy");
+                }
+                if (fmin > 0 )
+                {
+                    cmd.add("--fmin");
+                    cmd.add(String.format("%1$.2f", fmin));
+                }
+                if (fmax > 0)
+                {
+                    cmd.add("--fmax");
+                    cmd.add(String.format("%1$.2f", fmax));
+                }
+                
+                // @todo Implement in gwpy stuff            xyp.setLineThickness(lineThickness);
+                            
+                String title = String.format("Coherence:  %1$s vs %2$s", refChanName,otherChanNames);
+                cmd.add("--suptitle");
+                cmd.add(title);
+                
+//                TimeInterval ti = ref.getTimeInterval();
+//                long duration = ti.getDuration();
+//                float nfft;
+//                nfft = (float) Math.floor(duration/(secpfft*(1-ovlap)) - 1);
+//                String xLabel = String.format("Frequency (Hz) sec/fft: %1$.1f "
+//                        + "bin-width: %2$.3f, #-fft: %3$.0f", secpfft, 1/secpfft,
+//                        nfft);
+//                cmd.add("--xlabel");
+//                cmd.add(xLabel);
+  
+                File outImage = getTempFile("ldvw-coh-", ".png");
+                files.add(outImage);
+                cmd.add("--out");
+                cmd.add(outImage.getCanonicalPath());
+                
+                if (runExternalProgram(cmd))
+                {
+                    imageId = addImg2Db(outImage, db, vuser.getCn());
+                    if (imageId > 0)
+                    {
+                        PageItem descItem = makeDescription(this, dbuf);
                         String descHtml = descItem.getHtml();
                         getImageTable(db);
                         imgTbl.addDescription(imageId, descHtml);
+                        imageIds.add(imageId);
+                    }
+                    else
+                    {
+                        vpage.add("Coherence program returned normal status but produced no output.");
+                        vpage.add(getErrorMessage("Coherence plot",cmd));
                     }
                 }
+                else
+                {
+                    vpage.add(getErrorMessage("Coherence plot",cmd));
+                }
+                //   removeTempFiles(files);
+                files.clear();
             }
-         //   removeTempFiles(files);
-            files.clear();
-        }
-        catch (WebUtilException | IOException | SQLException ex)
-        {
-            if (!files.isEmpty())
+            catch (WebUtilException | IOException | SQLException ex)
             {
-                removeTempFiles(files);
+                if (!files.isEmpty())
+                {
+                    removeTempFiles(files);
+                }
+                throw new WebUtilException("Error making coherence calculations: " + ex.getLocalizedMessage());
             }
-            throw new WebUtilException("Error making coherence calculations: " + ex.getLocalizedMessage());
+
+            return imageIds;
         }
-        
-        return imageIds;
+        catch (LdvTableException ex)
+        {
+            throw new WebUtilException("Make coherence plot", ex);
+        }
     }
 
     @Override
@@ -194,6 +240,15 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
         return name;
     }
 
+    /**
+     * Get the html objects to use for selecting this product and setting options.
+     * 
+     * @param enableKey - parameter for the checkbox
+     * @param nSel - number of channels selected
+     * @param multDisp
+     * @return
+     * @throws WebUtilException 
+     */
     @Override
     public PageItem getSelector(String enableKey, int nSel, String[] multDisp) throws WebUtilException
     {
@@ -245,25 +300,13 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
 
         
         // allow them to select the reference channel
-        if (!selectedCInfo.isEmpty())
+        if (!baseChans.isEmpty())
         {
            
-            TreeSet<String> servers;
-            // if we have channels from multiple servers we need to include server in selector
-            // otherwise we'll just use channel name
-            servers = new TreeSet<>();
-            for(ChanInfo ci : selectedCInfo)
-            {
-                servers.add(ci.getServer());
-            }
             ArrayList<String> chlist = new ArrayList<>();
-            for(ChanInfo ci : selectedCInfo)
+            for(BaseChanSelection bcs : baseChans)
             {
-                String selStr = ci.getChanName();
-                if (servers.size() > 1)
-                {
-                    selStr += " @ " + ci.getServer();
-                }
+                String selStr = bcs.getName();
                 chlist.add(selStr);
             }
             String[] chlistStr = new String[0];
@@ -273,15 +316,15 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
             ptr = GUISupport.getObjRow(refChan, "Reference Channel:", "");
             product.addRow(ptr);
 
-            ret.add(product);
         }
+        ret.add(product);
         return ret;
     }
 
     @Override
     public boolean needsDataXfer()
     {
-        return true;
+        return false;
     }
 
     @Override
@@ -345,9 +388,9 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
         return false;
     }
 
-    public void setChanList(ArrayList<ChanInfo> selectedCInfo)
+    public void setChanList(List<BaseChanSelection> baseChans)
     {
-        this.selectedCInfo = selectedCInfo;
+        this.baseChans = baseChans;
     }
 
     /**
@@ -356,19 +399,14 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
      * @param dbuf data buffers (with data)
      * @return the reference channel's data buffer
      */
-    private ChanDataBuffer getRefBuf(ArrayList<ChanDataBuffer> dbuf)
+    private ChanDataBuffer getRefBuf(ArrayList<ChanDataBuffer> dbuf) throws LdvTableException
     {
         ChanDataBuffer ref = null;
         for(ChanDataBuffer it : dbuf)
         {
             boolean ok = true;
             ok &= it.getChanInfo().getChanName().contentEquals(ref_name);
-            String srv = it.getChanInfo().getServer();
-            ok &= ref_server.isEmpty() || ref_server.equals(srv);
-            if (ok)
-            {
-                ref = it;
-            }
+            ref = it;
         }
         if (ref == null)
         {
@@ -398,6 +436,14 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
         if (scl != null && scl.length > 0)
         {
             scale=scl[0];
+        }
+        else
+        {
+            scale="log";
+        }
+        if (scale.toLowerCase().contains("log"))
+        {
+            logYaxis = true;
         }
         secpfft = getVal("coh_secperfft",1.f);
         ovlap = getVal("coh_fftoverlap",.5f);
