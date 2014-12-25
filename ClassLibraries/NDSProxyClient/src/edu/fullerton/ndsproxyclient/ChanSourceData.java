@@ -28,6 +28,7 @@ import edu.fullerton.ndsproxyclient.NDSException;
 import edu.fullerton.ndsproxyclient.NDSProxyClient;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -402,6 +403,36 @@ public class ChanSourceData
     public int getnRawIntervals()
     {
         return nRawIntervals;
+    }
+
+    public StringBuilder getAsStringBuilder(TimeInterval searchRange, int indentLevel)
+    {
+        StringBuilder ret = new StringBuilder();
+        String indent = new String(new char[indentLevel * 4]).replace('\0', ' ');
+        
+        
+        for(Entry<String, ArrayList<TimeInterval>> ent : frmTypes.entrySet())
+        {
+            StringBuilder tmp = new StringBuilder();
+            int nIntervalMatches = 0;
+            
+            tmp.append(indent).append(ent.getKey()).append(":\n");
+            for(TimeInterval ti : ent.getValue())
+            {
+                if (ti.getStartGps()<= searchRange.getStopGps() 
+                    && ti.getStopGps() >= searchRange.getStartGps())
+                {
+                    tmp.append(indent).append(indent);
+                    tmp.append(String.format("%1$d, %2$d\n", ti.getStartGps(), ti.getStopGps()));
+                    nIntervalMatches++;
+                }
+            }
+            if (nIntervalMatches > 0)
+            {
+                ret.append(tmp);
+            }
+        }
+        return ret;
     }
     
 }
