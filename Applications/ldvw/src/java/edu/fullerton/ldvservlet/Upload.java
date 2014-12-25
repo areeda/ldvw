@@ -27,6 +27,7 @@ import edu.fullerton.ldvtables.ImageTable;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.rmi.ServerException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -138,6 +139,16 @@ public class Upload extends HttpServlet
             
             Page vpage = servletSupport.getVpage();
             vpage.setTitle("Image upload");
+            try
+            {
+                servletSupport.addStandardHeader(version);
+                servletSupport.addNavBar();
+            }
+            catch (WebUtilException ex)
+            {
+               throw new ServerException("Adding nav bar after upload", ex);
+            }
+            
             // Parse the request
             List<FileItem> items = upload.parseRequest(request);
             int cnt = items.size();
