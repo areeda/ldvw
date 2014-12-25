@@ -36,6 +36,7 @@ Channels::Channels()
     dataTypes[_undefined] = "undef";
     dataTypes[_16bit_integer] = "INT-16";
     dataTypes[_32bit_integer] = "INT-32";
+    dataTypes[_32bit_uint] = "UINT-32";
     dataTypes[_64bit_integer] = "INT-64";
     dataTypes[_32bit_float] = "FLT-32";
     dataTypes[_64bit_double] = "FLT-64";
