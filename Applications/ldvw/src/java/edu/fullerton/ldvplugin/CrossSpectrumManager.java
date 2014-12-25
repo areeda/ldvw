@@ -23,6 +23,7 @@ import edu.fullerton.jspWebUtils.PageItem;
 import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.plugindefn.CrossSpectrumDefinition;
 import edu.fullerton.viewerplugin.ChanDataBuffer;
@@ -31,6 +32,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -54,46 +57,53 @@ public class CrossSpectrumManager extends ExternalPlotManager implements PlotPro
     @Override
     public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbuf, boolean compact) throws WebUtilException
     {
-        if (width > 200 && height > 100)
+        try
         {
-            String[] geom = {String.format("%1$dx%2$d", width, height)};
-            paramMap.put("geom", geom);
-        }
-        csd.setFormParameters(paramMap);
-        String cmd = csd.getCommandLine(dbuf, paramMap);
-        vpage.add(cmd);
-        vpage.addBlankLines(2);
-        ArrayList<Integer> ret = new ArrayList<>();
-        if (runExternalProgram(cmd))
-        {
-            String txtOutput = String.format("%1$s Output:<br>%2$s", getProductName(), getStdout());
-            vpage.add(new PageItemString(txtOutput, false));
-            vpage.addBlankLines(1);
-            txtOutput = String.format("%1$s <br>Stderr: %2$s", getProductName(), getStderr());
-            vpage.add(new PageItemString(txtOutput, false));
-            vpage.addBlankLines(1);
-            tempFile = csd.getTempFile();
-            if (tempFile != null && tempFile.canRead())
+            if (width > 200 && height > 100)
             {
-                String desc = "";
-                int imgId = importImage(tempFile, "image/png", desc);
-                if (imgId > 0)
+                String[] geom = {String.format("%1$dx%2$d", width, height)};
+                paramMap.put("geom", geom);
+            }
+            csd.setFormParameters(paramMap);
+            String cmd = csd.getCommandLine(dbuf, paramMap);
+            vpage.add(cmd);
+            vpage.addBlankLines(2);
+            ArrayList<Integer> ret = new ArrayList<>();
+            if (runExternalProgram(cmd))
+            {
+                String txtOutput = String.format("%1$s Output:<br>%2$s", getProductName(), getStdout());
+                vpage.add(new PageItemString(txtOutput, false));
+                vpage.addBlankLines(1);
+                txtOutput = String.format("%1$s <br>Stderr: %2$s", getProductName(), getStderr());
+                vpage.add(new PageItemString(txtOutput, false));
+                vpage.addBlankLines(1);
+                tempFile = csd.getTempFile();
+                if (tempFile != null && tempFile.canRead())
                 {
-                    ret.add(imgId);
+                    String desc = "";
+                    int imgId = importImage(tempFile, "image/png", desc);
+                    if (imgId > 0)
+                    {
+                        ret.add(imgId);
+                    }
                 }
             }
+            else
+            {
+                int stat = getStatus();
+                String stderr = getStderr();
+                vpage.add(String.format("%1$s returned and error: %2$d", getProductName(), stat));
+                vpage.addBlankLines(1);
+                PageItemString ermsg = new PageItemString(stderr, false);
+                vpage.add(ermsg);
+            }
+            
+            return ret;
         }
-        else
+        catch (LdvTableException ex)
         {
-            int stat = getStatus();
-            String stderr = getStderr();
-            vpage.add(String.format("%1$s returned and error: %2$d", getProductName(), stat));
-            vpage.addBlankLines(1);
-            PageItemString ermsg = new PageItemString(stderr, false);
-            vpage.add(ermsg);
+            throw new WebUtilException("Making cross spectrum plot:", ex);
         }
-
-        return ret;
 
     }
 
