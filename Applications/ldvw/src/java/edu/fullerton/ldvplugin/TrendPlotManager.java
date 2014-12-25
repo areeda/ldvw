@@ -23,6 +23,7 @@ import edu.fullerton.jspWebUtils.PageItem;
 import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.plugindefn.TrendPlotDefinition;
 import edu.fullerton.plugindefn.WplotDefinition;
@@ -32,6 +33,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -60,42 +63,49 @@ public class TrendPlotManager extends ExternalPlotManager implements PlotProduct
     @Override
     public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbuf, boolean compact) throws WebUtilException
     {
-        TrendPlotDefinition tpd = new TrendPlotDefinition();
-        tpd.init();
-        tpd.setFormParameters(paramMap);
-        tpd.setVuser(vuser);
-
-        String cmd = tpd.getCommandLine(dbuf, paramMap);
-        vpage.add(cmd);
-        vpage.addBlankLines(2);
-        ArrayList<Integer> ret = new ArrayList<>();
-        if (runExternalProgram(cmd))
+        try
         {
-            String hdr = String.format("Your %1$s is being queued for processing, and email will be "
-                    + "sent to %2$s with a link to the results when finished.<br>", 
+            TrendPlotDefinition tpd = new TrendPlotDefinition();
+            tpd.init(); 
+            tpd.setFormParameters(paramMap);
+            tpd.setVuser(vuser);
+            
+            String cmd = tpd.getCommandLine(dbuf, paramMap);
+            vpage.add(cmd);
+            vpage.addBlankLines(2);
+            ArrayList<Integer> ret = new ArrayList<>();
+            if (runExternalProgram(cmd))
+            {
+                String hdr = String.format("Your %1$s is being queued for processing, and email will be "
+                        + "sent to %2$s with a link to the results when finished.<br>",
                                        getProductName(), vuser.getMail());
-            vpage.add(new PageItemString(hdr, false));
-            hdr = "Please be patient, currently there is only one batch queue processing these plots.<br>"
+                vpage.add(new PageItemString(hdr, false));
+                hdr = "Please be patient, currently there is only one batch queue processing these plots.<br>"
             + "Processing time depends on how much data you requested and what else is running.";
-            vpage.add(new PageItemString(hdr, false));
-            String txtOutput = String.format("%1$s Output:<br>%2$s", getProductName(), getStdout());
-            vpage.add(new PageItemString(txtOutput, false));
-            vpage.addBlankLines(1);
-            txtOutput = String.format("%1$s Stderr: <br>%2$s", getProductName(), getStderr());
-            vpage.add(new PageItemString(txtOutput, false));
-            vpage.addBlankLines(1);
+                vpage.add(new PageItemString(hdr, false));
+                String txtOutput = String.format("%1$s Output:<br>%2$s", getProductName(), getStdout());
+                vpage.add(new PageItemString(txtOutput, false));
+                vpage.addBlankLines(1);
+                txtOutput = String.format("%1$s Stderr: <br>%2$s", getProductName(), getStderr());
+                vpage.add(new PageItemString(txtOutput, false));
+                vpage.addBlankLines(1);
+            }
+            else
+            {
+                int stat = getStatus();
+                String stderr = getStderr();
+                vpage.add(String.format("%1$s returned and error: %2$d", getProductName(), stat));
+                vpage.addBlankLines(1);
+                PageItemString ermsg = new PageItemString(stderr, false);
+                vpage.add(ermsg);
+            }
+            
+            return ret;
         }
-        else
+        catch (LdvTableException ex)
         {
-            int stat = getStatus();
-            String stderr = getStderr();
-            vpage.add(String.format("%1$s returned and error: %2$d", getProductName(), stat));
-            vpage.addBlankLines(1);
-            PageItemString ermsg = new PageItemString(stderr, false);
-            vpage.add(ermsg);
+            throw new WebUtilException("Making trend plot:", ex);
         }
-
-        return ret;
 
     }
 
