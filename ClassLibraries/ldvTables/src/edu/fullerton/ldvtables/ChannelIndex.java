@@ -252,7 +252,7 @@ public class ChannelIndex extends Table
      * @param fs
      * @param cType
      * @param cnamePat pattern to match against channel name 
-     * @return 
+     * @return where clause for mysql (without the keyword WHERE)
      */
     private String getWhere(String ifo, String subsys, String fsCmp, Float fs, 
                             String cType, String cnamePat)
@@ -312,11 +312,17 @@ public class ChannelIndex extends Table
             else
             {
                 where += where.isEmpty() ? "" : " AND ";
-                where += String.format(" nameHash = %1$d ", cnamePat.hashCode());
+                where += String.format(" name = '%1$s' ", cnamePat);
             }
         }
         return where;
     }
+    /**
+     * Test if the user entered match string can use a simple match or requires a regular expression
+     * 
+     * @param pat user's match string
+     * @return true if we need a regular expression
+     */
     public static boolean needRegex(String pat)
     {
         String chars = "* ()?|";     // these have special meanings
@@ -324,7 +330,7 @@ public class ChannelIndex extends Table
         boolean ret = false;
         for(int i=0;i<chars.length() && !ret;i++)
         {
-            ret |= pat.contains(chars.substring(i, i));
+            ret |= (pat.indexOf(chars.substring(i, i+1)) > -1 );
         }
         return ret;
     }
@@ -343,6 +349,7 @@ public class ChannelIndex extends Table
         regexp = regexp.replace("*", ".*");
         regexp = regexp.replace(" ", ".*");
         regexp = regexp.replace("?", ".");
+        regexp = "(" + regexp + ")";
         return regexp;
     }
 
