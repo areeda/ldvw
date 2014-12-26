@@ -230,26 +230,6 @@ public class BaseChannelSelector extends GUISupport
         String cType = getParam("ctype");
         String chnamefilt = getParam("chnamefilt");
         submitAct = getParam("submitAct");
-        Pattern ifoSubsysPat = Pattern.compile("(^.+):((.+?)[_-])?");
-        
-        // optimize the search iff they specify channel name with ifo and or subsys that contain
-        // no wild cards but have wild cards in the rest.
-        
-        Matcher ifoSubsysMat = ifoSubsysPat.matcher(chnamefilt);
-        if ( ( ChannelIndex.needRegex(chnamefilt)  ) && ifoSubsysMat.find())
-        {
-            String myIfo = ifoSubsysMat.group(1);
-            String mySubsys = ifoSubsysMat.group(3);
-            if (myIfo != null && ifo.isEmpty() && ! myIfo.contains("*") && ! myIfo.contains("?"))
-            {
-                ifo = myIfo;
-            }
-            
-            if (mySubsys != null && subsys.isEmpty() && ! mySubsys.contains("*") && ! mySubsys.contains("?"))
-            {
-                subsys = mySubsys;
-            }
-        }
         // do the query
         selections = getBaseChanSelections();   // see if they selected any channels so far
 
