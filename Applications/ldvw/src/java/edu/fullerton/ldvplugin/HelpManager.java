@@ -131,7 +131,7 @@ public class HelpManager  extends GUISupport
         tbl.addRow(row);
         if (!helpTxt.isEmpty())
         {
-            String editorContent = helpTxt.replaceAll("'", "&#39;").replaceAll("\\n", "<br>");
+            String editorContent = helpTxt.replaceAll("'", "&#39;").replaceAll("\\n", "");
             editorContent = editorContent.replaceAll("\\r", "");
             String script = String.format("tinyMCE.get('helpTxt').setContent('%1$s');",editorContent);
             vpage.addLoadJS(script);
