@@ -136,21 +136,52 @@ public class TimeAndDate
         Date d = new Date(time);
         return dateAsUtcString(d);
     }
+    
+    public static Double[] getGPSDouble(String[] strDateTime)
+    {
+        Pattern fltPat = Pattern.compile("^(([1-9][0-9]*\\.?[0-9]*)|(\\.[0-9]+))([Ee][+-]?[0-9]+)?$");
+        ArrayList<Double> ret = new ArrayList<>();
+        for (String str : strDateTime)
+        {
+            str = str.trim();
+            if (!str.isEmpty())
+            {
+                Double gps;
+                Matcher fltM = fltPat.matcher(str);
+                if (fltM.find())
+                {
+                    gps = Double.parseDouble(str);
+                }
+                else if (str.matches("^[0-9]+$"))
+                {
+                    gps = (double) Long.parseLong(str);
+                }
+                else
+                {
+                    gps = (double) getGPS(str);
+                }
+                ret.add(gps);
+            }
+        }
+        Double[] r = new Double[0];
+        return ret.toArray(r);
+    }
     /**
      * A convenience function for string arrays returned from HTML forms.
-     * We still only deal with the first value because we only have one return value
+     * 
      * @param str - one of many time/date formats
-     * @return - GPS seconds corresponding to (what we think) input string specifies
+     * @see #getGPS(java.lang.String) 
+     * @return - GPS seconds corresponding to (what we think) rach input string specifies
      */
     public static long[] getGPS(String[] str)
     {
-        long[] ret = null;
+        long[] ret = new long[0];
+        ArrayList<Long> vals = new ArrayList<>();
         if (str != null && str.length > 0)
         {
-            ArrayList<Long> vals = new ArrayList<>();
-            for(int i=0;i<str.length;i++)
+            for(String it: str)
             {
-                String it = str[i].trim();
+                it = it.trim();
                 if (!it.isEmpty())
                 {
                     vals.add(getGPS(it));
@@ -162,19 +193,20 @@ public class TimeAndDate
                 ret[i]=vals.get(i);
             }
         }
+        
         return ret;
     }
     /**
      * Convert a string to GPS seconds
      * empty string => now
-     * <positive integer> => gps time
-     * <negative integer> => seconds ago, now - n
-     * <date> => 00Z on that date
-     * <date> <time> => UTC
-     * <date> <time> <time zone>
-     * <date> :=  YYYY-MM-DD | MM/DD/YYYY | MMM-DD-YYYY | DD-MMM-YYYY  
+     * [positive integer] => gps time
+     * [negative integer] => seconds ago, now - n
+     * [date] => 00Z on that date
+     * [date] [time] => UTC
+     * [date] [time] [time zone]
+     * [date] :=  YYYY-MM-DD | MM/DD/YYYY | MMM-DD-YYYY | DD-MMM-YYYY  
      * (sorry Europeans DD/MM/YYYY is ambiguous the first 12 days of every month
-     * <time> := HH:MM:SS [AM|PM]| HH:MM [AM|PM] |HHMM
+     * [time] := HH:MM:SS [AM|PM]| HH:MM [AM|PM] |HHMM
      * 
      * @param it - a compatible date time string
      * @return GPS seconds corresponding to (what we think) input string specifies
