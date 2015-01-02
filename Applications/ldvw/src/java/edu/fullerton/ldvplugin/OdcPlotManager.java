@@ -150,12 +150,21 @@ public class OdcPlotManager extends ExternalPlotManager implements PlotProduct
         this.paramMap = parameterMap;
     }
     @Override
-    public PageItem getSelector(String enableKey, int nSel, String[] multDisp)
+    public PageItem getSelector(String enableKey, int nSel, String[] multDisp) throws WebUtilException
     {
         PageItemList ret = new PageItemList();
         String enableText = "Generate ODC Plot";
         enableText += nSel > 1 ? "s<br><br>" : "<br><br>";
-        ret.add(new PageFormCheckbox(enableKey, enableText));
+        
+        this.enableKey = enableKey;
+        boolean enabled = getPrevValue(enableKey);
+
+        PageFormCheckbox cb = new PageFormCheckbox(enableKey, enableText, enabled);
+        cb.setId(enableKey + "_cb");
+        String fun = String.format("boldTextOnCheckbox('%1$s_cb','%1$s_accLbl')", enableKey);
+        cb.addEvent("onclick", fun);
+        ret.add(cb);
+
         ret.add(new PageItemString("No special options for ODC plots"));
         return ret;
     }
