@@ -93,7 +93,12 @@ public abstract class PluginController
         }
         String enableText = "Generate " + getName();
         enableText += nSel > 1 ? "s<br><br>" : "<br><br>";
-        ret.add(new PageFormCheckbox(enableKey, enableText));
+        boolean enabled = getPrevValue(enableKey);
+        PageFormCheckbox cb = new PageFormCheckbox(enableKey, enableText, enabled);
+        cb.setId(enableKey + "_cb");
+        String fun = String.format("boldTextOnCheckbox('%1$s_cb','%1$s_accLbl')", enableKey);
+        cb.addEvent("onclick", fun);
+        ret.add(cb);
         
         String intro = "Set appropriate parameters below:<br>";
         ret.add(new PageItemString (intro, false));
@@ -106,11 +111,19 @@ public abstract class PluginController
         PageTable product = new PageTable();
         product.setClassName("SelectorTable");
         PageTableRow ptr;
-        
+        String prefix = getNamespace() + "_";
         for(PluginParameter p : parameters)
         {
             if (p.getType() != PluginParameter.Type.STANDARD)
             {
+                p.setLastVal(paramMap.get(prefix + p.getFormName()));
+                if (p.getType() == PluginParameter.Type.SWITCH)
+                {
+                    if (paramMap.get(prefix + p.getFormName()) != null)
+                    {
+                        p.setVal(true);
+                    }
+                }
                 ptr = p.getSelectorRow(getNamespace());
                 product.addRow(ptr);
             }
@@ -378,6 +391,14 @@ public abstract class PluginController
                 }
                 break;
                 
+            case "startDbl":
+                for (ChanDataBuffer buf : dbuf)
+                {
+                    Double startGps = buf.getTimeInterval().getStartGpsD();
+                    ret += getCmdArg(p.getArgumentName(), String.format("%1$.4f", startGps));
+                }
+                break;
+                
             case "tempDir":
                 try
                 {
@@ -544,6 +565,38 @@ public abstract class PluginController
     public File getTempFile()
     {
         return tempFile;
+    }
+    /**
+     * As part of remembering where we came from, form values are passed back and forth to select
+     * more. Here we use the previous value or default for the specified key
+     *
+     * @param key - Parameter name for this field
+     * @param idx - Index into value array, 0 if only 1 value allowed
+     * @param def - default value if no parameter or parameter is empty
+     * @return
+     */
+    public String getPrevValue(String key, int idx, String def)
+    {
+        String ret = def;
+        String[] prev = paramMap.get(key);
+        if (prev != null && prev.length > idx && !prev[0].isEmpty())
+        {
+            ret = prev[idx];
+        }
+        return ret;
+    }
+
+    /**
+     * Checkboxes are a bit difficult because their key only gets sent if it's checked. So we don't
+     * really know if it's the first time thru with no values for anything or they unchecked it.
+     *
+     * @param key - parameter name
+     * @return true if parameter is available
+     */
+    public boolean getPrevValue(String key)
+    {
+        boolean ret = paramMap.containsKey(key);
+        return ret;
     }
     
 }
