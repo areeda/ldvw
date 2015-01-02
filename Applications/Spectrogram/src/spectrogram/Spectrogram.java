@@ -24,6 +24,7 @@ import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.Progress;
 import edu.fullerton.ldvjutils.TimeAndDate;
 import edu.fullerton.ldvtables.ChannelTable;
+import edu.fullerton.ndsproxyclient.NDSBufferStatus;
 import edu.fullerton.ndsproxyclient.NDSException;
 import edu.fullerton.ndsproxyclient.NDSProxyClient;
 import edu.fullerton.viewerplugin.GDSFilter;
@@ -196,6 +197,9 @@ public class Spectrogram
     /**
      * The controller of the process loop, init -> get data -> process -> make image
      * @return 
+     * @throws viewerconfig.ViewConfigException 
+     * @throws edu.fullerton.jspWebUtils.WebUtilException 
+     * @throws edu.fullerton.ndsproxyclient.NDSException 
      */
     public int doPlot() throws ViewConfigException, WebUtilException, NDSException
     {
@@ -278,6 +282,12 @@ public class Spectrogram
                             int dt = (int) (ndsClient.getStartGPS() - startGPS);
                             setProgress(String.format("Processing %1$,4d of %2$,4d seconds of data", dt, duration));
                             setProgress(dt, duration);
+                            NDSBufferStatus bufferStatus = ndsClient.getBufferStatus();
+                            if (sampleRate != bufferStatus.getFs())
+                            {
+                                sampleRate = bufferStatus.getFs();
+                                initImage();
+                            }
                             int startSample = (int) (dt * sampleRate);
                             int nsample = (int) (duration * sampleRate);
                             long pStrt=System.nanoTime();
