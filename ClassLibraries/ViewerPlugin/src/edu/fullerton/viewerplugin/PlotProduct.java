@@ -50,6 +50,18 @@ public interface PlotProduct
     boolean isStackable();
     
     /**
+     * If the parameterMap contains our enable key, we're selected.
+     * @return true if this plot is selected
+     */
+    boolean isSelected();
+    
+    /**
+     * The enable key is an HTML parameter name for the check box that selects this plot
+     * @return - the parameter name
+     */
+    String getEnableKey();
+    
+    /**
      * Determines whether the PluginManager creates an image description for each image in the list
      * 
      * @return  true if the PluginManager should do it, false if the product does it
