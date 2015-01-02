@@ -28,23 +28,17 @@ import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.BaseChanSelection;
-import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvjutils.LdvTableException;
-import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.viewerplugin.GUISupport;
-import edu.fullerton.viewerplugin.XYPlotter;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.regex.Pattern;
-import sun.security.krb5.internal.Krb5;
 
 /**
  * Calculate and plot the coherence of 2 time series
@@ -258,9 +252,16 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
         };
         String[] lineThicknessOptions = { "1", "2", "3", "4" };
         
+        this.enableKey = enableKey;
+        
         PageItemList ret = new PageItemList();
         String enableText = "Generate Coherence Plots";
-        ret.add(new PageFormCheckbox(enableKey, enableText));
+        boolean enabled = getPrevValue(enableKey);
+        PageFormCheckbox cb = new PageFormCheckbox(enableKey, enableText, enabled);
+        cb.setId(enableKey + "_cb");
+        String fun = String.format("boldTextOnCheckbox('%1$s_cb','%1$s_accLbl')", enableKey);
+        cb.addEvent("onclick", fun);
+        ret.add(cb);
         
         ret.addBlankLines(1);
         ret.add("Set appropriate parameters below:");
@@ -271,30 +272,39 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
         PageTableRow ptr;
 
         PageFormSelect scaleSel = new PageFormSelect("coh_scaling", scalingNames);
+        String prevVal = getPrevValue("coh_scaling", 0, scalingNames[0]);
+        scaleSel.setSelected(prevVal);
         ptr = GUISupport.getObjRow(scaleSel, "Scaling:", "");
         product.addRow(ptr);
         
         PageFormSelect lineThicknessSelector = new PageFormSelect("coh_linethickness", lineThicknessOptions);
-        lineThicknessSelector.setSelected("2");
+        prevVal = getPrevValue("coh_linethickness", 0, "2");
+        lineThicknessSelector.setSelected(prevVal);
         ptr = GUISupport.getObjRow(lineThicknessSelector, "Line thickness: ", "");
         product.addRow(ptr);
 
         // length and overlap off fft
-        ptr = GUISupport.getTxtRow("coh_secperfft", "Sec/fft:", "", 16, "1");
+        prevVal = getPrevValue("coh_secperfft", 0, "1");
+        ptr = GUISupport.getTxtRow("coh_secperfft", "Sec/fft:", "", 16, prevVal);
         product.addRow(ptr);
 
-        ptr = GUISupport.getTxtRow("coh_fftoverlap", "Overlap [0-1):", "Leave blank for auto", 16, "");
+        prevVal = getPrevValue("coh_fftoverlap", 0, "");
+        ptr = GUISupport.getTxtRow("coh_fftoverlap", "Overlap [0-1):", "Leave blank for auto", 16, 
+                                    prevVal);
         product.addRow(ptr);
 
         // frequncy axis limits
-        ptr = GUISupport.getTxtRow("coh_fmin", "Min freq:", "Leave blank for auto", 16, "");
+        prevVal = getPrevValue("coh_fmin", 0, "");
+        ptr = GUISupport.getTxtRow("coh_fmin", "Min freq:", "Leave blank for auto", 16, prevVal);
         product.addRow(ptr);
 
-        ptr = GUISupport.getTxtRow("coh_fmax", "Max freq:", "Leave blank for auto", 16, "");
+        prevVal = getPrevValue("coh_fmax", 0, "");
+        ptr = GUISupport.getTxtRow("coh_fmax", "Max freq:", "Leave blank for auto", 16, prevVal);
         product.addRow(ptr);
 
-        // do they want axis to be logarithmic
-        PageFormCheckbox logx = new PageFormCheckbox("coh_logfreq", "Freq axis logarithmic", true);
+        // do they want axis to be linear
+        enabled = getPrevValue("coh_linfreq");
+        PageFormCheckbox logx = new PageFormCheckbox("coh_linfreq", "Freq axis linear", enabled);
         ptr = GUISupport.getObjRow(logx, "", "");
         product.addRow(ptr);
 
@@ -312,7 +322,9 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
             String[] chlistStr = new String[0];
             chlistStr = chlist.toArray(chlistStr);
 
+            prevVal = getPrevValue("coh_Ref", 0, chlist.get(0));
             PageFormSelect refChan = new PageFormSelect("coh_Ref", chlistStr);
+            refChan.setSelected(prevVal);
             ptr = GUISupport.getObjRow(refChan, "Reference Channel:", "");
             product.addRow(ptr);
 
@@ -450,7 +462,7 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
         fmin = getVal("coh_fmin",0.f);
         fmax = getVal("coh_fmax",0.f);
         
-        logXaxis = paramMap.get("coh_logfreq") != null;
+        logXaxis = paramMap.get("coh_linfreq") == null;
     }
     private Float getVal(String pname, Float def)
     {
