@@ -78,12 +78,14 @@ public class ChanIndexInfo
         minRdsRate = cii.minRdsRate;
         maxRdsRate = cii.maxRdsRate;
         hasMtrends = cii.hasMtrends;
+        hasStrends = cii.hasStrends;
         hasOnline = cii.hasOnline;
         hasRaw = cii.hasRaw;
         hasRds = cii.hasRds;
         hasStatic = cii.hasStatic;
         hasTstPnt = cii.hasTstPnt;
         nServers = cii.nServers;
+        cisAvail = cii.cisAvail;
         chanIDs = new ArrayList<>(cii.chanIDs);
         inited = cii.inited;
     }
@@ -129,6 +131,7 @@ public class ChanIndexInfo
      * Note if the ResultSet contains more than one row only the current row is used
      * 
      * @param rs a row in the ChannelIndex table
+     * @throws java.sql.SQLException
      */
     public void fill(ResultSet rs) throws SQLException
     {
@@ -176,7 +179,7 @@ public class ChanIndexInfo
     }
     public ArrayList<String> getTypeList()
     {
-        ArrayList<String> ret = new ArrayList<String>();
+        ArrayList<String> ret = new ArrayList<>();
         if (hasRaw) ret.add("Raw");
         if (hasRds) ret.add("RDS");
         if (hasOnline) ret.add("Online");
