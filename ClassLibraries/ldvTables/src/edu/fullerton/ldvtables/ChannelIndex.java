@@ -272,11 +272,12 @@ public class ChannelIndex extends Table
         if (fs > 0 )
         {
             where += where.isEmpty() ? "" : " AND ";
-            if (fsCmp.contains(">"))
+            if (fsCmp.contains("<"))
             {
-                where += String.format(" ( minRawRate %1$s %2$f OR minRdsRate %1$s %2$f)", fsCmp, fs);
+                where += String.format(" ( (minRawRate %1$s %2$f AND minRawRate > 0) "
+                        + "OR (minRdsRate %1$s %2$f AND minRdsRate > 0)", fsCmp, fs);
             }
-            else if (fsCmp.contains("<"))
+            else if (fsCmp.contains(">"))
             {
                 where += String.format(" ( (maxRawRate %1$s %2$f AND maxRawRate > 0) "
                 + "OR (maxRdsRate %1$s %2$f AND maxRdsRate > 0) )", fsCmp, fs);
