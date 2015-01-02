@@ -46,14 +46,11 @@ import edu.fullerton.viewerplugin.GUISupport;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * UI class to filter channel lists and select channels (V2) and present list of selections
@@ -138,17 +135,15 @@ public class BaseChannelSelector extends GUISupport
         pf.addHidden("act", "baseChan");
         pf.addHidden("baseSelector", "true");
         
-        // if we're on a "select more" command, save all previous selections
-        if (paramMap.containsKey("selMore"))
-        {
-            selections = getBaseChanSelections();
-            addSelections(pf);
-            int selCnt = selections.size();
-            String selCount = String.format("%d %s selected.", selCnt, selCnt > 1 ? "channels are" :
-                    "channel is");
-            vpage.add(selCount);
-            vpage.addBlankLines(2);
-        }
+        selections = getBaseChanSelections();
+        addSelections(pf);
+        int selCnt = selections.size();
+        String selCount = String.format("%d %s selected.", selCnt, selCnt > 1 ? "channels are" :
+                "channel is");
+        vpage.add(selCount);
+        vpage.addBlankLines(2);
+        
+        addParams(pf);
 
         pf.setNoSubmit(true);
 
@@ -167,9 +162,6 @@ public class BaseChannelSelector extends GUISupport
         addListSelector(chanFiltSpec, compare, "Sample Frequency: ", "fs", ChanParts.getSampleRates(),
                         multipleSelections, getParameter("fs"), true);
 
-//        addListSelector(chanFiltSpec, null, "Channel Type: ", "ctype", ChanParts.getChanTypes(),
-//                        multipleSelections, getParameter("ctype"), true);
-        
         PageTableRow row = new PageTableRow();
         // first column is a label for this parameter(s)
         PageItemString lbl = new PageItemString("Channel name filter: ");
@@ -234,14 +226,13 @@ public class BaseChannelSelector extends GUISupport
         selections = getBaseChanSelections();   // see if they selected any channels so far
 
         int nsel = selections.size();
-        if (nsel > 0)
-        {
-            vpage.add(String.format("%1$,d channel%2$s selected.  ", nsel, (nsel > 1 ? "s are" : " is")));
-        }
-        
+         
         Float fs = fsStr.isEmpty() ? 0.f : Float.parseFloat(fsStr);
         
-        ChannelIndex cidx = new ChannelIndex(db);
+        if (cidx == null)
+        {
+            cidx = new ChannelIndex(db);
+        }
         int nMatch = cidx.getMatchCount(ifo, subsys, fsCmp, fs, cType, chnamefilt);
         
         if (nMatch == 0)
@@ -250,6 +241,16 @@ public class BaseChannelSelector extends GUISupport
         }
         else
         {
+            PageItemString whatToDo = new PageItemString("Select one or more sub channels, "
+                                                         + "then click on the Continue button.");
+            whatToDo.setClassName("processStep");
+            vpage.add(whatToDo);
+            vpage.addBlankLines(2);
+            if (nsel > 0)
+            {
+                vpage.add(String.format("%1$,d channel%2$s selected.  ", nsel, (nsel > 1 ? "s are" : " is")));
+            }
+
             processPageControls();
             
             strt = Math.min(strt, nMatch - 1);
@@ -279,6 +280,7 @@ public class BaseChannelSelector extends GUISupport
             pf.setAction(getServletPath());
             pf.addHidden("act", "baseChan");
             pf.addHidden("strt", Integer.toString(strt));
+            addParams(pf);
             // add in the hidden variables from the channel parts dialog
             String[] partsVariables =
             {
@@ -566,15 +568,15 @@ public class BaseChannelSelector extends GUISupport
     {
         String[] hdrAll =
         {
-            "Name", "Raw rate(s)", "RDS rate(s)", "Info links"
+            "Name", "Raw rate(s)", "RDS rate(s)"
         };
         String[] hdrRawRds =
         {
-            "Sel", "Name", "Type", "Rate(s)", "Info links"
+            "Sel", "Name", "Type", "Rate(s)"
         };
         String[] hdrTrend =
         {
-            "Name", "Type", "Trends", "Info links"
+            "Name", "Type", "Trends"
         };
 
         String[] hdr;
@@ -604,6 +606,21 @@ public class BaseChannelSelector extends GUISupport
             }
             r.add(new PageItemString(h, false));
         }
+        // Add info column, with help
+        PageItemList infoLinks = new PageItemList();
+        infoLinks.add("Info links");
+        try
+        {
+            HelpManager hm = new HelpManager(db, vpage, vuser);
+            hm.setContextPath(contextPath);
+            PageItemList helpButton = hm.getHelpButton("InfoLinks");
+            infoLinks.add(helpButton);
+        }
+        catch (LdvTableException | SQLException ex)
+        {
+            // just don't add the button if we can't get help
+        }
+        r.add(infoLinks);
         r.setRowType(PageTableRow.RowType.HEAD);
         r.addStyleAll("text-align", "center");
         return r;
@@ -937,6 +954,7 @@ public class BaseChannelSelector extends GUISupport
             try
             {
                 addBCSSelectRow(ret, bcs, odd);
+                odd = !odd;
             }
             catch (LdvTableException ex)
             {
@@ -1061,12 +1079,51 @@ public class BaseChannelSelector extends GUISupport
         }
         else
         {
-            r1.setClassAll("odd");
-            r2.setClassAll("odd");
+            r1.setClassAll("even");
+            r2.setClassAll("even");
         }
         tbl.addRow(r1);
         tbl.addRow(r2);
 
+    }
+
+    /**
+     * In order to remember parameters set for plots when they select more channels we copy almost
+     * everything to the form as hidden parameters.  It turns out to be easier and more robust to
+     * keep a list of parameters not to copy rather than the other way around.
+     * 
+     * @param pf - the form we're displaying this time
+     * @throws WebUtilException
+     */
+    private void addParams(PageForm pf) throws WebUtilException
+    {
+        HashSet<String> dontCopy = new HashSet<>();
+        dontCopy.add("act");
+        dontCopy.add("submit");
+        dontCopy.add("submitact");
+        dontCopy.add("selmore");
+        
+        boolean selmore = paramMap.containsKey("selMore");
+        HashSet<String> selMoreDontCopy = new HashSet<>();
+        selMoreDontCopy.add("ifo");
+        selMoreDontCopy.add("chnamefilt");
+        selMoreDontCopy.add("subsys");
+        
+        for(Entry<String,String[]> ent : paramMap.entrySet())
+        {
+            String key = ent.getKey();
+            if (!dontCopy.contains(key.toLowerCase()) && 
+                !(selmore && selMoreDontCopy.contains(key.toLowerCase())))
+            {
+                for(String val: ent.getValue())
+                {
+                    if (val != null && !val.isEmpty())
+                    {
+                        pf.addHidden(key, val);
+                    }
+                }
+            }
+        }
     }
     
 }
