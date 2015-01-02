@@ -36,7 +36,12 @@ class PluginStandardParameter extends PluginParameter
     @Override
     public String getStringVal()
     {
-        return val;
+        String ret = val;
+        if (lastVal != null && lastVal.length > 0)
+        {
+            ret = lastVal[0];
+        }
+        return ret;
     }
     @Override
     public PluginParameter setVal(String val)

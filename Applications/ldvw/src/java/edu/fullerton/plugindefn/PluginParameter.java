@@ -28,10 +28,10 @@ import java.util.ArrayList;
  */
 public abstract class PluginParameter
 {
-    private String formLabel;
-    private String formName;
-    private String comment;
-    private String argumentName;
+    private String formLabel;   // String label for display
+    private String formName;    // with prefix becomes the parameter name on the form
+    private String comment;     // additional information for display
+    private String argumentName;// argument name for command line program without --
  
     private String help;
     private Type type;
@@ -39,6 +39,7 @@ public abstract class PluginParameter
     protected int nDecimals;
 
     public final String fpRegex = "^((\\d+\\.?\\d*)|(\\.\\d+))([Ee][+-]?\\d+)?$";
+    protected String[] lastVal; // parameter value from submitted form
     
     
     public enum Type 
@@ -125,6 +126,10 @@ public abstract class PluginParameter
         this.type = type;
     }
 
+    /**
+     * Return the name of the command line argument for extrernal program
+     * @return argument name without --
+     */
     public String getArgumentName()
     {
         return argumentName;
@@ -140,7 +145,8 @@ public abstract class PluginParameter
 
     
     // the get/set methods must be overriden for the type appropriate for the class
-    // we define them ALL here so users deal only with the base class
+    // we define them ALL here so users deal only with the base class and derived classes
+    // only have to implement the ones they need.
     
     public boolean getBoolValue() 
     {
@@ -220,9 +226,14 @@ public abstract class PluginParameter
         nDecimals = n;
         return this;
     }
-    void setMax(double d)
+    /**
+     * set the last value returned by the client, so we can remember as we skip from page to page.
+     * @param param - value from the parameter map
+     */
+    public void setLastVal(String[] param)
     {
-        throw new UnsupportedOperationException("This parameter does not have that operation");
+        lastVal = param;
     }
 
+    
 }

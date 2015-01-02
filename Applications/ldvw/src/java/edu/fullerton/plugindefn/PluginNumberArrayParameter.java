@@ -84,29 +84,36 @@ class PluginNumberArrayParameter extends PluginParameter
     public String getStringVal()
     {
         String ret = "";
-        String fmt = String.format("%%1$.%1$df", nDecimals);
-        if (values.isEmpty() && ! stringDef.isEmpty())
+        if (lastVal != null && lastVal.length > 0)
         {
-            setStringVal(stringDef);
+            ret = lastVal[0];
         }
-        if (values.size() > 1)
+        else
         {
-            for(Double val: values)
+            String fmt = String.format("%%1$.%1$df", nDecimals);
+            if (values.isEmpty() && ! stringDef.isEmpty())
             {
-                ret += ret.isEmpty() ? "" : " ";
-                if (val.isInfinite())
+                setStringVal(stringDef);
+            }
+            if (values.size() > 1)
+            {
+                for(Double val: values)
                 {
-                    ret += "inf";
-                }
-                else
-                {
-                    ret += String.format(fmt,val);
+                    ret += ret.isEmpty() ? "" : " ";
+                    if (val.isInfinite())
+                    {
+                        ret += "inf";
+                    }
+                    else
+                    {
+                        ret += String.format(fmt,val);
+                    }
                 }
             }
-        }
-        else if (values.size() == 1)
-        {
-            ret = String.format(fmt,values.get(0));
+            else if (values.size() == 1)
+            {
+                ret = String.format(fmt,values.get(0));
+            }
         }
         return ret;
     }

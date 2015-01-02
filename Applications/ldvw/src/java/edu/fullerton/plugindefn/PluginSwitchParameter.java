@@ -38,6 +38,8 @@ class PluginSwitchParameter extends PluginParameter
     @Override
     public boolean getBoolValue()
     {
+        boolean ret = val;
+        
         return val;
     }
 

@@ -88,7 +88,11 @@ class PluginListParameter extends PluginParameter
         String formItemName = namespace + "_" + getFormName();
         PageFormSelect sel = new PageFormSelect(formItemName, getStringArrayValue());
         sel.setMultAllowed(getMultiSel());
-        if (! defaultVal.isEmpty())
+        if (lastVal != null && lastVal.length > 0)
+        {
+            sel.setSelected(lastVal);
+        }
+        else if (! defaultVal.isEmpty())
         {
             sel.setSelected(defaultVal);
         }

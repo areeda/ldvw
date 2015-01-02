@@ -83,18 +83,25 @@ class PluginNumberParameter extends PluginParameter
     public String getStringVal()
     {
         String ret = "";
-        String fmt = String.format("%%1$.%1$df", nDecimals);
-        
-        
-        if (val.isNaN() && !stringDef.isEmpty())
+        if (lastVal != null && lastVal.length > 0)
         {
-            setStringVal(stringDef);
+            ret = lastVal[0];
         }
-        
-        if (! val.isNaN())
+        else
         {
-            ret += ret.isEmpty() ? "" : " ";
-            ret += String.format(fmt, val);
+            String fmt = String.format("%%1$.%1$df", nDecimals);
+
+
+            if (val.isNaN() && !stringDef.isEmpty())
+            {
+                setStringVal(stringDef);
+            }
+
+            if (! val.isNaN())
+            {
+                ret += ret.isEmpty() ? "" : " ";
+                ret += String.format(fmt, val);
+            }
         }
         return ret;
     }
