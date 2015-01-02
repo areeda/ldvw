@@ -26,7 +26,6 @@ import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.viewerplugin.ChanDataBuffer;
 import edu.fullerton.ldvplugin.CoherenceManager;
 import edu.fullerton.ldvplugin.CrossSpectrumManager;
-import edu.fullerton.ldvplugin.LivePlotManager;
 import edu.fullerton.viewerplugin.GUISupport;
 import edu.fullerton.ldvplugin.OdcPlotManager;
 import edu.fullerton.viewerplugin.PlotProduct;
@@ -40,7 +39,6 @@ import edu.fullerton.ldvtables.ImageCoordinateTbl;
 import edu.fullerton.ldvtables.ImageGroupTable;
 import edu.fullerton.ldvtables.ImageTable;
 import edu.fullerton.ldvjutils.TimeInterval;
-import edu.fullerton.ldvplugin.ExternalPlotManager;
 import edu.fullerton.ldvtables.ChanPointerTable;
 import edu.fullerton.ldvtables.ChannelIndex;
 import edu.fullerton.ldvtables.ViewUser;
@@ -56,16 +54,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * manages the products we supply. Creates forms for the client to select products and set options.
+ * Manages the plot products we supply. Creates forms for the client to select products and set options.
  * Interprets returned form data. Calls the products whether internal classes or external plug ins.
  *
  * @author Joseph Areeda <joe@areeda.com>
@@ -195,12 +190,14 @@ public class PluginManager extends GUISupport
         
         // Add Time series
         TsPlot tsp = new TsPlot();
+        tsp.setParameters(paramMap);
         PageItemList tspPil = getSelectorContent(tsp,"doTimeSeries",nSel,multDisp);
         tspPil.setUseDiv(false);
         pfDiv.add(tspPil);
         
         // add Spectrum
         SpectrumPlot sp = new SpectrumPlot();
+        sp.setParameters(paramMap);
         sp.setup(db, vpage, vuser);
         PageItemList spPil = getSelectorContent(sp, "doSpectrum", nSel, multDisp);
         spPil.setUseDiv(false);
@@ -208,6 +205,7 @@ public class PluginManager extends GUISupport
         
         // add Spectrogram
         SpectrogramManager spgm = new SpectrogramManager( db, vpage, vuser);
+        spgm.setParameters(paramMap);
         PageItemList spgPil = getSelectorContent(spgm,"doSpectrogram",nSel, multDisp);
         spgPil.setUseDiv(false);
         pfDiv.add(spgPil);
@@ -215,39 +213,42 @@ public class PluginManager extends GUISupport
         // add Coherence
         CoherenceManager chm = new CoherenceManager(db,vpage,vuser);
         chm.setChanList(baseChans);
+        chm.setParammap(paramMap);
         PageItemList chmPil = getSelectorContent(chm, "doCoherence", nSel, multDisp);
         chmPil.setUseDiv(false);
         pfDiv.add(chmPil);
         
         // add Omega scan
         WplotManager wpm = new WplotManager(db, vpage, vuser);
+        wpm.setParammap(paramMap);
         PageItemList wpmPil = getSelectorContent(wpm, "doWplot", nSel, multDisp);
         wpmPil.setUseDiv(false);
         pfDiv.add(wpmPil);
         
         // add ODC plots
         OdcPlotManager odm = new OdcPlotManager(db, vpage, vuser);
+        odm.setParammap(paramMap);
         PageItemList odmPil = getSelectorContent(odm, "doOdc", nSel, multDisp);
         odmPil.setUseDiv(false);
         pfDiv.add(odmPil);
         
-        // add Long term trend plots
-        if (vuser.isTester())
-        {
-            TrendPlotManager tpm = new TrendPlotManager(db, vpage, vuser);
-            PageItemList tpmPil = getSelectorContent(tpm, "trndplt", nSel, multDisp);
-            tpmPil.setUseDiv(false);
-            pfDiv.add(tpmPil);
-        }
+//        // add Long term trend plots
+//        if (vuser.isTester())
+//        {
+//            TrendPlotManager tpm = new TrendPlotManager(db, vpage, vuser);
+//            PageItemList tpmPil = getSelectorContent(tpm, "trndplt", nSel, multDisp);
+//            tpmPil.setUseDiv(false);
+//            pfDiv.add(tpmPil);
+//        }
         
-        // add Cross Spectral Analysis
-        if (vuser.isTester())
-        {
-            CrossSpectrumManager csm = new CrossSpectrumManager(db, vpage, vuser);
-            PageItemList csmPil = getSelectorContent(csm, "csaplot", nSel, multDisp);
-            csmPil.setUseDiv(false);
-            pfDiv.add(csmPil);
-        }
+//        // add Cross Spectral Analysis
+//        if (vuser.isTester())
+//        {
+//            CrossSpectrumManager csm = new CrossSpectrumManager(db, vpage, vuser);
+//            PageItemList csmPil = getSelectorContent(csm, "csaplot", nSel, multDisp);
+//            csmPil.setUseDiv(false);
+//            pfDiv.add(csmPil);
+//        }
         
         //========= put new products above this line=========
         
@@ -1265,8 +1266,12 @@ public class PluginManager extends GUISupport
         PageItemList ret = new PageItemList();
         PageItem spPI = prod.getSelector(paramName, nSel, multDisp);
         spPI.setClassName("plotSelector");
+        PageItemString accordionLabel = new PageItemString(prod.getProductName() + ":");
+        String weight = prod.isSelected() ? "bold" : "normal";
+        accordionLabel.addStyle("font-weight", weight);
+        accordionLabel.setId(prod.getEnableKey() + "_accLbl");
 
-        ret.add(new PageItemHeader(prod.getProductName() + ":", 3));
+        ret.add(accordionLabel);
         
         ret.add(spPI);
         
