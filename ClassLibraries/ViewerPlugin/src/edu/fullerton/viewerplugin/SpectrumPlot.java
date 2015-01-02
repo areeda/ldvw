@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Joseph Areeda <joe@areeda.com>
+ * Copyright (C) 2012-2014 Joseph Areeda <joe@areeda.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.ChanInfo;
+import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.TimeAndDate;
 import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.viewerplugin.SpectrumCalc.Scaling;
@@ -38,7 +39,6 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -91,7 +91,14 @@ public
         ArrayList<Integer> ret = new ArrayList<>();
         if (parameterMap.containsKey("sp_newplt"))
         {
-            ret = makeAddPlotFiles(dbufs, compact);
+            try
+            {
+                ret = makeAddPlotFiles(dbufs, compact);
+            }
+            catch (LdvTableException ex)
+            {
+                throw new WebUtilException("Making spectrum plot: ", ex);
+            }
         }
         else
         {
@@ -104,8 +111,7 @@ public
             }
             catch (IOException | NoSuchAlgorithmException | SQLException ex)
             {
-                throw new WebUtilException("Creating spectrum plot: " + ex.getClass().getSimpleName() 
-                        + ": " + ex.getLocalizedMessage());
+                throw new WebUtilException("Making spectrum plot: ", ex);
             }
         }
         
@@ -292,7 +298,7 @@ public
             wantStacked = true;
         }
     }
-    public double[][] calcSpectrum(ChanDataBuffer dbuf)
+    public double[][] calcSpectrum(ChanDataBuffer dbuf) throws LdvTableException
     {
         
         long dlen = dbuf.getDataLength();
@@ -394,7 +400,7 @@ public
         }
         return spectrum;
     }
-    private float calcSpectrum(XYSeries xySeries, ChanDataBuffer dbuf)
+    private float calcSpectrum(XYSeries xySeries, ChanDataBuffer dbuf) throws LdvTableException
     {
         double[][] spectrum = calcSpectrum(dbuf);
         for (double[] spectrum1 : spectrum)
@@ -597,10 +603,18 @@ public
         };
         String[] lineThicknessOptions = { "1", "2", "3", "4" };
         
+        this.enableKey = enableKey;     // save for fancy page formatting
+        
         PageItemList ret = new PageItemList();
         String enableText = "Generate spectrum plot";
         enableText += nSel > 1 ? "s" : "";
-        ret.add(new PageFormCheckbox(enableKey,enableText ));
+        boolean enabled = getPrevValue(enableKey);
+        PageFormCheckbox cb = new PageFormCheckbox(enableKey, enableText, enabled);
+        cb.setId(enableKey + "_cb");
+        String fun = String.format("boldTextOnCheckbox('%1$s_cb','%1$s_accLbl')", enableKey);
+        cb.addEvent("onclick", fun);
+        ret.add(cb);
+
         ret.addBlankLines(1);
         ret.add("Set appropriate parameters.");
         ret.addBlankLines(1);
@@ -612,30 +626,38 @@ public
 
         // window and scaling
         PageFormSelect win = new PageFormSelect("window", windows);
+        String prevVal = getPrevValue("window", 0, windows[0]);
+        win.setSelected(prevVal);
         ptr = GUISupport.getObjRow(win, "Window:", "");
         product.addRow(ptr);
 
         PageFormSelect scale = new PageFormSelect("scaling", scalingNames);
+        prevVal = getPrevValue("scaling", 0, scalingNames[0]);
         ptr = GUISupport.getObjRow(scale, "Scaling:", "");
         product.addRow(ptr);
         
         PageFormSelect lineThicknessSelector = new PageFormSelect("sp_linethickness", lineThicknessOptions);
-        lineThicknessSelector.setSelected("2");
+        prevVal = getPrevValue("sp_linethickness", 0, "2");
+        lineThicknessSelector.setSelected(prevVal);
         ptr = GUISupport.getObjRow(lineThicknessSelector, "Line thickness: ", "");
         product.addRow(ptr);
 
         // length and overlap off fft
-        ptr = GUISupport.getTxtRow("secperfft", "Sec/fft:", "", 16, "1.0");
+        prevVal = getPrevValue("secperfft", 0, "1.0");
+        ptr = GUISupport.getTxtRow("secperfft", "Sec/fft:", "", 16, prevVal);
         product.addRow(ptr);
         
-        ptr = GUISupport.getTxtRow("fftoverlap", "Overlap fraction [0-1):", "", 16, "0.5");
+        prevVal = getPrevValue("fftoverlap", 0, "0.5");
+        ptr = GUISupport.getTxtRow("fftoverlap", "Overlap fraction [0-1):", "", 16, prevVal);
         product.addRow(ptr);
 
         // frequncy axis limits
-        ptr = GUISupport.getTxtRow("fmin", "Min freq:", "Leave blank for auto", 16, "");
+        prevVal = getPrevValue("fmin", 0, "");
+        ptr = GUISupport.getTxtRow("fmin", "Min freq:", "Leave blank for auto", 16, prevVal);
         product.addRow(ptr);
 
-        ptr = GUISupport.getTxtRow("fmax", "Max freq:", "Leave blank for auto", 16, "");
+        prevVal = getPrevValue("fmax", 0, "");
+        ptr = GUISupport.getTxtRow("fmax", "Max freq:", "Leave blank for auto", 16, prevVal);
         product.addRow(ptr);
         
         // do we want axis to be logarithmic
@@ -647,16 +669,15 @@ public
         ptr = GUISupport.getObjRow(logy, "", "");
         product.addRow(ptr);
         
-        PageFormCheckbox dnld = new PageFormCheckbox("sp_dnld", "Download spectrum as CSV", false);
+        enabled = getPrevValue("sp_dnld");
+        PageFormCheckbox dnld = new PageFormCheckbox("sp_dnld", "Download spectrum as CSV", enabled);
         ptr = GUISupport.getObjRow(dnld, "", "No plots will be produced and 1 series only can be selected");
         product.addRow(ptr);
 
-        if (vuser.isTester())
-        {
-            PageFormCheckbox newPlt = new PageFormCheckbox("sp_newplt", "Use new plot functions", true);
-            ptr = GUISupport.getObjRow(newPlt, "", "Uncheck to use classic plots, leave for new routines");
-            product.addRow(ptr);
-        }
+        PageFormCheckbox newPlt = new PageFormCheckbox("sp_newplt", "Use new plot functions", true);
+        ptr = GUISupport.getObjRow(newPlt, "", "Uncheck to use classic plots, leave for new routines");
+        product.addRow(ptr);
+
         ret.add(product);
 
         return ret;
@@ -749,10 +770,11 @@ public
      * @param compact minimize label because output image will be small
      * @return 
      */
-    private ArrayList<Integer> makeAddPlotFiles(ArrayList<ChanDataBuffer> dbufs, boolean compact) throws WebUtilException
+    private ArrayList<Integer> makeAddPlotFiles(ArrayList<ChanDataBuffer> dbufs, boolean compact) throws WebUtilException, LdvTableException
     {
         ExternalProgramManager epm = new ExternalProgramManager();
         ArrayList<Integer> ret = new ArrayList<>();
+        float fsMax=0;
         try
         {
             ArrayList<String> cmd = new ArrayList<>();
@@ -786,18 +808,12 @@ public
                 File spFile = epm.writeTempCSV("Spectrum_", spectrum);
                 String fTitle = "";
                 String fLegend = "";
-                if (sameChannel && !sameTime)
-                {
-                    long gps = buf.getTimeInterval().getStartGps();
-                    String utc = TimeAndDate.gpsAsUtcString(gps);
-                    fTitle = String.format("%1$s (%2$d)",utc, gps);
-                    fLegend = String.format("%1$s", gps);
-                }
-                else if (!sameChannel && sameTime)
+                float fs = buf.getChanInfo().getRate();
+                fsMax = Math.max(fsMax, fs);
+                if (!sameChannel)
                 {
                     String chanName = buf.getChanInfo().getChanName();
                     String chanFs;
-                    float fs = buf.getChanInfo().getRate();
                     if (fs >= 1)
                     {
                         chanFs = String.format("%1$.0f Hz", fs);
@@ -810,8 +826,13 @@ public
                     {
                         fTitle += ", ";
                     }
-                    fTitle = String.format("%1$s at %2$s", chanName, chanFs);
-                    fLegend = chanName;
+                    fLegend += String.format("%1$s at %2$s ", chanName, chanFs);
+                }
+                if (!sameTime)
+                {
+                    long gps = buf.getTimeInterval().getStartGps();
+                    String utc = TimeAndDate.gpsAsUtcString(gps);
+                    fLegend += String.format("%1$s (%2$d)",utc, gps);
                 }
                 spectra.add(new genPlotInfo(spFile, fTitle, fLegend));
             }
@@ -826,10 +847,16 @@ public
                 cmd.add(f.getCanonicalPath());
                 if (!sameChannel || !sameTime )
                 {
-                    cmd.add("--title");
-                    cmd.add(gpi.title);
-                    cmd.add("--legend");
-                    cmd.add(gpi.legend);
+                    if (gpi.title.length() > 0)
+                    {
+                        cmd.add("--title");
+                        cmd.add(gpi.title);
+                    }
+                    if (gpi.legend.length() > 0)
+                    {
+                        cmd.add("--legend");
+                        cmd.add(gpi.legend);
+                    }
                 }
             }
             // add and output file
@@ -844,8 +871,29 @@ public
             {
                 cmd.add("--logx");
             }
+            if (height > 100 && width > 100)
+            {
+                cmd.add("--geometry");
+                cmd.add(String.format("%1$dx%2$d", width, height));
+            }
+            if (fmin > 0)
+            {
+                cmd.add("--xmin");
+                cmd.add(String.format("%1$.2f", fmin));
+            }
+            if (fmax < fsMax && fmax > 0)
+            {
+                cmd.add("--xmax");
+                cmd.add(String.format("%1$.2f",fmax));
+            }
             // add the super title
             String supTitle = "Spectrum plot";
+            long dur = dbufs.get(0).getTimeInterval().getDuration();            
+            String durStr = String.format("%1$,d s", dur);
+            if (dur >= 3600)
+            {
+                durStr = TimeAndDate.hrTime(dur);
+            }
             if (!multiPlot)
             {
                 supTitle = getTitle(dbufs, false);
@@ -853,9 +901,9 @@ public
             else if (!sameChannel && sameTime)
             {
                 long gps = dbufs.get(0).getTimeInterval().getStartGps();
-                long dur = dbufs.get(0).getTimeInterval().getDuration();
-                supTitle = String.format("%1$s (%2$d) t = %3$d",TimeAndDate.gpsAsUtcString(gps),
-                                         gps,dur);
+
+                supTitle = String.format("%1$s (%2$d) t = %3$s",TimeAndDate.gpsAsUtcString(gps),
+                                         gps,durStr);
             }
             else if (sameChannel && !sameTime)
             {
@@ -869,8 +917,12 @@ public
                 {
                     chanFs = String.format("%1$.3f", fs);
                 }
-                supTitle = String.format("%1$s at %2$s Hz", 
-                                         dbufs.get(0).getChanInfo().getChanName(), chanFs);
+                supTitle = String.format("%1$s at %2$s Hz, t=%3$s", 
+                                         dbufs.get(0).getChanInfo().getChanName(), chanFs, durStr);
+            }
+            else if (!sameChannel && !sameTime)
+            {
+                supTitle = "Spectrum plot";
             }
             cmd.add("--suptitle");
             cmd.add(supTitle);
