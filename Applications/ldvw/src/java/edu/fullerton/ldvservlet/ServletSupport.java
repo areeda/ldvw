@@ -295,104 +295,12 @@ public class ServletSupport
     public void addNavBar() throws WebUtilException
     {
         String mainHelpUrl = getHelpUrl();
-        // Top row commands 2 element rows "Text", "get parameters" or "http*://"
-        String[][] commands =
-        {
-            {
-                "Home", "basechan"
-            },
-            {
-                "Saved Plots", "ImageHistory&amp;size=med"
-            },
-            {
-                "Chan Stats", "ChannelStats"
-            },
-            {
-                "NDS Status", "ndsStatus"
-            },
-            {
-                "Upload", "upload"
-            },
-            {
-                "Help", mainHelpUrl
-            },
-            {
-                "Contact Us", "contactUs"
-            }
-        };
-        // Commands only available to admin group
-        String[][] adminCommands =
-        {
-            {
-                "User Stats", "Stats"
-            },
-            {
-                "Edit Help", "EditHelp"
-            },
-            {
-                "DB stats", "dbstats"
-            },
-            
-            {
-                "Servers", "serverManager"
-            }
-        };
-        // commands available to admins or testers
-        String[][] experimentalCommands =
-        {
-            {
-                "Base channel selector", "baseChan"
-            }
-        };
+        NavBar navBar = new NavBar();
+        navBar.setLink("Help", mainHelpUrl);
+        
+        PageItem nav = navBar.getNavBar(contextPath, vuser.isTester(), vuser.isAdmin());
 
-        PageItem navBar;
-
-        PageItemBSNavBar bsnav = new PageItemBSNavBar();
-        String baseUrl = contextPath + "/view?act=";
-        String cmdUrl;
-
-        for (String[] command : commands)
-        {
-            if (!command[0].isEmpty() && !command[1].isEmpty())
-            {
-                if (command[1].matches("^http.?://.*"))
-                {
-                    bsnav.addLink(command[1], command[0], "_blank");
-                }
-                else
-                {
-                    cmdUrl = baseUrl + command[1];
-                    bsnav.addLink(cmdUrl, command[0]);
-                }
-            }
-        }
-
-        if (vuser.isTester())
-        {
-            bsnav.createNewSubmenu("Experimental");
-
-            for (String[] command : experimentalCommands)
-            {
-                cmdUrl = baseUrl + command[1];
-                bsnav.addSubmenuLink(cmdUrl, command[0]);
-            }
-            bsnav.addCurSubmenu();
-        }
-        if (vuser.isAdmin())
-        {
-            bsnav.createNewSubmenu("Admin");
-
-            for (String[] command : adminCommands)
-            {
-                cmdUrl = baseUrl + command[1];
-                bsnav.addSubmenuLink(cmdUrl, command[0]);
-            }
-            bsnav.addCurSubmenu();
-        }
-
-        navBar = bsnav;
-
-        vpage.add(navBar);
+        vpage.add(nav);
         vpage.addBlankLines(2);
     }
 
