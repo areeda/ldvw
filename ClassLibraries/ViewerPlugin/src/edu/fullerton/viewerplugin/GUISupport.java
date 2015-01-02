@@ -18,16 +18,21 @@ package edu.fullerton.viewerplugin;
 
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.*;
+import edu.fullerton.ldvjutils.BaseChanSelection;
+import edu.fullerton.ldvjutils.ChanIndexInfo;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ChanPointerTable;
+import edu.fullerton.ldvtables.ChannelIndex;
 import edu.fullerton.ldvtables.ChannelTable;
 import edu.fullerton.ldvtables.ViewUser;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,6 +67,16 @@ public class GUISupport
         paramMap = pmap;
     }
 
+    public String getParameter(String pname)
+    {
+        String ret = null;
+        String[] vals = paramMap.get(pname);
+        if (vals != null && vals.length >0)
+        {
+            ret = vals[0];
+        }
+        return ret;
+    }
     /**
      * The context path is where we get root files like css and js
      * @param context 
@@ -140,7 +155,7 @@ public class GUISupport
         else if (selType.equalsIgnoreCase("selbchan"))
         {
             // base channels and perhaps channel type are selected
-            getBaseChanSelections(selections);
+            getBChanSelAsChanIds(selections);
         }
         else
         {
@@ -148,7 +163,64 @@ public class GUISupport
         }
         return selections;
     }
+    public Map<Integer, BaseChanSelection> getBaseSelections() throws WebUtilException
+    {
+        Map<Integer, BaseChanSelection> ret = new HashMap<>();
+        try
+        {
+            ChannelIndex cidx = new ChannelIndex(db);
+            
+            Pattern trendPat = Pattern.compile("(second|minute)-trend_(\\d+)", Pattern.CASE_INSENSITIVE);
+            Pattern singlePat = Pattern.compile("(raw|online|static|testpoint|rds)_(\\d+)", Pattern.CASE_INSENSITIVE);
 
+            for (Entry<String, String[]> ent : paramMap.entrySet())
+            {
+                String pname = ent.getKey();
+                Matcher trendMatch = trendPat.matcher(pname.toLowerCase());
+                Matcher singleMatch = singlePat.matcher(pname.toLowerCase());
+                if (singleMatch.find())
+                {
+                    int chanIdx = Integer.parseInt(singleMatch.group(2));
+                    BaseChanSelection bcs = ret.get(chanIdx);
+                    if (bcs == null)
+                    {
+                        ChanIndexInfo cii = cidx.getInfo(chanIdx);
+                        bcs = new BaseChanSelection();
+                        bcs.init(cii);
+                    }
+                    bcs.setSingleSel(singleMatch.group(1));
+                    ret.put(chanIdx, bcs);
+                }
+                if (trendMatch.find())
+                {
+                    String trendType = trendMatch.group(1);
+                    int chanIdx = Integer.parseInt(trendMatch.group(2));
+                    BaseChanSelection bcs = ret.get(chanIdx);
+                    if (bcs == null)
+                    {
+                        ChanIndexInfo cii = cidx.getInfo(chanIdx);
+                        bcs = new BaseChanSelection();
+                        bcs.init(cii);
+                    }
+                    String[] trendVals = ent.getValue();
+                    if (trendVals != null && trendVals.length > 0)
+                    {
+                        String ttype = trendVals[0];
+                        if (!ttype.equalsIgnoreCase("none"))
+                        {
+                            bcs.setTrend(trendType,ttype );
+                            ret.put(chanIdx, bcs);
+                        }
+                    }
+                }
+            }
+        }
+        catch (SQLException | NumberFormatException | LdvTableException ex)
+        {
+            throw new WebUtilException("Getting base channel selections", ex);
+        }
+        return ret;
+    }
     /**
      * Add current selections to the form as hidden items
      * 
@@ -347,8 +419,12 @@ public class GUISupport
         }
         return ret;
     }
-
-    private void getBaseChanSelections(HashSet<Integer> selections) throws WebUtilException
+    /**
+     * Add classic channel IDs to the list from base channel selections
+     * @param selections
+     * @throws WebUtilException 
+     */
+    private void getBChanSelAsChanIds(HashSet<Integer> selections) throws WebUtilException
     {
         String cType = null;
         if (paramMap != null)
@@ -368,8 +444,8 @@ public class GUISupport
         try
         {
             cpt = new ChanPointerTable(db);
-            Pattern trendPat = Pattern.compile("(second|minute)-trend_(\\d+)");
-            Pattern singlePat = Pattern.compile("(raw|online|static|testpoint|rds)_(\\d+)");
+            Pattern trendPat = Pattern.compile("(second|minute)-trend_(\\d+)", Pattern.CASE_INSENSITIVE);
+            Pattern singlePat = Pattern.compile("(raw|online|static|testpoint|rds)_(\\d+)", Pattern.CASE_INSENSITIVE);
             
             for (Entry<String, String[]> ent : paramMap.entrySet())
             {
