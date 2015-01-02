@@ -121,6 +121,26 @@ public class PageFormSelect extends PageFormItem
         this.multAllowed = multAllowed;
     }
 
+    /**
+     * If multiple selections are allowed sets all from the array.  If not the first is used.
+     * 
+     * @param options - null or empty array does nothing
+     */
+    public void setSelected(String[] options)
+    {
+        if (options != null && options.length > 0)
+        {
+            for(String option : options)
+            {
+                setSelected(option);
+            }
+        }
+    }
+    /**
+     * Select a single option from option list.
+     * Note: if mutliple selections are allowed this can be called several times.
+     * @param nam - exact match for option
+     */
     public void setSelected(String nam)
     {
         for(Option o : options)
