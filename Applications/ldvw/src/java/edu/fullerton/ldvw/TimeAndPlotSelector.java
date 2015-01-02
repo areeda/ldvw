@@ -98,6 +98,7 @@ public class TimeAndPlotSelector extends GUISupport
         PluginManager pmanage = new PluginManager(db, vpage, vuser, paramMap);
         pmanage.setContextPath(contextPath);
         pmanage.setServletPath(servletPath);
+        pmanage.setParamMap(paramMap);
 
         PageItem chanSelector;
         if (selType.equalsIgnoreCase("selchan"))
@@ -167,7 +168,9 @@ public class TimeAndPlotSelector extends GUISupport
 
             tsRow.add("Group by:  ");
             PageFormSelect pltGroup = new PageFormSelect("plotGroup");
+            String grp = getPrevValue("plotGroup", 0, pltGroups[0]);
             pltGroup.add(pltGroups);
+            pltGroup.setSelected(grp);
             tsRow.add(pltGroup);
 
             HelpManager helpManager = new HelpManager(db, vpage, vuser);
@@ -280,29 +283,27 @@ public class TimeAndPlotSelector extends GUISupport
         helpManager.setParamMap(paramMap);
 
         PageItem strtHelpBtn = helpManager.getHelpButton("startTime");
+        String strtStr = TimeAndDate.nowAsUtcString(-10 * 60 * 1000);
+        strtStr = getPrevValue("strtTime",0,strtStr);
         timeSpecTbl.addRow(GUISupport.getTxtRow("strtTime", "Start time:", "(gps or YYYY-MM-DD HH:MM)", 
-                                          itemWidth, TimeAndDate.nowAsUtcString(-10 * 60 * 1000),
-                                          strtHelpBtn));
+                                          itemWidth, strtStr,strtHelpBtn));
         PageTableRow moreTimes;
-        moreTimes = getLabelTxtRow("strtTime", "Start time:", "(gps or YYYY-MM-DD HH:MM)", itemWidth, "");
-        moreTimes.setClassName("moreTimes");
-        moreTimes.addStyle("display", "none");
-        timeSpecTbl.addRow(moreTimes);
-        
-        moreTimes = getLabelTxtRow("strtTime", "Start time:", "(gps or YYYY-MM-DD HH:MM)", itemWidth, "");
-        moreTimes.setClassName("moreTimes");
-        moreTimes.addStyle("display", "none");
-        timeSpecTbl.addRow(moreTimes);
-
-        moreTimes = getLabelTxtRow("strtTime", "Start time:", "(gps or YYYY-MM-DD HH:MM)", itemWidth, "");
-        moreTimes.setClassName("moreTimes");
-        moreTimes.addStyle("display", "none");
-        timeSpecTbl.addRow(moreTimes);
+        int nTimes=4;
+        for (int i=1;i<= nTimes; i++)
+        {
+            strtStr=getPrevValue("strtTime", i, "");
+            moreTimes = getLabelTxtRow("strtTime", "Start time:", "(gps or YYYY-MM-DD HH:MM)", 
+                                       itemWidth, strtStr);
+            moreTimes.setClassName("moreTimes");
+            moreTimes.addStyle("display", "none");
+            timeSpecTbl.addRow(moreTimes);
+        }
         
         PageItem durHelpBtn = helpManager.getHelpButton("duration");
 
+        String durStr=getPrevValue("duration", 0, "20");
         timeSpecTbl.addRow(GUISupport.getTxtRow("duration", "Duration", "(day HH:MM:SS or sec)", 
-                                                itemWidth, "20",durHelpBtn));
+                                                itemWidth, durStr, durHelpBtn));
 
         PageTableRow rpt = new PageTableRow();
         PageItemString rptLbl = new PageItemString("Repeat every:");
@@ -315,19 +316,23 @@ public class TimeAndPlotSelector extends GUISupport
 
         PageFormText pft = new PageFormText("repeatDur", "");
         pft.setMaxLen(255);
-        pft.setSize(itemWidth-10);        
-        pft.setDefaultValue("0");
+        pft.setSize(itemWidth-10); 
+        String val=getPrevValue("repeatDur", 0, "0");
+        pft.setDefaultValue(val);
         rptLst.add(pft);
 
         PageFormSelect rptUnit = new PageFormSelect("repeatUnit");
         rptUnit.add(durUnits);
+        val = getPrevValue("repeatUnit", 0, durUnits[0]);
+        rptUnit.setSelected(val);
         rptLst.add(rptUnit);
         rpt.add(rptLst);
         rpt.add("");
         rpt.setClassAll("noborder");
         timeSpecTbl.addRow(rpt);
         
-        rpt = getLabelTxtRow("rptCnt", "Repeat count:", "" , itemWidth, "1");
+        val = getPrevValue("rptCnt", 0, "1");
+        rpt = getLabelTxtRow("rptCnt", "Repeat count:", "" , itemWidth, val);
         rpt.setClassName("repeatOptions");
         rpt.addStyle("display", "none");
         timeSpecTbl.addRow(rpt);
@@ -365,15 +370,15 @@ public class TimeAndPlotSelector extends GUISupport
         {
             "strtTime", "duration", "repeatDur", "repeatUnit", "rptCnt"
         };
-        long[] startGps;
+        Double[] startGps;
         long duration;
         long repeatDur;
         long repeatUnit;  // converted to seconds
-        long rptCnt;       // they better not expect a larger value that can be stored in an int
+        long rptCnt;
 
         String[] str = paramMap.get(ourParams[0]);
-        startGps = TimeAndDate.getGPS(str);
-        if (startGps == null)
+        startGps = TimeAndDate.getGPSDouble(str);
+        if (startGps == null || startGps.length == 0)
         {
             String dateStr = "";
             if (str != null && str.length > 0)
@@ -418,8 +423,8 @@ public class TimeAndPlotSelector extends GUISupport
             {
                 for(int i=0;i<startGps.length;i++)
                 {
-                    long strt = startGps[i] + r * repeatDur * repeatUnit;
-                    long stop = strt + duration;
+                    Double strt = startGps[i] + r * repeatDur * repeatUnit;
+                    Double stop = strt + duration;
                     TimeInterval ti = new TimeInterval(strt, stop);
                     times.add(ti);
                 }
@@ -657,5 +662,24 @@ public class TimeAndPlotSelector extends GUISupport
         selClrBar.addRow(selClrRow);
 
         return selClrBar;
+    }
+
+    /**
+     * As part of remembering where we came from, form values are passed back and forth to 
+     * select more.  Here we use the previous value or default for the specified key
+     * @param key - Parameter name for this field
+     * @param idx - Index into value array, 0 if only 1 value allowed
+     * @param def - default value if no parameter or parameter is empty
+     * @return 
+     */
+    private String getPrevValue(String key, int idx, String def)
+    {
+        String ret = def;
+        String[] prev = paramMap.get(key);
+        if (prev != null && prev.length > idx && !prev[0].isEmpty())
+        {
+            ret = prev[idx];
+        }
+        return ret;
     }
 }
