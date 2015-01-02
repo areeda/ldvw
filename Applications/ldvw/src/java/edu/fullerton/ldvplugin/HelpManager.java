@@ -21,6 +21,7 @@ import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageForm;
 import edu.fullerton.jspWebUtils.PageFormButton;
 import edu.fullerton.jspWebUtils.PageFormSelect;
+import edu.fullerton.jspWebUtils.PageItemImage;
 import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.PageTable;
@@ -49,6 +50,7 @@ public class HelpManager  extends GUISupport
     private String location;
     private String title;
     private String helpTxt;
+    
 
     /**
      * Constructor with necessary objects for our servlets
@@ -68,6 +70,7 @@ public class HelpManager  extends GUISupport
         location = "";
         title = "";
         helpTxt = "";
+        
     }
 
     public void editHelp() throws WebUtilException, LdvTableException
@@ -186,8 +189,9 @@ public class HelpManager  extends GUISupport
         helpDiv.add(closeBtn);
         helpDiv.setClassName("helpTxt");
         helpDiv.setId(hi.getName());
-        PageFormButton btn = new PageFormButton("help_"+hi.getName(),"?","");
-        btn.setType("button");
+        PageItemImage btn = new PageItemImage(getContextPath() + "/help.png", "help", "");
+        btn.setDim(14, 14);
+        
         String dispTitle = hi.getTitle();
         if (vuser.isAdmin())
         {
