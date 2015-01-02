@@ -66,12 +66,14 @@ public class ExternalPlotManager extends ExternalProgramManager
     protected Page vpage;
     protected ViewUser vuser;
     private ImageCoordinate imgCoord;
+    protected String enableKey;
     
     public ExternalPlotManager( Database db, Page vpage, ViewUser vuser)
     {
         this.db = db;
         this.vpage = vpage;
         this.vuser = vuser;
+        enableKey = "no way should this string be a key in the parameter map";
     }
 
     public void setup(Database db, Page vpage, ViewUser vuser)
@@ -86,6 +88,10 @@ public class ExternalPlotManager extends ExternalProgramManager
         this.paramMap = parammap;
     }
 
+    public void setParameters(Map<String, String[]> parameterMap)
+    {
+        setParammap(parameterMap);
+    }
     public void setContextPath(String contextPath)
     {
         this.contextPath = contextPath;
@@ -96,7 +102,51 @@ public class ExternalPlotManager extends ExternalProgramManager
         this.servletPath = servletPath;
     }
 
-    
+    public boolean isSelected()
+    {
+        boolean ret = false;
+        if (paramMap != null)
+        {
+            ret = paramMap.containsKey(enableKey);
+        }
+        return ret;
+    }
+    public String getEnableKey()
+    {
+        return enableKey;
+    }
+    /**
+     * As part of remembering where we came from, form values are passed back and forth to select
+     * more. Here we use the previous value or default for the specified key
+     *
+     * @param key - Parameter name for this field
+     * @param idx - Index into value array, 0 if only 1 value allowed
+     * @param def - default value if no parameter or parameter is empty
+     * @return
+     */
+    public String getPrevValue(String key, int idx, String def)
+    {
+        String ret = def;
+        String[] prev = paramMap.get(key);
+        if (prev != null && prev.length > idx && !prev[0].isEmpty())
+        {
+            ret = prev[idx];
+        }
+        return ret;
+    }
+
+    /**
+     * Checkboxes are a bit difficult because their key only gets sent if it's checked. So we don't
+     * really know if it's the first time thru with no values for anything or they unchecked it.
+     *
+     * @param key - parameter name
+     * @return true if parameter is available
+     */
+    public boolean getPrevValue(String key)
+    {
+        boolean ret = paramMap.containsKey(key);
+        return ret;
+    }
     /**
      * Call an external (command line) program that produces a single image.  Store the image in our 
      * Image table and add it to the results page
