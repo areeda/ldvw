@@ -64,7 +64,7 @@ public class WplotDefinition extends PluginController
             p.setArgumentName("ndsServer");
             addParameter(p);
 
-            p = ParameterFactory.buildParam(PluginParameter.Type.STANDARD, "start", null, null);
+            p = ParameterFactory.buildParam(PluginParameter.Type.STANDARD, "startDbl", null, null);
             p.setArgumentName("eventTime");
             addParameter(p);
 
