@@ -163,12 +163,17 @@ public class PageTableRow extends PageItem
             col.setAlign(algn);
         }
     }
-    public void setClassAll(String id)
+    /**
+     * Set the class of this row and all columns in the row
+     * @param className name of the CSS class
+     */
+    public void setClassAll(String className)
     {
         for(PageTableColumn col : cols)
         {
-            col.setClassName(id);
+            col.setClassName(className);
         }
+        setClassName(className);
     }
     public void addStyleAll(String style, String val) throws WebUtilException
     {
