@@ -24,7 +24,6 @@ import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
-import edu.fullerton.plugindefn.PluginController;
 import edu.fullerton.plugindefn.WplotDefinition;
 import edu.fullerton.viewerplugin.ChanDataBuffer;
 import edu.fullerton.viewerplugin.PlotProduct;
@@ -32,8 +31,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -63,7 +60,8 @@ public class WplotManager extends ExternalPlotManager implements PlotProduct
     public PageItemList getSelector(String enableKey,int nSel, String[] multDisp) throws WebUtilException
     {
         WplotDefinition wpd = new WplotDefinition();
-        
+        this.enableKey = enableKey;
+        wpd.setFormParameters(paramMap);
         PageItemList ret = wpd.getSelector(enableKey, nSel);
         return ret;
     }
