@@ -23,6 +23,7 @@ import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.TimeAndDate;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -37,6 +38,8 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.NumberTickUnit;
+import org.jfree.chart.axis.TickUnit;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -56,12 +59,11 @@ import org.jfree.data.xy.XYSeriesCollection;
  */
 public class TsPlot extends PluginSupport implements PlotProduct
 {
-
-    private boolean wantStacked = false;
     private boolean addLinFit;
     private String timeAxis;
     private String xAxisLabel="Time";
     private int lineThickness=2;
+    private boolean wantStacked;
 
     public TsPlot()
     {
@@ -73,130 +75,133 @@ public class TsPlot extends PluginSupport implements PlotProduct
         int imageId;
         try
         {
-            String gtitle = getTitle(dbufs,compact);
-            
-            XYSeriesCollection xyds = new XYSeriesCollection();
-            TimeSeriesCollection mtds = new TimeSeriesCollection();
-
-            compact = dbufs.size() > 2 ? false : compact;
-            for (ChanDataBuffer dbuf : dbufs)
+            if (parameterMap.containsKey("ts_newplt"))
             {
+                imageId = makeAddPlotFiles(dbufs, compact);
+            }
+            else
+            {
+                String gtitle = getTitle(dbufs,compact);
+
+                XYSeriesCollection xyds = new XYSeriesCollection();
+                TimeSeriesCollection mtds = new TimeSeriesCollection();
+
+                compact = dbufs.size() > 2 ? false : compact;
+                for (ChanDataBuffer dbuf : dbufs)
+                {
+                    if (timeAxis.equalsIgnoreCase("utc"))
+                    {
+                        addTimeSeries(dbuf, compact, mtds);
+                    }
+                    else
+                    {
+                        addXySeries(dbuf,compact,xyds);
+                    }
+                }
+                Double minx,miny,maxx,maxy;
+                Double[] rng = new Double[4];
+
                 if (timeAxis.equalsIgnoreCase("utc"))
                 {
-                    addTimeSeries(dbuf, compact, mtds);
+                    PluginSupport.getRangeLimits(mtds, rng);
                 }
                 else
                 {
-                    addXySeries(dbuf,compact,xyds);
+                    PluginSupport.getRangeLimits(xyds, rng, 0);
                 }
-            }
-            Double minx,miny,maxx,maxy;
-            Double[] rng = new Double[4];
-            
-            if (timeAxis.equalsIgnoreCase("utc"))
-            {
-                PluginSupport.getRangeLimits(mtds, rng);
-            }
-            else
-            {
-                PluginSupport.getRangeLimits(xyds, rng, 0);
-            }
-            minx = rng[0];
-            miny = rng[1];
-            maxx = rng[2];
-            maxy = rng[3];
-            
-            int exp;
-            if (timeAxis.equalsIgnoreCase("utc"))
-            {
-                exp = PluginSupport.scaleRange(mtds,miny,maxy);
-            }
-            else
-            {
-                exp = PluginSupport.scaleRange(xyds,miny,maxy);
-            }
-            
-            ChartPanel cpnl;
-            DefaultXYDataset ds = new DefaultXYDataset();
-            JFreeChart chart;
-            if (timeAxis.equalsIgnoreCase("utc"))
-            {
-                chart = ChartFactory.createTimeSeriesChart(gtitle, "Time (UTC)", "Amplitude (Counts)", ds, true, true, false);
-            }
-            else
-            {
-                chart = ChartFactory.createXYLineChart(gtitle, xAxisLabel, "Amplitude (Counts)", ds, PlotOrientation.VERTICAL, true, false, false);
-            }
-            
-            XYPlot plot = (XYPlot) chart.getPlot();
-            NumberAxis rangeAxis = new NumberAxis("Amplitude (Counts)");
-            ScaledAxisNumberFormat sanf = new ScaledAxisNumberFormat();
-            sanf.setExp(exp);
-            if ( maxy != 0 && Math.abs(maxy-miny) < Math.abs(maxy) * 1e-30)
-            {
-                // this garbage is to get jFreeChart to put labels on the Y axis
-                double dt = Math.abs(miny)/10;
-                double scaledMin = (miny - dt) * Math.pow(10., exp);
-                double scaledMax = (maxy + dt) * Math.pow(10., exp);
-                rangeAxis.setRange(scaledMin, scaledMax);
-                rangeAxis.setAutoRange(false);
-            }
-            else
-            {
-                sanf.setMinMax(miny, maxy);
-                rangeAxis.setAutoRange(true);
-            }
-            rangeAxis.setNumberFormatOverride(sanf);
-            rangeAxis.setAutoRangeIncludesZero(false);
-            plot.setRangeAxis(rangeAxis);
-            
-            if (timeAxis.equalsIgnoreCase("utc"))
-            {
-                plot.setDataset(0, mtds);
-                
-            }
-            else
-            {
-                plot.setDataset(0, xyds);
-            }
-            // Set the line thickness
-            XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
-            BasicStroke str = new BasicStroke(lineThickness);
-            int n = plot.getSeriesCount();
-            for (int i = 0; i < n; i++)
-            {
-                r.setSeriesStroke(i, str);
-            }
-            plot.setBackgroundPaint(Color.WHITE);
-            // add 
-            plot.setDomainGridlinesVisible(true);
-            plot.setDomainGridlinePaint(Color.BLACK);
-            plot.setRangeGridlinesVisible(true);
-            plot.setRangeGridlinePaint(Color.BLACK);
-            
-            r.setBaseFillPaint(Color.WHITE);
-            if (compact)
-            {
-                chart.removeLegend();
-            }
-            
-            chart.setBackgroundPaint(Color.WHITE);
+                minx = rng[0];
+                miny = rng[1];
+                maxx = rng[2];
+                maxy = rng[3];
 
-            cpnl = new ChartPanel(chart);
-            imageId = saveImageAsPNG(cpnl);
+                int exp;
+                if (timeAxis.equalsIgnoreCase("utc"))
+                {
+                    exp = PluginSupport.scaleRange(mtds,miny,maxy);
+                }
+                else
+                {
+                    exp = PluginSupport.scaleRange(xyds,miny,maxy);
+                }
 
+                ChartPanel cpnl;
+                DefaultXYDataset ds = new DefaultXYDataset();
+                JFreeChart chart;
+                if (timeAxis.equalsIgnoreCase("utc"))
+                {
+                    chart = ChartFactory.createTimeSeriesChart(gtitle, "Time (UTC)", "Amplitude (Counts)", ds, true, true, false);
+                }
+                else
+                {
+                    chart = ChartFactory.createXYLineChart(gtitle, xAxisLabel, "Amplitude (Counts)", ds, PlotOrientation.VERTICAL, true, false, false);
+                }
+
+                XYPlot plot = (XYPlot) chart.getPlot();
+                NumberAxis rangeAxis = new NumberAxis("Amplitude (Counts)");
+                ScaledAxisNumberFormat sanf = new ScaledAxisNumberFormat();
+                sanf.setExp(exp);
+//                if ( maxy != 0 && Math.abs(maxy-miny) < Math.abs(maxy) * 1e-30)
+                {
+                    // this garbage is to get jFreeChart to put labels on the Y axis
+                    double dt = Math.abs(miny)/10;
+                    double scaledMin = (miny - dt) * Math.pow(10., exp);
+                    double scaledMax = (maxy + dt) * Math.pow(10., exp);
+                    rangeAxis.setRange(scaledMin, scaledMax);
+                    NumberTickUnit unit = new NumberTickUnit((scaledMax  - scaledMin)/10.);
+                    rangeAxis.setTickUnit(unit);
+                    rangeAxis.setAutoRange(false);
+                }
+//                else
+//                {
+//                    sanf.setMinMax(miny, maxy);
+//                    rangeAxis.setRange(miny, maxy);
+//                    NumberTickUnit unit = new NumberTickUnit((maxy  - miny)/6.);
+//                    rangeAxis.setTickUnit(unit);
+//                    rangeAxis.setAutoRange(false);
+//                }
+                rangeAxis.setNumberFormatOverride(sanf);
+                rangeAxis.setAutoRangeIncludesZero(false);
+                plot.setRangeAxis(rangeAxis);
+
+                if (timeAxis.equalsIgnoreCase("utc"))
+                {
+                    plot.setDataset(0, mtds);
+
+                }
+                else
+                {
+                    plot.setDataset(0, xyds);
+                }
+                // Set the line thickness
+                XYLineAndShapeRenderer r = (XYLineAndShapeRenderer) plot.getRenderer();
+                BasicStroke str = new BasicStroke(lineThickness);
+                int n = plot.getSeriesCount();
+                for (int i = 0; i < n; i++)
+                {
+                    r.setSeriesStroke(i, str);
+                }
+                plot.setBackgroundPaint(Color.WHITE);
+                // add 
+                plot.setDomainGridlinesVisible(true);
+                plot.setDomainGridlinePaint(Color.BLACK);
+                plot.setRangeGridlinesVisible(true);
+                plot.setRangeGridlinePaint(Color.BLACK);
+
+                r.setBaseFillPaint(Color.WHITE);
+                if (compact)
+                {
+                    chart.removeLegend();
+                }
+
+                chart.setBackgroundPaint(Color.WHITE);
+
+                cpnl = new ChartPanel(chart);
+                imageId = saveImageAsPNG(cpnl);
+            }
         }
-        catch (IOException  ex)
+        catch (LdvTableException | NoSuchAlgorithmException | SQLException | IOException  ex)
         {
-            throw new WebUtilException(ex);
-        }
-        catch (SQLException ex)
-        {
-            throw new WebUtilException(ex);
-        }
-        catch (NoSuchAlgorithmException ex)
-        {
-            throw new WebUtilException(ex);
+            throw new WebUtilException("Making time series plot: ", ex);
         }
         ArrayList<Integer> ret = new ArrayList<Integer>();
         ret.add (imageId);
@@ -339,10 +344,18 @@ public class TsPlot extends PluginSupport implements PlotProduct
     {
         String[] timeAxisOptions = { "&Delta;t", "UTC", "GPS" };
         String[] lineThicknessOptions = { "1", "2", "3", "4" };
+        
+        this.enableKey = enableKey;
+        
         PageItemList ret = new PageItemList();
         String enableText = "Generate time series plot";
         enableText += nSel > 1 ? "s" : "";
-        ret.add(new PageFormCheckbox(enableKey, enableText));
+        boolean selected = getPrevValue(enableKey);
+        PageFormCheckbox cb =new PageFormCheckbox(enableKey, enableText, selected);
+        cb.setId(enableKey + "_cb");
+        String fun = String.format("boldTextOnCheckbox('%1$s_cb','%1$s_accLbl')", enableKey);
+        cb.addEvent("onclick" ,fun);
+        ret.add(cb);
         ret.addBlankLines(1);
         ret.add("Set apprpriate parameters.");
         ret.addBlankLines(1);
@@ -352,22 +365,26 @@ public class TsPlot extends PluginSupport implements PlotProduct
         
         PageTableRow ptr;
 
-
-        PageFormCheckbox linfit = new PageFormCheckbox("tsLinFit", "Add linear fit");
+        selected = getPrevValue("tsLinFit");
+        PageFormCheckbox linfit = new PageFormCheckbox("tsLinFit", "Add linear fit", selected);
         ptr = GUISupport.getObjRow(linfit, "", "");
         product.addRow(ptr);
         
-        PageFormCheckbox detrend = new PageFormCheckbox("doDetrend", "Detrend");
+        selected = getPrevValue("doDetrend");
+        PageFormCheckbox detrend = new PageFormCheckbox("doDetrend", "Detrend", selected);
         ptr = GUISupport.getObjRow(detrend, "", "");
         product.addRow(ptr);
         
         PageFormSelect timeAxisSelector = new PageFormSelect("ts_timeaxis", timeAxisOptions);
+        String val = getPrevValue("ts_timeaxis", 0, timeAxisOptions[0]);
+        timeAxisSelector.setSelected(val);
         timeAxisSelector.setEscapeOptions(false);
         ptr = GUISupport.getObjRow(timeAxisSelector, "Time axis" , "");
         product.addRow(ptr);
         
         PageFormSelect lineThicknessSelector = new PageFormSelect("ts_linethickness", lineThicknessOptions);
-        lineThicknessSelector.setSelected("2");
+        val = getPrevValue("ts_linethickness", 0, "2");
+        lineThicknessSelector.setSelected(val);
         ptr = GUISupport.getObjRow(lineThicknessSelector, "Line thickness: ", "");
         product.addRow(ptr);
         
@@ -383,7 +400,7 @@ public class TsPlot extends PluginSupport implements PlotProduct
         return true;
     }
 
-    private void addTimeSeries(ChanDataBuffer dbuf, boolean compact,  TimeSeriesCollection mtds)
+    private void addTimeSeries(ChanDataBuffer dbuf, boolean compact,  TimeSeriesCollection mtds) throws LdvTableException
     {
         String legend = getLegend(dbuf, compact);
         TimeSeries ts;
@@ -417,7 +434,7 @@ public class TsPlot extends PluginSupport implements PlotProduct
 
     }
 
-    private void addXySeries(ChanDataBuffer dbuf, boolean compact, XYSeriesCollection xyds)
+    private void addXySeries(ChanDataBuffer dbuf, boolean compact, XYSeriesCollection xyds) throws LdvTableException
     {
         String legend = getLegend(dbuf, compact);
         XYSeries xys = new XYSeries(legend,false);
@@ -476,5 +493,11 @@ public class TsPlot extends PluginSupport implements PlotProduct
     public boolean hasImages()
     {
         return true;
+    }
+
+    
+    private int makeAddPlotFiles(ArrayList<ChanDataBuffer> dbufs, boolean compact)
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
