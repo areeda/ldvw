@@ -25,12 +25,15 @@ public class TimeInterval implements Comparable<TimeInterval>
 {
     private long startGps;
     private long stopGps;
+    private Double startGpsD;
+    private Double stopGpsD;
     private int cacheId;
     private long dataLength;
     
     public TimeInterval()
     {
         startGps = stopGps = dataLength = 0;
+        startGpsD = stopGpsD = 0.;
         cacheId = 0;
     }
     /**
@@ -42,10 +45,27 @@ public class TimeInterval implements Comparable<TimeInterval>
     {
         startGps = Math.min(start, stop);
         stopGps = Math.max(start, stop);
+        startGpsD = (double) startGps;
+        stopGpsD = (double) stopGps;
         cacheId = 0;
         dataLength = 0;
     }
 
+    /**
+     * Some routines can handle fractional start/stop times, others only integer values.
+     * 
+     * @param start starting gps time (seconds), may have as many significant digits as needed
+     * @param stop topping gps time (seconds)
+     */
+    public TimeInterval(double start, double stop)
+    {
+        startGpsD = start;
+        stopGpsD = stop;
+        startGps = startGpsD.longValue();
+        stopGps = Math.round(stopGpsD);
+        cacheId =0;
+        dataLength = 0;
+    }
     /**
      * construct a new time interval representing a cached buffer
      * @param start starting gps time in seconds
@@ -89,7 +109,30 @@ public class TimeInterval implements Comparable<TimeInterval>
     public void setStartGps(long startGps)
     {
         this.startGps = startGps;
+        startGpsD = (double) startGps;
         checkTimes();
+    }
+
+    public Double getStartGpsD()
+    {
+        return startGpsD;
+    }
+
+    public void setStartGpsD(Double startGpsD)
+    {
+        this.startGpsD = startGpsD;
+        startGps = startGpsD.longValue();
+    }
+
+    public Double getStopGpsD()
+    {
+        return stopGpsD;
+    }
+
+    public void setStopGpsD(Double stopGpsD)
+    {
+        this.stopGpsD = stopGpsD;
+        stopGps = stopGpsD.longValue();
     }
 
     /**
