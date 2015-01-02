@@ -81,3 +81,22 @@ function historySubmit(act,ele)
     frmEle = document.getElementById(frmId);
     frmEle.submit();
 }
+/**
+ * Set a text filed bold or normal depending on checkbox
+ * 
+ * @param {type} cbId checkbox to determine what to do
+ * @param {type} txtId text to bold or normal
+ * @returns {undefined} none
+ */
+function boldTextOnCheckbox(cbId, txtId)
+{
+    if (jQuery('#' + cbId).is(":checked"))
+    {
+        jQuery('#'+txtId).css('font-weight', 'bold');
+    }
+    else
+    {
+        jQuery('#'+txtId).css('font-weight', 'normal');
+    }
+
+}
