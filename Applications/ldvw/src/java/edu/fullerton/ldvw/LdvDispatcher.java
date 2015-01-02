@@ -658,12 +658,19 @@ public class LdvDispatcher extends GUISupport
         if (submitAct.isEmpty())
         {
             vpage.setTitle("LigoDV-web base channel selection");
-                 
-            vpage.add("Use the optional fields below to narrow down the list of base channels, ");
+            
+            // Give them a hint what to do.
+            PageItemList intro = new PageItemList();
+            intro.setClassName("processStep");
+            intro.add("Use the optional fields below to narrow down the list of base channels ");
             PageItem hlpBtn = helpManager.getHelpButton("baseChan");
-            vpage.add(hlpBtn);
-            vpage.add("then hit the Retrieve Channel List button.");
-            vpage.addBlankLines(2);
+            intro.add(hlpBtn);
+            intro.add(", ");
+            intro.addBlankLines(1);
+            intro.add("then hit the Retrieve Channel List button.");
+            intro.addBlankLines(2);
+            vpage.add(intro);
+            
             PageForm chanSel = bsc.addSelector(true);
             vpage.add(chanSel);
             vpage.addBlankLines(1);
@@ -676,7 +683,7 @@ public class LdvDispatcher extends GUISupport
         else if (submitAct.toLowerCase().contains("retrieve"))
         {
             vpage.setTitle("LigoDV-web Select Base Channels");
-            PageForm chanSel = bsc.addSelector(true);
+            PageForm chanSel = bsc.addSelector(false);
             vpage.add(chanSel);
             vpage.addBlankLines(1);
             
