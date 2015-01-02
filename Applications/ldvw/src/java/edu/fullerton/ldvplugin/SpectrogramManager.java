@@ -47,7 +47,7 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
     private final String name = "Spectrogram";
     private Integer width;
     private Integer height;
-    private Map<String, String[]> parameterMap;
+
     /**
      * Manage the external Spectrogram program
      * @param db
@@ -90,10 +90,17 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
             "Jet", "hot", "bw"
         };
 
+        this.enableKey = enableKey;
         PageItemList ret = new PageItemList();
         String enableText = "Generate Spectrogram";
         enableText += nSel > 1 ? "s<br><br>" : "<br><br>";
-        ret.add(new PageFormCheckbox(enableKey, enableText));
+        boolean enabled=getPrevValue(enableKey);
+        PageFormCheckbox cb = new PageFormCheckbox(enableKey, enableText, enabled);
+        cb.setId(enableKey + "_cb");
+        String fun = String.format("boldTextOnCheckbox('%1$s_cb','%1$s_accLbl')", enableKey);
+        cb.addEvent("onclick", fun);
+        ret.add(cb);
+
         //ret.addBlankLines(1);
         ret.add("Set appropriate parameters below:");
         ret.addBlankLines(1);
@@ -104,61 +111,83 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
 
         // window and scaling
         PageFormSelect win = new PageFormSelect("spg_window", windows);
+        String prevVal = getPrevValue("spg_window", 0, windows[0]);
+        win.setSelected(prevVal);
         ptr = GUISupport.getObjRow(win, "Window:", "");
         product.addRow(ptr);
 
         PageFormSelect scale = new PageFormSelect("spg_scaling", scalingNames);
+        prevVal = getPrevValue("spg_scaling", 0, scalingNames[0]);
+        scale.setSelected(prevVal);
         ptr = GUISupport.getObjRow(scale, "Scaling:", "");
         product.addRow(ptr);
 
         // length and overlap off fft
-        ptr = GUISupport.getTxtRow("spg_secperfft", "Sec/fft:", "", 16, "1");
+        prevVal=getPrevValue("spg_secperfft", 0, "1");
+        ptr = GUISupport.getTxtRow("spg_secperfft", "Sec/fft:", "", 16, prevVal);
         product.addRow(ptr);
 
-        ptr = GUISupport.getTxtRow("spg_fftoverlap", "Overlap [0-1):", "Leave blank for auto", 16, "");
+        prevVal=getPrevValue("spg_fftoverlap", 0, "");
+        ptr = GUISupport.getTxtRow("spg_fftoverlap", "Overlap [0-1):", "Leave blank for auto", 16, 
+                                   prevVal);
         product.addRow(ptr);
 
         // frequncy axis limits
-        ptr = GUISupport.getTxtRow("spg_fmin", "Min freq:", "Leave blank for auto", 16, "");
+        prevVal = getPrevValue("spg_fmin", 0, "");
+        ptr = GUISupport.getTxtRow("spg_fmin", "Min freq:", "Leave blank for auto", 16, prevVal);
         product.addRow(ptr);
 
-        ptr = GUISupport.getTxtRow("spg_fmax", "Max freq:", "Leave blank for auto", 16, "");
+        prevVal = getPrevValue("spg_fmax", 0, "");
+        ptr = GUISupport.getTxtRow("spg_fmax", "Max freq:", "Leave blank for auto", 16, prevVal);
         product.addRow(ptr);
 
         // do they want axis to be logarithmic
-        PageFormCheckbox logx = new PageFormCheckbox("spg_logfreq", "Freq axis logarithmic", true);
+        enabled = getPrevValue("spg_linfreq");
+        PageFormCheckbox logx = new PageFormCheckbox("spg_linfreq", "Freq axis linear (default=log)", enabled);
         ptr = GUISupport.getObjRow(logx, "", "");
         product.addRow(ptr);
         
         // do they want a logarithmic color scale
-        PageFormCheckbox logIntensity = new PageFormCheckbox("spg_logintensity", "Color scale logarithmic", true);
+        enabled = getPrevValue("spg_linintensity");
+        PageFormCheckbox logIntensity = new PageFormCheckbox("spg_linintensity", 
+                "Color scale linear (default=log)", enabled);
         ptr = GUISupport.getObjRow(logIntensity, "", "");
         product.addRow(ptr);
 
         // normalize -> divide each frequency by mean
-        PageFormCheckbox norm = new PageFormCheckbox("spg_norm", "Normalize", false);
+        enabled = getPrevValue("spg_norm");
+        PageFormCheckbox norm = new PageFormCheckbox("spg_norm", "Normalize", enabled);
         ptr = GUISupport.getObjRow(norm, "", "Divide each FFT by the mean FFT");
         product.addRow(ptr);
         
         // want to smooth?
-        PageFormCheckbox smooth = new PageFormCheckbox("spg_smooth", "Smooth in time and freq", false);
+        enabled = getPrevValue("spg_smooth");
+        PageFormCheckbox smooth = new PageFormCheckbox("spg_smooth", "Smooth in time and freq", 
+                                                        enabled);
         ptr = GUISupport.getObjRow(smooth, "", "");
         product.addRow(ptr);
 
         // want to interpolate
-        PageFormCheckbox interp = new PageFormCheckbox("spg_interp", "Interpolate resulting image", false);
+        enabled = getPrevValue("spg_interp");
+        PageFormCheckbox interp = new PageFormCheckbox("spg_interp", "Interpolate resulting image", 
+                                                        enabled);
         ptr = GUISupport.getObjRow(interp, "", "");
         product.addRow(ptr);
         
         // histogram operations on the intensity scale
-        ptr = GUISupport.getTxtRow("spg_lo", "Low:", "Min pixel (percentile 0 <= low < 1)", 16, "0.2");
+        prevVal = getPrevValue("spg_log", 0, "0.2");
+        ptr = GUISupport.getTxtRow("spg_lo", "Low:", "Min pixel (percentile 0 <= low < 1)", 16, prevVal);
         product.addRow(ptr);
         
-        ptr = GUISupport.getTxtRow("spg_up", "Up:", "Max pixel (percentile 0 < up <= 1)", 16, "1.0");
+        prevVal = getPrevValue("spg_up", 0, "1.0");
+        ptr = GUISupport.getTxtRow("spg_up", "Up:", "Max pixel (percentile 0 < up <= 1)", 16, 
+                                   prevVal);
         product.addRow(ptr);
 
         // Select a color scale
         PageFormSelect color = new PageFormSelect("spg_color", colorTableNames);
+        prevVal = getPrevValue("spg_color", 0, colorTableNames[0]);
+        color.setSelected(prevVal);
         ptr = GUISupport.getObjRow(color, "Color table:", "");
         product.addRow(ptr);
         
@@ -234,8 +263,14 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
             addParam(cmd, "spg_lo", "lo");
             addParam(cmd, "spg_up", "up");
             
-            addSwitch(cmd, "spg_logfreq", "logfreq");
-            addSwitch(cmd, "spg_logintensity","logintensity");
+            if (! paramMap.containsKey("spg_linfreq"))
+            {
+                cmd.append(" --logfreq ");
+            }
+            if (! paramMap.containsKey("spg_linintensity"))
+            {
+                cmd.append("--logintensity");
+            }
             addSwitch(cmd, "spg_norm", "norm");
             addSwitch(cmd, "spg_smooth", "smooth");
             addSwitch(cmd, "spg_interp", "interp");
@@ -246,9 +281,9 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
             
             addParam(cmd, "spg_fftoverlap", "overlap");
             
-            if (parameterMap.containsKey("prefilt"))
+            if (paramMap.containsKey("prefilt"))
             {
-                String filt = parameterMap.get("prefilt")[0];
+                String filt = paramMap.get("prefilt")[0];
                 if (!filt.equalsIgnoreCase("none"))
                 {
                     if (filt.equalsIgnoreCase("high pass"))
@@ -301,7 +336,7 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
         String[] param;
         String cnm = cname == null || cname.isEmpty() ? mapName : cname;
 
-        param = parameterMap.get(mapName);
+        param = paramMap.get(mapName);
         if (param != null && param.length == 1 && !param[0].isEmpty())
         {
             cmd.append(" --").append(cnm).append(" ").append(param[0]);
@@ -321,7 +356,7 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
         String[] param;
         String cnm = cname == null || cname.isEmpty() ? mapName : cname;
 
-        param = parameterMap.get(mapName);
+        param = paramMap.get(mapName);
         if (param != null && param.length == 1)
         {
             cmd.append(" --").append(cnm);
@@ -354,12 +389,7 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
         // we can ignore this because it's done in our contructor
     }
 
-    @Override
-    public void setParameters(Map<String, String[]> parameterMap)
-    {
-        this.parameterMap = parameterMap;
-    }
-
+   
     @Override
     public boolean needsImageDescriptor()
     {
@@ -371,5 +401,7 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
     {
         return true;
     }
+
+    
 
 }
