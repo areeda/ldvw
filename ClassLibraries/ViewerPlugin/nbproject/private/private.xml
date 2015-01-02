@@ -1,25 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="13">
-        <file>
-            <url>src/edu/fullerton/viewerplugin/SpectrumPlot.java</url>
-            <bookmark id="12">
-                <name/>
-                <line>148</line>
-                <key/>
-            </bookmark>
-            <bookmark id="13">
-                <name/>
-                <line>792</line>
-                <key/>
-            </bookmark>
-            <bookmark id="9">
-                <name/>
-                <line>847</line>
-                <key/>
-            </bookmark>
-        </file>
-    </editor-bookmarks>
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="17"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group name="LDVW libraries">
             <file>file:/home/joe/NetBeans8Projects/ldvw/ClassLibraries/ViewerPlugin/src/edu/fullerton/viewerplugin/GUISupport.java</file>
@@ -27,6 +8,9 @@
         <group name="ldvw">
             <file>file:/home/joe/NetBeansProjects/ldvw/ClassLibraries/ViewerPlugin/src/edu/fullerton/viewerplugin/PlotProduct.java</file>
         </group>
-        <group/>
+        <group>
+            <file>file:/home/joe/NetBeansProjects/ldvw/ClassLibraries/ViewerPlugin/src/edu/fullerton/viewerplugin/TsPlot.java</file>
+            <file>file:/home/joe/NetBeansProjects/ldvw/ClassLibraries/ViewerPlugin/src/edu/fullerton/viewerplugin/PluginSupport.java</file>
+        </group>
     </open-files>
 </project-private>
