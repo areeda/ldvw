@@ -20,14 +20,13 @@ import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.WebUtilException;
-import edu.fullerton.ldvtables.ImageCoordinateTbl;
+import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ImageTable;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,8 +37,7 @@ import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
 
 /**
  * General routines for calling command line functions
@@ -134,7 +132,17 @@ public class ExternalProgramManager
         return ret;
     }
 
-    public boolean runExternalProgram(ArrayList<String> command, String sendData) throws WebUtilException
+    /**
+     * Run an external program and wait for completion
+     * @param command - command and arguments as a list (no quoting needed)
+     * @param sendData - String to pass on stdin
+     * @return true if programs return status == 0
+     * @throws WebUtilException 
+     * @see #getStatus() - for actual return status value
+     * @see #getStderr()  - text program sent to stderr
+     * @see #getStdout()  - text program sent to stdout
+     */
+    public boolean runExternalProgram(List<String> command, String sendData) throws WebUtilException
     {
         boolean ret;
         try
@@ -175,7 +183,7 @@ public class ExternalProgramManager
     {
         return status;
     }
-    public PageItemList makeDescription(PlotProduct product, ArrayList<ChanDataBuffer> bufList) throws WebUtilException
+    public PageItemList makeDescription(PlotProduct product, ArrayList<ChanDataBuffer> bufList) throws WebUtilException, LdvTableException
     {
         PageItemList intro = new PageItemList();
         PageItemString pname = new PageItemString(product.getProductName());
@@ -192,7 +200,13 @@ public class ExternalProgramManager
         
         return intro;
     }
-    
+    /**
+     * The image table is the database section which holds results.
+     * 
+     * @param db mysql database object
+     * @return image table object
+     * @throws SQLException 
+     */
     public ImageTable getImageTable(Database db) throws SQLException
     {
         if (imgTbl == null)
@@ -219,7 +233,7 @@ public class ExternalProgramManager
      * @param prefix
      * @return a new empty temporary directory
      * @throws IOException 
-     * @see #getTempFile(java.lang.String) 
+     * @see #getTempFile(java.lang.String, java.lang.String)  
      * @see #removeTemps() 
      */
     public File getTempDir(String prefix) throws IOException
@@ -295,28 +309,38 @@ public class ExternalProgramManager
     public File writeTempCSV(String prefix, double[][] data) throws IOException
     {
         File tmpFile = getTempFile(prefix, ".csv");
-        BufferedWriter bw = new BufferedWriter(new FileWriter(tmpFile));
-        for (double[] r : data)
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(tmpFile)))
         {
-            bw.append(String.format("%.6f, %.20g%n", r[0],r[1]));
+            for (double[] r : data)
+            {
+                bw.append(String.format("%.6f, %.20g%n", r[0],r[1]));
+            }
         }
-        bw.close();
         
         return tmpFile;
     }
+    /**
+     * Add an external image file to the image table in the ligodv database
+     * @param outFile - output of some product (png, pdf, jpg, gif)
+     * @param db - ligodv database
+     * @param userCn - user's common name to file this under
+     * @return image ID of the newly added image
+     * @throws WebUtilException 
+     */
     public int addImg2Db(File outFile, Database db, String userCn) throws WebUtilException
     {
         int imgId = 0;      // return code 0 means no image saved
         try
         {
-            ImageTable itbl = new ImageTable(db);
+            ImageTable itbl = getImageTable(db);
             
             // read in the output image
             long len = outFile.length();
             if (len > 1000)
             {
                 FileInputStream fis = null;
-                try {
+                try 
+                {
                     byte[] imgBytes = new byte[(int) len];
                     fis = new FileInputStream(outFile);
                     int rlen = fis.read(imgBytes);
@@ -344,7 +368,7 @@ public class ExternalProgramManager
             }
             else
             {
-                throw new WebUtilException("Adding image to database: image is not invalid.");
+                throw new WebUtilException("Adding image to database: image is not valid.");
             }
         }
         catch (SQLException ex)
