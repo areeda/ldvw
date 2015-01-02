@@ -26,6 +26,7 @@ import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.TimeAndDate;
 import edu.fullerton.ldvtables.ImageTable;
 import edu.fullerton.ldvtables.ViewUser;
@@ -78,13 +79,26 @@ public class PluginSupport
     protected int height=480;
     protected Map<String, String[]> parameterMap; // all request parameters for a plot request
     private String xAxisLabel;
+    protected String enableKey;
 
     
     public PluginSupport()
     {
-        
+        enableKey="no way should the parameter map contain this";
     }
-    
+    public boolean isSelected()
+    {
+        boolean ret = false;
+        if (parameterMap != null)
+        {
+            ret = parameterMap.containsKey(enableKey);
+        }
+        return ret;
+    }
+    public String getEnableKey()
+    {
+        return enableKey;
+    }
     public void setup(Database db, Page vpage, ViewUser vuser)
     {
         this.db = db;
@@ -92,7 +106,14 @@ public class PluginSupport
         this.vuser = vuser;
     }
 
-    public String getTitle(ArrayList<ChanDataBuffer> dbufs, boolean compact)
+    /**
+     * Use information from the buffer to create a title for the plot
+     * @param dbufs - data being plotted
+     * @param compact - if it's a small plot don't tell them too much
+     * @return
+     * @throws LdvTableException
+     */
+    public String getTitle(ArrayList<ChanDataBuffer> dbufs, boolean compact) throws LdvTableException
     {
         String ret;
         if (dbufs.size() == 1)
@@ -101,7 +122,7 @@ public class PluginSupport
         }
         else if (dbufs.size() > 1)
         {
-            TreeSet<String> chans = new TreeSet<String>();
+            TreeSet<String> chans = new TreeSet<>();
             for(ChanDataBuffer dbuf: dbufs)
             {
                 chans.add(dbuf.getChanInfo().getChanName());
@@ -123,8 +144,14 @@ public class PluginSupport
         return ret;
     }
 
-    
-    public String getLegend(ChanDataBuffer dbuf, boolean compact)
+    /**
+     * From the single time series create text for a legend
+     * @param dbuf
+     * @param compact
+     * @return
+     * @throws LdvTableException
+     */
+    public String getLegend(ChanDataBuffer dbuf, boolean compact) throws LdvTableException
     {
         String ret;
         String chName = dbuf.getChanInfo().getChanName();
@@ -447,7 +474,7 @@ public class PluginSupport
      * @param legend - plot legend for this series
      * @return JFreeChart time series for adding to a plot
      */
-    public TimeSeries getTimeSeries(ChanDataBuffer dbuf, String legend, int sum)
+    public TimeSeries getTimeSeries(ChanDataBuffer dbuf, String legend, int sum) throws LdvTableException
     {
         sum = sum < 1 ? 1 : sum;
         TimeSeries ts;
@@ -493,7 +520,7 @@ public class PluginSupport
      * @param xAxisLabel this argument is returned set to a label for the X-axis
      * @return A series to be added to a JFreeChart plot
      */
-    public XYSeries addXySeries(ChanDataBuffer dbuf, String legend, boolean dt, int sum)
+    public XYSeries addXySeries(ChanDataBuffer dbuf, String legend, boolean dt, int sum) throws LdvTableException
     {
         sum = sum < 1 ? 1 : sum;
         XYSeries xys = new XYSeries(legend, false);
@@ -555,5 +582,36 @@ public class PluginSupport
     {
         return xAxisLabel;
     }
-    
+    /**
+     * As part of remembering where we came from, form values are passed back and forth to select
+     * more. Here we use the previous value or default for the specified key
+     *
+     * @param key - Parameter name for this field
+     * @param idx - Index into value array, 0 if only 1 value allowed
+     * @param def - default value if no parameter or parameter is empty
+     * @return
+     */
+    public String getPrevValue(String key, int idx, String def)
+    {
+        String ret = def;
+        String[] prev = parameterMap.get(key);
+        if (prev != null && prev.length > idx && !prev[0].isEmpty())
+        {
+            ret = prev[idx];
+        }
+        return ret;
+    }
+    /**
+     * Checkboxes are a bit difficult because their key only gets sent if it's checked.  So we 
+     * don't really know if it's the first time thru with no values for anything or they unchecked
+     * it.
+     * 
+     * @param key - parameter name
+     * @return true if parameter is available
+     */
+    public boolean getPrevValue(String key)
+    {
+        boolean ret = parameterMap.containsKey(key);
+        return ret;
+    }
 }
