@@ -155,6 +155,7 @@ public class Spectrogram
     private double binWidth;
     private String rawDataFilename;
     private SwappedDataInputStream inStream;
+    private SpectrogramCommandLine cmd;
 
     public Spectrogram() throws SQLException
     {
@@ -276,18 +277,28 @@ public class Spectrogram
                         ndsClient = new NDSProxyClient(server);
                         ndsClient.connect();
 
-                        boolean reqStat = ndsClient.requestData(channelName, chanInfo.getcType(), curgps, curgps + duration, stride);
+                        boolean reqStat = ndsClient.requestData(channelName, chanInfo.getcType(), 
+                                                                curgps, curgps + duration, stride);
                         if (reqStat)
-                        {
+                        {   
+                            // for the first buffer we get channel information from NDS2 and 
+                            // adjust accordingly
                             int dt = (int) (ndsClient.getStartGPS() - startGPS);
-                            setProgress(String.format("Processing %1$,4d of %2$,4d seconds of data", dt, duration));
+                            setProgress(String.format("Processing %1$,4d of %2$,4d seconds of data", 
+                                                      dt, duration));
                             setProgress(dt, duration);
                             NDSBufferStatus bufferStatus = ndsClient.getBufferStatus();
                             if (sampleRate != bufferStatus.getFs())
                             {
                                 sampleRate = bufferStatus.getFs();
                                 initImage();
+                                initCache();
                             }
+                            if (fmax == 0)
+                            {
+                                fmax = sampleRate / 2;
+                            }
+
                             int startSample = (int) (dt * sampleRate);
                             int nsample = (int) (duration * sampleRate);
                             long pStrt=System.nanoTime();
@@ -443,10 +454,6 @@ public class Spectrogram
             
         }
         setProgress("Starting transfer.");
-        if (fmax == 0)
-        {
-            fmax = sampleRate / 2;
-        }
     }
     /**
      * Using previously set up object members verify the channel and get needed info, complication is
@@ -1073,7 +1080,7 @@ public class Spectrogram
     private boolean processArgs(String[] args)
     {
         boolean ret;
-        SpectrogramCommandLine cmd = new SpectrogramCommandLine();
+        cmd = new SpectrogramCommandLine();
         if (cmd.parseCommand(args, programName, version))
         {
             channelName = cmd.getChannelName();
