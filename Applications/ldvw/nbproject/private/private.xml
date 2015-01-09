@@ -71,9 +71,6 @@
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/PluginManager.java</file>
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
         </group>
-        <group>
-            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/View.java</file>
-            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/BaseChannelSelector.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>
