@@ -13,6 +13,8 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group name="LDVW Applications"/>
         <group name="LDVW libraries"/>
-        <group/>
+        <group>
+            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/Spectrogram/src/spectrogram/Spectrogram.java</file>
+        </group>
     </open-files>
 </project-private>
