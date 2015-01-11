@@ -1102,22 +1102,26 @@ public class BaseChannelSelector extends GUISupport
         dontCopy.add("submit");
         dontCopy.add("submitact");
         dontCopy.add("selmore");
+        dontCopy.add("chnamefilt");
+        dontCopy.add("strt");
         
         boolean selmore = paramMap.containsKey("selMore");
+        // don't copy these keys, note we convert to lower case before we check
         HashSet<String> selMoreDontCopy = new HashSet<>();
         selMoreDontCopy.add("ifo");
-        selMoreDontCopy.add("chnamefilt");
         selMoreDontCopy.add("subsys");
+        selMoreDontCopy.add("pagenum");
         
         for(Entry<String,String[]> ent : paramMap.entrySet())
         {
             String key = ent.getKey();
             if (!dontCopy.contains(key.toLowerCase()) && 
-                !(selmore && selMoreDontCopy.contains(key.toLowerCase())))
+                !(selmore || selMoreDontCopy.contains(key.toLowerCase())))
             {
                 for(String val: ent.getValue())
                 {
-                    if (val != null && !val.isEmpty())
+                    if ( !(key.toLowerCase().contains("trend") && val.equalsIgnoreCase("none"))
+                        && (val != null && !val.isEmpty()))
                     {
                         pf.addHidden(key, val);
                     }
