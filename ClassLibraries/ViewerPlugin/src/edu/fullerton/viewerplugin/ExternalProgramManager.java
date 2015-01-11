@@ -37,7 +37,11 @@ import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import viewerconfig.ViewerConfig;
 
 /**
  * General routines for calling command line functions
@@ -112,6 +116,7 @@ public class ExternalProgramManager
         {
             ExternalProgramManager.getTGT();   // we need a Kerberos ticket for this
 
+            setGlobalEnvironment();
             Process p;
             if (env == null || env.isEmpty())
             {
@@ -148,7 +153,8 @@ public class ExternalProgramManager
         try
         {
             ExternalProgramManager.getTGT();   // we need a Kerberos ticket for this
-
+            setGlobalEnvironment();
+            
             Process p;
             if (env == null || env.isEmpty())
             {
@@ -215,16 +221,19 @@ public class ExternalProgramManager
         }
         return imgTbl;
     }
+    /**
+     * Add each element of the input array to the programs runtime environment.
+     * Each element should be of the form name=value
+     * 
+     * @param e array of environment variable settings. 
+     */
     public void addEnv(String[] e)
     {
         if (env == null )
         {
             env = new ArrayList<>();
         }
-        for (String es : e)
-        {
-            env.add(es);
-        }
+        env.addAll(Arrays.asList(e));
     }
     /**
      * Help manage temporary files/directories
@@ -423,5 +432,29 @@ public class ExternalProgramManager
             throw new WebUtilException("Running external program:", ex);
         }
         return ret;
+    }
+
+    /**
+     * For some things like Python programs we need system dependent environment variables,
+     * these are set in the configuration file.  
+     * 
+     * @throws IOException 
+     */
+    private void setGlobalEnvironment() throws IOException
+    {
+        ViewerConfig viewerConfig = new ViewerConfig();
+        viewerConfig.readConfig();
+        Map<String, String> genv = viewerConfig.getEnv();
+        ArrayList<String> envList = new ArrayList<>();
+        for (Entry<String, String> ent : genv.entrySet())
+        {
+            String envEnt = ent.getKey() + "=" + ent.getValue();
+            envList.add(envEnt);
+        }
+        if (!envList.isEmpty())
+        {
+            String[] strs = new String[0];
+            addEnv(envList.toArray(strs));
+        }
     }
 }
