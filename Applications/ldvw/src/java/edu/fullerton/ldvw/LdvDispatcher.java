@@ -653,6 +653,10 @@ public class LdvDispatcher extends GUISupport
         bsc.setServletPath(servletPath);
         bsc.setParamMap(paramMap);
         String submitAct = getParameter("submitAct");
+        if (submitAct == null || submitAct.isEmpty())
+        {
+            submitAct = getParameter("submit");
+        }
         submitAct = submitAct == null ? "" : submitAct;
 
         if (submitAct.isEmpty())
