@@ -42,6 +42,7 @@ import org.json.JSONArray;
 public class ViewerConfig
 {
     private final TreeMap<String,String> params;
+    private final TreeMap<String,String> env;
     
     private final String configDir = "/usr/local/ldvw/";
     
@@ -58,6 +59,7 @@ public class ViewerConfig
     {
         params = new TreeMap<>();
         appProperties = new Properties();
+        env = new TreeMap<>();
     }
     /**
      * Read the default configuration files
@@ -77,6 +79,7 @@ public class ViewerConfig
     
     /**
      * Read a specific configuration file
+     * 
      * @param fname full path to the file
      * @throws FileNotFoundException
      * @throws IOException 
@@ -108,7 +111,15 @@ public class ViewerConfig
                 {
                     String key=pmat.group(1);
                     String val = pmat.group(2);
-                    params.put(key, val);
+                    if (key.startsWith("$"))
+                    {
+                        key = key.substring(1);
+                        env.put(key, val);
+                    }
+                    else
+                    {
+                        params.put(key, val);
+                    }
                 }
             }
         }
@@ -245,4 +256,10 @@ public class ViewerConfig
     {
         this.configFileName = configFileName;
     }
+
+    public TreeMap<String, String> getEnv()
+    {
+        return env;
+    }
+    
 }
