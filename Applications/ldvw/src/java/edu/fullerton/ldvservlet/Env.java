@@ -214,8 +214,16 @@ public class Env extends HttpServlet
         try
         {
             Collection<Part> parts;
-            parts = request.getParts();
-            if (!parts.isEmpty())
+            try
+            {
+                parts = request.getParts();
+            }
+            catch (Exception ex)
+            {
+                vpage.add("No parts because: " + ex.getLocalizedMessage());
+                parts = null;
+            }
+            if (parts != null && !parts.isEmpty())
             {
                 PageTable pt = new PageTable();
                 String[] hdr =
@@ -238,9 +246,10 @@ public class Env extends HttpServlet
             }
             vpage.addBlankLines(2);
         }
-        catch (ServletException ex)
+        catch (Exception ex)
         {
-            // this seems to mean there are no parts
+            vpage.add("Error getting parts: " + ex.getLocalizedMessage());
+            vpage.addBlankLines(2);
         }
     }
 
