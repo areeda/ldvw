@@ -173,7 +173,6 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
                 files.add(outImage);
                 cmd.add("--out");
                 cmd.add(outImage.getCanonicalPath());
-                
                 if (runExternalProgram(cmd))
                 {
                     imageId = addImg2Db(outImage, db, vuser.getCn());
