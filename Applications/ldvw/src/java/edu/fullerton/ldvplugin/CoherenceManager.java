@@ -415,9 +415,10 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
         ChanDataBuffer ref = null;
         for(ChanDataBuffer it : dbuf)
         {
-            boolean ok = true;
-            ok &= it.getChanInfo().getChanName().contentEquals(ref_name);
-            ref = it;
+            if (it.getChanInfo().getChanName().contentEquals(ref_name))
+            {
+                ref = it;
+            }
         }
         if (ref == null)
         {
