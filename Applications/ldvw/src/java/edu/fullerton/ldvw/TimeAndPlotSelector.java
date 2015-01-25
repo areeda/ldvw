@@ -21,7 +21,6 @@ import com.areeda.jaDatabaseSupport.Database;
 import commonUI.ChannelsUI;
 import edu.fullerton.jspWebUtils.*;
 import edu.fullerton.ldvjutils.BaseChanSelection;
-import edu.fullerton.ldvjutils.BaseChanSingle;
 import edu.fullerton.ldvjutils.ChanIndexInfo;
 import edu.fullerton.ldvjutils.ChanInfo;
 
@@ -112,7 +111,7 @@ public class TimeAndPlotSelector extends GUISupport
         if (chanSelector == null)
         {
             vpage.addBlankLines(3);
-            vpage.add("No Channels are selected.  Please use back button.");            
+            vpage.add("No channels are selected.  Please use back button.");            
         }
         else
         {
