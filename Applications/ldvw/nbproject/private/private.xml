@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="41">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="42">
         <file>
             <url>src/java/edu/fullerton/ldvw/ChanSourceData.java</url>
             <bookmark id="15">
@@ -13,7 +13,7 @@
             <url>src/java/edu/fullerton/ldvw/BaseChannelSelector.java</url>
             <bookmark id="41">
                 <name/>
-                <line>153</line>
+                <line>145</line>
                 <key/>
             </bookmark>
         </file>
@@ -27,6 +27,14 @@
             <bookmark id="36">
                 <name/>
                 <line>271</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>src/java/edu/fullerton/ldvplugin/SpectrogramManager.java</url>
+            <bookmark id="42">
+                <name/>
+                <line>252</line>
                 <key/>
             </bookmark>
         </file>
