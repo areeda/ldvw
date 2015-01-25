@@ -140,7 +140,7 @@ public class TsPlot extends PluginSupport implements PlotProduct
                 NumberAxis rangeAxis = new NumberAxis("Amplitude (Counts)");
                 ScaledAxisNumberFormat sanf = new ScaledAxisNumberFormat();
                 sanf.setExp(exp);
-//                if ( maxy != 0 && Math.abs(maxy-miny) < Math.abs(maxy) * 1e-30)
+                if ( maxy != 0 && Math.abs(maxy-miny) <= Math.abs(maxy) * 1e-25)
                 {
                     // this garbage is to get jFreeChart to put labels on the Y axis
                     double dt = Math.abs(miny)/10;
