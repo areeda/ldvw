@@ -220,6 +220,7 @@ public class BaseChanSelection extends ChanIndexInfo
      * Note base channel must be initialized first.
      * 
      * @param ci the information object on the one channel.
+     * @throws edu.fullerton.ldvjutils.LdvTableException
      */
     public void addSingleChan(ChanInfo ci) throws LdvTableException
     {
@@ -243,12 +244,13 @@ public class BaseChanSelection extends ChanIndexInfo
                     setTrend(ctype, ttype);
                     break;
                 }
-                if (trendType.isEmpty())
-                {
-                    String ermsg = String.format("BaseChanSelection: Unknown trend channel: %1$s", cname);
-                    throw new LdvTableException(ermsg);
-                }
             }
+            if (trendType.isEmpty())
+            {
+                String ermsg = String.format("BaseChanSelection: Unknown trend channel: %1$s", cname);
+                throw new LdvTableException(ermsg);
+            }
+
         }
         else
         {
@@ -264,22 +266,23 @@ public class BaseChanSelection extends ChanIndexInfo
         {
             for(String t : desiredTrends)
             {
-                if (t.toLowerCase().trim().equalsIgnoreCase(trendNames[i]))
+                if (t.toLowerCase().trim().equalsIgnoreCase(trendNames[i].trim()))
                 {
                     trends |= (1 << i);
                 }
             }
         }
-        switch(trendType)
+        if (trendType.contains("minute"))
         {
-            case "minute":
-                minuteTrends |= trends;
-                break;
-            case "second":
-                secondTrends |= trends;
-                break;
-            default:
-                throw new LdvTableException("Base channel selection: unknown trend type: " + trendType);
+            minuteTrends |= trends;
+        }
+        else if (trendType.contains("second"))
+        {
+            secondTrends |= trends;
+        }
+        else
+        {
+            throw new LdvTableException("Base channel selection: unknown trend type: " + trendType);
         }
     }
     public boolean hasSingle()
