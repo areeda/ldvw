@@ -138,8 +138,16 @@ public class BaseChannelSelector extends GUISupport
         selections = getBaseChanSelections();
         addSelections(pf);
         int selCnt = selections.size();
-        String selCount = String.format("%d %s selected.", selCnt, selCnt > 1 ? "channels are" :
-                "channel is");
+        String selCount;
+        if (selCnt == 0)
+        {
+            selCount = "No channels are selected.";
+        }
+        else
+        {
+            selCount = String.format("%d %s selected.", selCnt, selCnt > 1 ? "channels are" :
+                    "channel is");
+        }
         vpage.add(selCount);
         vpage.addBlankLines(2);
         
@@ -237,9 +245,16 @@ public class BaseChannelSelector extends GUISupport
         
         if (nMatch == 0)
         {
-            vpage.add("Query did not return any matches, please use back button");
+            // we tried the easy way and got nothing so try harder
+            chnamefilt = "*" + chnamefilt + "*";
+            nMatch = cidx.getMatchCount(ifo, subsys, fsCmp, fs, cType, chnamefilt);
+            
+            if (nMatch == 0)
+            {
+                vpage.add("Query did not return any matches, please use back button");
+            }
         }
-        else
+        if (nMatch > 0)
         {
             PageItemString whatToDo = new PageItemString("Select one or more sub channels, "
                                                          + "then click on the Continue button.");
