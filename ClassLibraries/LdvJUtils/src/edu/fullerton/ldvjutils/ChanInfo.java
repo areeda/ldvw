@@ -631,43 +631,49 @@ public class ChanInfo implements Comparable
         boolean ret = Math.abs(delta) < epsilon;
         return ret;
     }
-
     /**
-     * Compare two Channel info objects based on:
-     * name, server, chan type, rate, and data type (in that order)
-     * @param o the other
-     * @return -1 if this < other 0 if equal 1 if this > other
+     * non-generic compareTo
+     * @param o another ChanInfo instance
+     * @return 
      */
     @Override
     public int compareTo(Object o)
     {
-        int ret;
-        ChanInfo ci;
         if (o instanceof ChanInfo)
         {
-            int t;
-            ci = (ChanInfo) o;
-            ret = this.chanName.compareTo(ci.chanName);
-            if (ret == 0 && server != null && ci.server != null)
-            {
-                ret = server.compareTo(ci.server);
-            }
-            if (ret == 0 && cType != null && ci.cType != null)
-            {
-                ret = cType.compareTo(ci.cType);
-            }
-            if (ret == 0)
-            {
-                ret = rate.compareTo(ci.rate);
-            }
-            if (ret == 0 && dType != null && ci.dType != null)
-            {
-                ret = dType.compareTo(ci.dType);
-            }
+            return compareTo((ChanInfo) o);
         }
         else
         {
-            ret = -1;
+            throw new IllegalArgumentException("Attempt to compare ChanInfo to an object of a different class");
+        }
+    }
+    /**
+     * Compare two Channel info objects based on:
+     * name, server, chan type, rate, and data type (in that order)
+     * @param ci the other ChanInfo object to compare this one to
+     * @return -1 if this < other 0 if equal 1 if this > other
+     */
+    public int compareTo(ChanInfo ci)
+    {
+        int ret;
+        int t;
+        ret = this.chanName.compareTo(ci.chanName);
+        if (ret == 0 && server != null && ci.server != null)
+        {
+            ret = server.compareTo(ci.server);
+        }
+        if (ret == 0 && cType != null && ci.cType != null)
+        {
+            ret = cType.compareTo(ci.cType);
+        }
+        if (ret == 0)
+        {
+            ret = rate.compareTo(ci.rate);
+        }
+        if (ret == 0 && dType != null && ci.dType != null)
+        {
+            ret = dType.compareTo(ci.dType);
         }
         if (ret < 0)
         {
