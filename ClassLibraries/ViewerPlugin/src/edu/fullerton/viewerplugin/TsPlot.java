@@ -410,7 +410,7 @@ public class TsPlot extends PluginSupport implements PlotProduct
         float rate = dbuf.getChanInfo().getRate();
         double msPerSample = 1000 / rate;
         long startMs = TimeAndDate.gps2utc(dbuf.getTimeInterval().getStartGps()) * 1000;
-        float[] data = dbuf.getData();
+        double[] data = dbuf.getDblData();
         for (int i = 0; i < dbuf.getDataLength(); i++)
         {
             long curMs = Math.round(msPerSample * i + startMs);
@@ -473,7 +473,7 @@ public class TsPlot extends PluginSupport implements PlotProduct
             
         }
         
-        float[] data = dbuf.getData();
+        double[] data = dbuf.getDblData();
         for (int i = 0; i < dbuf.getDataLength(); i++)
         {
             double x =  (i / rate + t0) * scale; // handle gps vs dt and dt units
