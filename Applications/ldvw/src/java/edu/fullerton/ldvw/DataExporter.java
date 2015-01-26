@@ -161,14 +161,14 @@ class DataExporter
         
         dataFns.append("function data = ").append(funcName).append("()\n\n");
         dataFns.append("    data=[...\n");
-        float[] data = dbuf.getData();
+        double[] data = dbuf.getDblData();
         int linCnt = 8;
         for (int lidx = 0; lidx < data.length; lidx += linCnt)
         {
             dataFns.append("        ");
             for (int idx = lidx; idx < lidx + linCnt && idx < data.length; idx++)
             {
-                dataFns.append(Float.toString(data[idx]));
+                dataFns.append(Double.toString(data[idx]));
                 if (idx < data.length - 1)
                 {
                     dataFns.append("; ");
@@ -195,7 +195,7 @@ class DataExporter
         ChanInfo chanInfo = buf.getChanInfo();
         TimeInterval timeInterval = buf.getTimeInterval();
 
-        float[] data = buf.getData();
+        double[] data = buf.getDblData();
         float fs = chanInfo.getRate();
         Long startgps = timeInterval.getStartGps();
         

@@ -54,7 +54,7 @@ public class ChanDataBuffer
 
     private TimeInterval timeInterval;
     private int dataLength;
-    private float[] data;
+    private double[] data;
     private String lastError = "";
     private ViewUser vuser;
     private final Database db;
@@ -154,10 +154,10 @@ public class ChanDataBuffer
                     {
                         NDSBufferStatus nbs = client.getBufferStatus();
                         checkBufStatus(ci, nbs);
-                        data = new float[dataLength];
+                        data = new double[dataLength];
                         for (int i = 0; i < dataLength; i++)
                         {
-                            data[i] = client.getNextDouble().floatValue();
+                            data[i] = client.getNextDouble();
                         }
                         ret = true;
                         chanInfo = ci;
@@ -374,12 +374,24 @@ public class ChanDataBuffer
 
     public float[] getData()
     {
+        float[] fdata = new float[data.length];
+        for(int i=0; i< data.length;i++)
+        {
+            fdata[i] = (float)data[i];
+        }
+        return fdata;
+    }
+    public double[] getDblData()
+    {
         return data;
     }
-
-    public void setData(float[] data)
+    public void setData(float[] fdata)
     {
-        this.data = data;
+        data = new double[fdata.length];
+        for(int i=0;i<fdata.length;i++)
+        {
+            data[i] = fdata[i];
+        }
     }
 
     public TimeInterval getTimeInterval()
@@ -728,7 +740,7 @@ public class ChanDataBuffer
         double fit, t;
         for (int i = 0; i < dataLength; i++)
         {
-            data[i] = (float) (data[i] - (m * i + b));
+            data[i] = (data[i] - (m * i + b));
         }
     }
     /**
