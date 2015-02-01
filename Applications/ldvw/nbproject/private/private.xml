@@ -2,10 +2,15 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="42">
         <file>
-            <url>src/java/edu/fullerton/ldvw/ChanSourceData.java</url>
-            <bookmark id="15">
+            <url>src/java/edu/fullerton/ldvw/PluginManager.java</url>
+            <bookmark id="40">
                 <name/>
-                <line>131</line>
+                <line>191</line>
+                <key/>
+            </bookmark>
+            <bookmark id="37">
+                <name/>
+                <line>216</line>
                 <key/>
             </bookmark>
         </file>
@@ -31,10 +36,10 @@
             </bookmark>
         </file>
         <file>
-            <url>src/java/edu/fullerton/ldvplugin/SpectrogramManager.java</url>
-            <bookmark id="42">
+            <url>src/java/edu/fullerton/ldvw/ChanSourceData.java</url>
+            <bookmark id="15">
                 <name/>
-                <line>252</line>
+                <line>131</line>
                 <key/>
             </bookmark>
         </file>
@@ -47,15 +52,10 @@
             </bookmark>
         </file>
         <file>
-            <url>src/java/edu/fullerton/ldvw/PluginManager.java</url>
-            <bookmark id="40">
+            <url>src/java/edu/fullerton/ldvplugin/SpectrogramManager.java</url>
+            <bookmark id="42">
                 <name/>
-                <line>191</line>
-                <key/>
-            </bookmark>
-            <bookmark id="37">
-                <name/>
-                <line>216</line>
+                <line>252</line>
                 <key/>
             </bookmark>
         </file>
@@ -79,6 +79,8 @@
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/PluginManager.java</file>
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
         </group>
-        <group/>
+        <group>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/ExternalPlotManager.java</file>
+        </group>
     </open-files>
 </project-private>
