@@ -24,16 +24,10 @@ import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvjutils.ImageCoordinate;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.viewerplugin.ChanDataBuffer;
-import edu.fullerton.ldvplugin.CoherenceManager;
-import edu.fullerton.ldvplugin.CrossSpectrumManager;
 import edu.fullerton.viewerplugin.GUISupport;
 import edu.fullerton.ldvplugin.OdcPlotManager;
 import edu.fullerton.viewerplugin.PlotProduct;
-import edu.fullerton.ldvplugin.SpectrogramManager;
-import edu.fullerton.ldvplugin.TrendPlotManager;
-import edu.fullerton.ldvplugin.WplotManager;
 import edu.fullerton.viewerplugin.SpectrumPlot;
-import edu.fullerton.viewerplugin.TsPlot;
 import edu.fullerton.ldvtables.ChannelTable;
 import edu.fullerton.ldvtables.ImageCoordinateTbl;
 import edu.fullerton.ldvtables.ImageGroupTable;
@@ -45,6 +39,7 @@ import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.viewerplugin.GDSFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -88,6 +83,19 @@ public class PluginManager extends GUISupport
     private final boolean allowTestData = false;  // Should UI have test data options?
     private final ArrayList<Integer> imageIDs;    // list of images we produced
    
+    private class ProductDefn
+    {
+        String enableKey;           // form item name for checkbox that enables this product
+        String className;           // name of class that implements PlotProduct that manages it
+        
+        ProductDefn(String enableKey, String className)
+        {
+            this.enableKey = enableKey;
+            this.className = className;
+        }
+    }
+    private final ArrayList<ProductDefn>productList;
+    
     private HttpServletResponse response;
     
     public PluginManager(Database db, Page vpage, ViewUser vuser,
@@ -98,6 +106,20 @@ public class PluginManager extends GUISupport
         paramMap = pMap;
         imgTbl = new ImageTable(db);
         imageIDs = new ArrayList<>();
+        // define the products we manage by enable key and class name
+        // they will be added to the product accordion in the same order listed here
+        productList = new ArrayList<>();
+        productList.add(new ProductDefn("doTimeSeries", "edu.fullerton.viewerplugin.TsPlot"));
+        productList.add(new ProductDefn("doGwpyTs", "edu.fullerton.ldvplugin.TimeSeriesManager"));
+        productList.add(new ProductDefn("doSpectrum", "edu.fullerton.viewerplugin.SpectrumPlot"));
+        productList.add(new ProductDefn("doGwpySp", "edu.fullerton.ldvplugin.SpectrumManager"));
+        productList.add(new ProductDefn("doSpectrogram", "edu.fullerton.ldvplugin.SpectrogramManager"));
+        productList.add(new ProductDefn("doGwSpectrogram", "edu.fullerton.ldvplugin.GWSpectrogramManager"));
+        productList.add(new ProductDefn("doCoherence", "edu.fullerton.ldvplugin.CoherenceManager"));
+        productList.add(new ProductDefn("doGWCoh", "edu.fullerton.ldvplugin.GWCoherenceManager"));
+        productList.add(new ProductDefn("doGwCohgram", "edu.fullerton.ldvplugin.CoherencegramManager"));
+        productList.add(new ProductDefn("doWplot","edu.fullerton.ldvplugin.WplotManager"));
+        productList.add(new ProductDefn("doOdc","edu.fullerton.ldvplugin.OdcPlotManager"));
     }
 
     public void setResponse(HttpServletResponse response)
@@ -188,69 +210,31 @@ public class PluginManager extends GUISupport
         PageItemList pfDiv = new PageItemList();
         pfDiv.setId("accordion");
         
-        // Add Time series
-        TsPlot tsp = new TsPlot();
-        tsp.setParameters(paramMap);
-        PageItemList tspPil = getSelectorContent(tsp,"doTimeSeries",nSel,multDisp);
-        tspPil.setUseDiv(false);
-        pfDiv.add(tspPil);
+        for(ProductDefn pdef : productList)
+        {
+            String enKey = pdef.enableKey;
+            String clsName = pdef.className;
+            try
+            {
+                Class<?> cls = Class.forName(clsName);
+                Constructor<?> constructor = cls.getConstructor(com.areeda.jaDatabaseSupport.Database.class,
+                                                                edu.fullerton.jspWebUtils.Page.class,
+                                                                edu.fullerton.ldvtables.ViewUser.class);
+                PlotProduct product = (PlotProduct) constructor.newInstance(db, vpage, vuser);
+                product.setParameters(paramMap);
+                product.setChanList(baseChans);
+                PageItemList pPil = getSelectorContent(product,enKey,nSel,multDisp);
+                pPil.setUseDiv(false);
+                pfDiv.add(pPil);
+            }
+            catch (Exception ex)
+            {
+                String ermsg = "Error creating class or getting selector for " + clsName +
+                               " " + ex.getClass().getSimpleName() + " - " + ex.getLocalizedMessage();
+                throw new WebUtilException(ermsg);
+            }
+        }
         
-        // add Spectrum
-        SpectrumPlot sp = new SpectrumPlot();
-        sp.setParameters(paramMap);
-        sp.setup(db, vpage, vuser);
-        PageItemList spPil = getSelectorContent(sp, "doSpectrum", nSel, multDisp);
-        spPil.setUseDiv(false);
-        pfDiv.add(spPil);
-        
-        // add Spectrogram
-        SpectrogramManager spgm = new SpectrogramManager( db, vpage, vuser);
-        spgm.setParameters(paramMap);
-        PageItemList spgPil = getSelectorContent(spgm,"doSpectrogram",nSel, multDisp);
-        spgPil.setUseDiv(false);
-        pfDiv.add(spgPil);
-        
-        // add Coherence
-        CoherenceManager chm = new CoherenceManager(db,vpage,vuser);
-        chm.setChanList(baseChans);
-        chm.setParammap(paramMap);
-        PageItemList chmPil = getSelectorContent(chm, "doCoherence", nSel, multDisp);
-        chmPil.setUseDiv(false);
-        pfDiv.add(chmPil);
-        
-        // add Omega scan
-        WplotManager wpm = new WplotManager(db, vpage, vuser);
-        wpm.setParammap(paramMap);
-        PageItemList wpmPil = getSelectorContent(wpm, "doWplot", nSel, multDisp);
-        wpmPil.setUseDiv(false);
-        pfDiv.add(wpmPil);
-        
-        // add ODC plots
-        OdcPlotManager odm = new OdcPlotManager(db, vpage, vuser);
-        odm.setParammap(paramMap);
-        PageItemList odmPil = getSelectorContent(odm, "doOdc", nSel, multDisp);
-        odmPil.setUseDiv(false);
-        pfDiv.add(odmPil);
-        
-//        // add Long term trend plots
-//        if (vuser.isTester())
-//        {
-//            TrendPlotManager tpm = new TrendPlotManager(db, vpage, vuser);
-//            PageItemList tpmPil = getSelectorContent(tpm, "trndplt", nSel, multDisp);
-//            tpmPil.setUseDiv(false);
-//            pfDiv.add(tpmPil);
-//        }
-        
-//        // add Cross Spectral Analysis
-//        if (vuser.isTester())
-//        {
-//            CrossSpectrumManager csm = new CrossSpectrumManager(db, vpage, vuser);
-//            PageItemList csmPil = getSelectorContent(csm, "csaplot", nSel, multDisp);
-//            csmPil.setUseDiv(false);
-//            pfDiv.add(csmPil);
-//        }
-        
-        //========= put new products above this line=========
         
         // add the products and set them up as a closed accordion
         ret.add(pfDiv);
@@ -300,11 +284,7 @@ public class PluginManager extends GUISupport
             boolean noxfer = false;     // if nobody needs data we won't transfer it
             
             //===========what do they want to do?  ie. which products============
-            String[] allProducts =
-            {
-                "doTimeSeries", "doSpectrum", "doSpectrogram", "doCoherence","doWplot", "trndplt",
-                "csaplot", "doOdc"
-            };
+            
             ArrayList<PlotProduct> selectedProducts = new ArrayList< >();
 
             Integer nSel = countBaseChannelSelections(baseSelections);
@@ -323,12 +303,12 @@ public class PluginManager extends GUISupport
             else
             {
                 boolean needsData = false;
-                for (String s : allProducts)
+                for (ProductDefn pdef : productList)
                 {
-                    if (paramMap.containsKey(s))
+                    if (paramMap.containsKey(pdef.enableKey))
                     {
                         nProducts++;
-                        PlotProduct pp = getProduct(s);
+                        PlotProduct pp = getProduct(pdef);
                         selectedProducts.add(pp);
                         needsData |= pp.needsDataXfer();
                     }
@@ -617,41 +597,25 @@ public class PluginManager extends GUISupport
      * @return a product object
      * @throws WebUtilException
      */
-    private PlotProduct getProduct(String p) throws WebUtilException
+    private PlotProduct getProduct(ProductDefn pDef) throws WebUtilException
     {
         PlotProduct ret;
         String dispFormat;
-        String[] dispFormats;
-        switch (p)
+        String enKey = pDef.enableKey;
+        String clsName = pDef.className;
+        try
         {
-            case "doTimeSeries":
-                ret = new TsPlot();
-                dispFormats = paramMap.get("dispFormat");
-                break;
-            case "doSpectrum":
-                ret = new SpectrumPlot();
-                break;
-            case "doSpectrogram":
-                ret = new SpectrogramManager(db, vpage, vuser);
-                break;
-            case "doOdc":
-                ret = new OdcPlotManager(db, vpage, vuser);
-                ret.setParameters(paramMap);
-                break;
-            case "doCoherence":
-                ret = new CoherenceManager(db, vpage, vuser);
-                break;
-            case "doWplot":
-                ret = new WplotManager(db, vpage, vuser);
-                break;
-            case "trndplt":
-                ret = new TrendPlotManager(db, vpage, vuser);
-                break;
-            case "csaplot":
-                ret = new CrossSpectrumManager(db, vpage, vuser);
-                break;
-            default:
-                throw new WebUtilException("Unknown display product requested: " + p);
+            Class<?> cls = Class.forName(clsName);
+            Constructor<?> constructor = cls.getConstructor(com.areeda.jaDatabaseSupport.Database.class,
+                                                            edu.fullerton.jspWebUtils.Page.class,
+                                                            edu.fullerton.ldvtables.ViewUser.class);
+            ret = (PlotProduct) constructor.newInstance(db, vpage, vuser);
+        }
+        catch (Exception ex)
+        {
+            String ermsg = "Error creating class or getting selector for " + clsName
+                           + " " + ex.getClass().getSimpleName() + " - " + ex.getLocalizedMessage();
+            throw new WebUtilException(ermsg);
         }
         ret.setParameters(paramMap);
         ret.setup(db, vpage, vuser);
