@@ -33,6 +33,11 @@ class PluginSwitchParameter extends PluginParameter
     PluginSwitchParameter(String name, String formName, String comment)
     {
         super(name,formName,comment);
+        if (comment == null || comment.isEmpty())
+        {
+            throw new IllegalArgumentException("Comment can't be null for a switch "
+                    + "otherwise we end up with a naked checkbox");
+        }
     }
     
     @Override
