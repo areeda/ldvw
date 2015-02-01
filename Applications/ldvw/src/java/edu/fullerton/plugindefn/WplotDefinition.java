@@ -49,10 +49,12 @@ public class WplotDefinition extends PluginController
 
             addAttribute(new PluginAttribute("stackable", false));
             addAttribute(new PluginAttribute("needsDataXfer", false));
-            addAttribute(new PluginAttribute("program", "/usr/local/ldvw/bin/wplot dmt_wplot frameType='NDS2' "));
+            addAttribute(new PluginAttribute("program", "dmt_wplot"));
+            addConstant("frameType=NDS2");
             addAttribute(new PluginAttribute("useEquals", true));
             addAttribute(new PluginAttribute("nDashes", 0));
             addAttribute(new PluginAttribute("listType", "dmt"));
+            addAttribute(new PluginAttribute("useQuotes", false));
 
             PluginParameter p;
 
