@@ -1,3 +1,10 @@
+# OS/editor files
+*.swp
+.DS_Store
+.idea
+*~
+
+# NetBeans generated files
 /ClassLibraries/ViewerConfig/build/
 /ClassLibraries/LdvJUtils/build/
 /ClassLibraries/JSON/build/
