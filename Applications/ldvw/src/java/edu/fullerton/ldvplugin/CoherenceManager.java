@@ -48,10 +48,7 @@ import java.util.regex.Pattern;
 public class CoherenceManager extends ExternalPlotManager implements PlotProduct
 {
     private final String name = "Coherence";
-    private Integer width;
-    private Integer height;
     private boolean logXaxis=true, logYaxis=false;
-    private String dispFormat;
     private final String prog = "/usr/local/ldvw/bin/gw_coher.py";
 
     private String ref_name;
@@ -64,7 +61,6 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
     private Float fmax;
     private String yLabel="Coherence";
     private int lineThickness;
-    private List<BaseChanSelection> baseChans;
     /**
      * Manage the external program that calculates coherence of two series
      * @param db
@@ -350,7 +346,7 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
         this.paramMap = parameterMap;
         // decode the reference channel name + optional server
         String[] coh_ref = paramMap.get("coh_Ref");
-        if (coh_ref.length == 1)
+        if (coh_ref != null && coh_ref.length == 1)
         {
             int atIdx = coh_ref[0].indexOf("@");
             if (atIdx > 0)
@@ -399,10 +395,6 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
         return false;
     }
 
-    public void setChanList(List<BaseChanSelection> baseChans)
-    {
-        this.baseChans = baseChans;
-    }
 
     /**
      * Get the data buffer for the reference channel.  
