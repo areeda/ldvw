@@ -29,6 +29,7 @@ import edu.fullerton.viewerplugin.ChanDataBuffer;
 import edu.fullerton.viewerplugin.PlotProduct;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.io.FilenameUtils;
@@ -38,10 +39,8 @@ import org.apache.commons.io.FilenameUtils;
  * 
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
-public class WplotManager extends ExternalPlotManager implements PlotProduct
+public class WplotManager extends ExternalPlotManager 
 {
-    private int width;
-    private int height;
 
     public WplotManager(Database db, Page vpage, ViewUser vuser)
     {
@@ -60,6 +59,7 @@ public class WplotManager extends ExternalPlotManager implements PlotProduct
     public PageItemList getSelector(String enableKey,int nSel, String[] multDisp) throws WebUtilException
     {
         WplotDefinition wpd = new WplotDefinition();
+        wpd.init();
         this.enableKey = enableKey;
         wpd.setFormParameters(paramMap);
         PageItemList ret = wpd.getSelector(enableKey, nSel);
@@ -67,7 +67,8 @@ public class WplotManager extends ExternalPlotManager implements PlotProduct
     }
 
     @Override
-    public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbuf, boolean compact) throws WebUtilException
+    public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbuf, boolean compact) 
+            throws WebUtilException
     {
         try
         {
@@ -102,11 +103,12 @@ public class WplotManager extends ExternalPlotManager implements PlotProduct
             
             wpd.setFormParameters(paramMap);
             
-            String cmd = wpd.getCommandLine(dbuf,paramMap);
-            vpage.add(cmd);
+            List<String> cmd = wpd.getCommandArray(dbuf,paramMap);
+            String cmdStr = wpd.getCommandLine(dbuf, paramMap);
+            vpage.add(cmdStr);
             vpage.addBlankLines(2);
             ArrayList<Integer> ret = new ArrayList<>();
-            if (runExternalProgram(cmd))
+            if (runExternalProgram(cmd, ""))
             {
                 String txtOutput = String.format("%1$s Output:<br>%2$s",getProductName(),getStdout());
                 vpage.add(new PageItemString(txtOutput,false));
@@ -158,12 +160,6 @@ public class WplotManager extends ExternalPlotManager implements PlotProduct
         return false;
     }
 
-    @Override
-    public void setSize(int width, int height)
-    {
-        this.width = width;
-        this.height = height;
-    }
 
     @Override
     public String getProductName()
@@ -177,11 +173,6 @@ public class WplotManager extends ExternalPlotManager implements PlotProduct
         return false;
     }
 
-    @Override
-    public void setDispFormat(String dispFormat)
-    {
-        // ignore it because we can't control it
-    }
 
     @Override
     public void setParameters(Map<String, String[]> parameterMap)
