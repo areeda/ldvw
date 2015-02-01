@@ -105,7 +105,7 @@ public abstract class GWpyBaseDefn extends PluginController
     protected void addLogFaxis()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.SWITCH, "Linear F-axis", "nologf",
-                                        "Linear F-axis");
+                                        "Linear F-axis, default is log");
         p.setArgumentName("nologf");
         addParameter(p);
         addFaxisLimits();
@@ -127,7 +127,7 @@ public abstract class GWpyBaseDefn extends PluginController
     protected void addLogYaxis()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.SWITCH, "Linear Y-axis", "nology",
-                                        "default is logarithmic");
+                                        "Linear Y-axis, default is log");
         p.setArgumentName("nology");
         addParameter(p);
         addYaxisLimits();
@@ -185,7 +185,7 @@ public abstract class GWpyBaseDefn extends PluginController
     protected void addLogIntensity()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.SWITCH, "Linear color bar", "nologi",
-                                        "default is logarithmic");
+                                        "Linear colorbar, default is log");
         p.setArgumentName("lincolors");
         addParameter(p);
         addIntAxisLimits();
