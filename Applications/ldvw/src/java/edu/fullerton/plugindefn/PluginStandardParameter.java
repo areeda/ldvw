@@ -27,6 +27,7 @@ import edu.fullerton.jspWebUtils.WebUtilException;
 class PluginStandardParameter extends PluginParameter
 {
     private String val;
+    private String listStyle;
     
     public PluginStandardParameter(String name, String formName, String comment)
     {
@@ -54,5 +55,17 @@ class PluginStandardParameter extends PluginParameter
     PageTableRow getSelectorRow(String namespace) throws WebUtilException
     {
         return null;
+    }
+    @Override
+    public PluginParameter setListStyle(String val)
+    {
+        this.listStyle = val;
+        return this;
+    }
+
+    @Override
+    public String getListStyle()
+    {
+        return listStyle;
     }
 }
