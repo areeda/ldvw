@@ -16,7 +16,9 @@
  */
 package edu.fullerton.viewerplugin;
 
+import com.areeda.jaDatabaseSupport.Database;
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
+import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageFormCheckbox;
 import edu.fullerton.jspWebUtils.PageFormSelect;
 import edu.fullerton.jspWebUtils.PageItem;
@@ -25,10 +27,12 @@ import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.BaseChanSelection;
 import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.TimeAndDate;
 import edu.fullerton.ldvjutils.TimeInterval;
+import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.viewerplugin.SpectrumCalc.Scaling;
 import edu.fullerton.viewerplugin.WindowGen.Window;
 import java.awt.BasicStroke;
@@ -40,6 +44,7 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -61,8 +66,7 @@ import org.jfree.data.xy.XYSeriesCollection;
  * 
  * @author Joseph Areeda <joe@areeda.com>
  */
-public 
-        class SpectrumPlot extends PluginSupport implements PlotProduct
+public class SpectrumPlot extends PluginSupport implements PlotProduct
 {
 
     private boolean wantStacked = false;
@@ -85,6 +89,10 @@ public
     {
     }
 
+    public SpectrumPlot(Database db, Page vpage, ViewUser vuser)
+    {
+        
+    }
     @Override
     public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbufs, boolean compact) throws WebUtilException
     {
@@ -749,6 +757,12 @@ public
     public boolean hasImages()
     {
         return true;
+    }
+
+    @Override
+    public void setChanList(List<BaseChanSelection> baseChans)
+    {
+        // we don't need this for our plot, but it's part of the interface
     }
 
     private class genPlotInfo

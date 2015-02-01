@@ -21,8 +21,10 @@ import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageItem;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.BaseChanSelection;
 import edu.fullerton.ldvtables.ViewUser;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,6 +35,10 @@ public interface PlotProduct
 {
     /**
      * Create one or more plots from data provided
+     * 
+     * Note: internal products should implement this interface while products that use external 
+     * programs should subclass the ExternalPlotManager.
+     * 
      * @param dbuf data buffers with full descriptors
      * @param compact flag that image is small so minimize text added
      * @return list of image IDs of product images saved to the database
@@ -63,6 +69,7 @@ public interface PlotProduct
     
     /**
      * Determines whether the PluginManager creates an image description for each image in the list
+     * or if the product itself creates the description
      * 
      * @return  true if the PluginManager should do it, false if the product does it
      */
@@ -121,4 +128,11 @@ public interface PlotProduct
      * @return true if caller should expect a non-empty list of images.
      */
     public boolean hasImages();
+    
+    /**
+     * Some products such as Coherence need at least 2 channels and the UI lets them select a
+     * reference channel
+     * @param baseChans list of selected channels
+     */
+    public void setChanList(List<BaseChanSelection> baseChans);
 }

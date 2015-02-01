@@ -16,6 +16,8 @@
  */
 package edu.fullerton.viewerplugin;
 
+import com.areeda.jaDatabaseSupport.Database;
+import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageFormCheckbox;
 import edu.fullerton.jspWebUtils.PageFormSelect;
 import edu.fullerton.jspWebUtils.PageItem;
@@ -23,8 +25,10 @@ import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.BaseChanSelection;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.TimeAndDate;
+import edu.fullerton.ldvtables.ViewUser;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.IOException;
@@ -32,6 +36,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.SimpleTimeZone;
 import org.jfree.chart.ChartFactory;
@@ -69,6 +74,10 @@ public class TsPlot extends PluginSupport implements PlotProduct
     {
     }
 
+    public TsPlot(Database db, Page vpage, ViewUser vuser)
+    {
+        
+    }
     @Override
     public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbufs, boolean compact) throws WebUtilException
     {
@@ -499,5 +508,11 @@ public class TsPlot extends PluginSupport implements PlotProduct
     private int makeAddPlotFiles(ArrayList<ChanDataBuffer> dbufs, boolean compact)
     {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setChanList(List<BaseChanSelection> baseChans)
+    {
+        // we don't need this for our plot, but it's part of the interface
     }
 }
