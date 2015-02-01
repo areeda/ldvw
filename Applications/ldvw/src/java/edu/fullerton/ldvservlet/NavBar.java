@@ -39,7 +39,7 @@ public class NavBar
     private final String[][] historyMenu =
     {
         {
-            "Saved Plots", "ImageHistory&amp;size=med"
+            "Saved plots", "ImageHistory&amp;size=med"
         },
         {
             "Upload", "upload"
@@ -48,10 +48,10 @@ public class NavBar
     private final String[][] statusMenu =
     {
         {
-            "Chan Stats", "ChannelStats"
+            "Channel stats", "ChannelStats"
         },
         {
-            "NDS Status", "ndsStatus"
+            "NDS status", "ndsStatus"
         },
     };
     private final String[][] helpMenu =
@@ -60,17 +60,20 @@ public class NavBar
             "Help", mainHelpUrl
         },
         {
-            "Contact Us", "contactUs"
+            "Contact us", "contactUs"
+        },
+        {
+            "Release notes", "https://ligodv.areeda.com/ligodv/dokuwiki/doku.php?id=ldvrelnotes"
         }
     };
     // Commands only available to admin group
     private final String[][] adminCommands =
     {
         {
-            "User Stats", "Stats"
+            "User stats", "Stats"
         },
         {
-            "Edit Help", "EditHelp"
+            "Edit help", "EditHelp"
         },
         {
             "DB stats", "dbstats"
