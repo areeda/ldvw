@@ -1,24 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="42">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="50">
         <file>
             <url>src/java/edu/fullerton/ldvw/PluginManager.java</url>
-            <bookmark id="40">
+            <bookmark id="47">
                 <name/>
-                <line>191</line>
+                <line>212</line>
                 <key/>
             </bookmark>
-            <bookmark id="37">
+            <bookmark id="49">
                 <name/>
-                <line>216</line>
+                <line>310</line>
+                <key/>
+            </bookmark>
+            <bookmark id="50">
+                <name/>
+                <line>599</line>
                 <key/>
             </bookmark>
         </file>
         <file>
-            <url>src/java/edu/fullerton/ldvw/BaseChannelSelector.java</url>
-            <bookmark id="41">
+            <url>src/java/edu/fullerton/ldvplugin/SpectrogramManager.java</url>
+            <bookmark id="42">
                 <name/>
-                <line>145</line>
+                <line>252</line>
                 <key/>
             </bookmark>
         </file>
@@ -26,12 +31,17 @@
             <url>src/java/edu/fullerton/ldvplugin/CoherenceManager.java</url>
             <bookmark id="38">
                 <name/>
-                <line>102</line>
+                <line>98</line>
                 <key/>
             </bookmark>
             <bookmark id="36">
                 <name/>
-                <line>271</line>
+                <line>267</line>
+                <key/>
+            </bookmark>
+            <bookmark id="48">
+                <name/>
+                <line>396</line>
                 <key/>
             </bookmark>
         </file>
@@ -52,10 +62,23 @@
             </bookmark>
         </file>
         <file>
-            <url>src/java/edu/fullerton/ldvplugin/SpectrogramManager.java</url>
-            <bookmark id="42">
+            <url>src/java/edu/fullerton/plugindefn/PluginController.java</url>
+            <bookmark id="43">
                 <name/>
-                <line>252</line>
+                <line>203</line>
+                <key/>
+            </bookmark>
+            <bookmark id="44">
+                <name/>
+                <line>749</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>src/java/edu/fullerton/ldvw/BaseChannelSelector.java</url>
+            <bookmark id="41">
+                <name/>
+                <line>145</line>
                 <key/>
             </bookmark>
         </file>
@@ -80,7 +103,9 @@
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
         </group>
         <group>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/ExternalPlotManager.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/CrossSpectrumDefinition.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/CoherencegramDefn.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/GWpyBaseDefn.java</file>
         </group>
     </open-files>
 </project-private>
