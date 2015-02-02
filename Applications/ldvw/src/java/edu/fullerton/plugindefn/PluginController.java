@@ -23,6 +23,7 @@ import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.viewerplugin.ChanDataBuffer;
@@ -210,10 +211,8 @@ public abstract class PluginController
                     arg = getSwitchParameter(p);
                     break;
                 case NUMBER:
-                    arg = getSingleParam(p);
-                    break;
                 case STRING:
-                    unimplemented("string parameters not available yet");
+                    arg = getSingleParam(p);
                     break;
                 case NUMBERARRAY:
                     arg = getNumberArrayParameter(p);
@@ -429,7 +428,24 @@ public abstract class PluginController
                 {
                     if (p.getListStyle().equalsIgnoreCase("python"))
                     {
-                        ret.add(buf.getChanInfo().getChanName());
+                        ChanInfo ci = buf.getChanInfo();
+                        String nameStr = ci.getChanName();
+                        switch (ci.getcType())
+                        {
+                            case "minute-trend":
+                                nameStr += ",m-trend";
+                                break;
+                            case "second-trend":
+                                nameStr += ",s-trend";
+                                break;
+                            case "RDS":
+                                nameStr += ",reduced";
+                                break;
+                            case "online":
+                                nameStr += ",online";
+                                break;
+                        }
+                        ret.add(nameStr);
                     }
                     else if (useEquals)
                     {
