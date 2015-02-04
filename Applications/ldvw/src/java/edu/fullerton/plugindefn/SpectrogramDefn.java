@@ -48,6 +48,7 @@ public class SpectrogramDefn extends GWpyBaseDefn
             addPreFilter();
             addLogFaxis();
             addLogYaxis();
+            addLogIntensity();
         }
         inited = true;
     }
