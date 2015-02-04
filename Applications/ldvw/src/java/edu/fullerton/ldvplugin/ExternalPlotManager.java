@@ -646,10 +646,16 @@ public abstract class ExternalPlotManager extends ExternalProgramManager impleme
     /**
      * Return html object that displays all user settable parameters
      *
+     * @param enableKey - parameter name for the switch that enables this product
+     * @param nSel - number of input datasets available
+     * @param multDisp - I'm not sure
+     * @todo figure out if we still need/want multDisp parameter
      * @return the html object
+     * @throws edu.fullerton.jspWebUtils.WebUtilException
      */
     @Override
-    public abstract PageItem getSelector(String enableKey, int nSel, String[] multDisp) throws WebUtilException;
+    public abstract PageItem getSelector(String enableKey, int nSel, String[] multDisp) 
+            throws WebUtilException;
 
     /**
      * Does this product want the PlotManager to get data, or does it do it itself
