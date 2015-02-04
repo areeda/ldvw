@@ -8,6 +8,8 @@
         <group name="ldvw">
             <file>file:/home/joe/NetBeansProjects/ldvw/ClassLibraries/ViewerPlugin/src/edu/fullerton/viewerplugin/PlotProduct.java</file>
         </group>
-        <group/>
+        <group>
+            <file>file:/home/joe/ligo/java/ldvw/ClassLibraries/ViewerPlugin/src/edu/fullerton/viewerplugin/PlotProduct.java</file>
+        </group>
     </open-files>
 </project-private>
