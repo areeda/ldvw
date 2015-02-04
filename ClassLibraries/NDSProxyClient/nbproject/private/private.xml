@@ -3,14 +3,6 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/1"/>
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="4">
         <file>
-            <url>src/edu/fullerton/ndsproxyclient/NDSProxyClient.java</url>
-            <bookmark id="4">
-                <name/>
-                <line>783</line>
-                <key/>
-            </bookmark>
-        </file>
-        <file>
             <url>src/edu/fullerton/ndsproxyclient/NDSClient.java</url>
             <bookmark id="1">
                 <name/>
@@ -20,6 +12,14 @@
             <bookmark id="2">
                 <name/>
                 <line>614</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>src/edu/fullerton/ndsproxyclient/NDSProxyClient.java</url>
+            <bookmark id="4">
+                <name/>
+                <line>783</line>
                 <key/>
             </bookmark>
         </file>
