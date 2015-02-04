@@ -1,32 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="50">
-        <file>
-            <url>src/java/edu/fullerton/ldvw/PluginManager.java</url>
-            <bookmark id="47">
-                <name/>
-                <line>212</line>
-                <key/>
-            </bookmark>
-            <bookmark id="49">
-                <name/>
-                <line>310</line>
-                <key/>
-            </bookmark>
-            <bookmark id="50">
-                <name/>
-                <line>599</line>
-                <key/>
-            </bookmark>
-        </file>
-        <file>
-            <url>src/java/edu/fullerton/ldvplugin/SpectrogramManager.java</url>
-            <bookmark id="42">
-                <name/>
-                <line>252</line>
-                <key/>
-            </bookmark>
-        </file>
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="52">
         <file>
             <url>src/java/edu/fullerton/ldvplugin/CoherenceManager.java</url>
             <bookmark id="38">
@@ -63,14 +37,27 @@
         </file>
         <file>
             <url>src/java/edu/fullerton/plugindefn/PluginController.java</url>
-            <bookmark id="43">
+            <bookmark id="52">
                 <name/>
-                <line>203</line>
+                <line>101</line>
                 <key/>
             </bookmark>
-            <bookmark id="44">
+        </file>
+        <file>
+            <url>src/java/edu/fullerton/ldvw/PluginManager.java</url>
+            <bookmark id="47">
                 <name/>
-                <line>749</line>
+                <line>212</line>
+                <key/>
+            </bookmark>
+            <bookmark id="49">
+                <name/>
+                <line>310</line>
+                <key/>
+            </bookmark>
+            <bookmark id="50">
+                <name/>
+                <line>599</line>
                 <key/>
             </bookmark>
         </file>
@@ -79,6 +66,14 @@
             <bookmark id="41">
                 <name/>
                 <line>145</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>src/java/edu/fullerton/ldvplugin/SpectrogramManager.java</url>
+            <bookmark id="42">
+                <name/>
+                <line>252</line>
                 <key/>
             </bookmark>
         </file>
@@ -103,8 +98,15 @@
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
         </group>
         <group>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/CrossSpectrumDefinition.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/PluginController.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/TimeSeriesManager.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/CoherenceDefn.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/CoherencegramManager.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/TimeAndPlotSelector.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/ExternalPlotManager.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/PluginManager.java</file>
             <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/CoherencegramDefn.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/TimeSeriesDefn.java</file>
             <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/GWpyBaseDefn.java</file>
         </group>
     </open-files>
