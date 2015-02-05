@@ -78,8 +78,8 @@ public abstract class GWpyBaseDefn extends PluginController
     
     /**
      * FFTs are defined by time span and overlap
-     * @todo add window and scaling
      */
+    // @todo add window and scaling
     protected void addFFT()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Seconds per fft", "secpfft",
@@ -96,8 +96,8 @@ public abstract class GWpyBaseDefn extends PluginController
     }
     /**
      * Prefiltering options
-     * @todo add other filters available from GWpy
      */
+    // @todo add other filters available from GWpy
     protected void addPreFilter()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "High pass filter", "hpfilt",

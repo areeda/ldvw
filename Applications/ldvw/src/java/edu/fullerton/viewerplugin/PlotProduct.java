@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package viewerplugin;
+package edu.fullerton.viewerplugin;
 
-import viewerplugin.ChanDataBuffer;
+import edu.fullerton.viewerplugin.ChanDataBuffer;
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageItem;

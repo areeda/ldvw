@@ -25,7 +25,7 @@ import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.plugindefn.WplotDefinition;
-import viewerplugin.ChanDataBuffer;
+import edu.fullerton.viewerplugin.ChanDataBuffer;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

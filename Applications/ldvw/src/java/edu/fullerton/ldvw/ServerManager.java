@@ -28,7 +28,7 @@ import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.Server;
 import edu.fullerton.ldvtables.ServerTable;
 import edu.fullerton.ldvtables.ViewUser;
-import viewerplugin.GUISupport;
+import edu.fullerton.viewerplugin.GUISupport;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 

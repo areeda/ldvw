@@ -24,7 +24,7 @@ import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.plugindefn.CoherenceDefn;
-import viewerplugin.ChanDataBuffer;
+import edu.fullerton.viewerplugin.ChanDataBuffer;
 import java.util.ArrayList;
 
 /**

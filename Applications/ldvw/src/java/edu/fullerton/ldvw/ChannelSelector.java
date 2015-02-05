@@ -16,7 +16,7 @@
  */
 package edu.fullerton.ldvw;
 
-import viewerplugin.GUISupport;
+import edu.fullerton.viewerplugin.GUISupport;
 import com.areeda.jaDatabaseSupport.Database;
 import com.areeda.jaDatabaseSupport.Utils;
 import commonUI.ChannelsUI;

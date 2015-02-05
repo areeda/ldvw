@@ -23,11 +23,11 @@ import edu.fullerton.ldvjutils.ChanIndexInfo;
 import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvjutils.ImageCoordinate;
 import edu.fullerton.ldvjutils.LdvTableException;
-import viewerplugin.ChanDataBuffer;
-import viewerplugin.GUISupport;
+import edu.fullerton.viewerplugin.ChanDataBuffer;
+import edu.fullerton.viewerplugin.GUISupport;
 import edu.fullerton.ldvplugin.OdcPlotManager;
-import viewerplugin.PlotProduct;
-import viewerplugin.SpectrumPlot;
+import edu.fullerton.viewerplugin.PlotProduct;
+import edu.fullerton.viewerplugin.SpectrumPlot;
 import edu.fullerton.ldvtables.ChannelTable;
 import edu.fullerton.ldvtables.ImageCoordinateTbl;
 import edu.fullerton.ldvtables.ImageGroupTable;
@@ -36,7 +36,7 @@ import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.ldvtables.ChanPointerTable;
 import edu.fullerton.ldvtables.ChannelIndex;
 import edu.fullerton.ldvtables.ViewUser;
-import viewerplugin.GDSFilter;
+import edu.fullerton.viewerplugin.GDSFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
@@ -285,7 +285,8 @@ public class PluginManager extends GUISupport
             
             //===========what do they want to do?  ie. which products============
             
-            ArrayList<PlotProduct> selectedProducts = new ArrayList< >();
+            ArrayList<PlotProduct> singleProducts = new ArrayList<>();
+            ArrayList<PlotProduct> pairedProducts = new ArrayList<>();
 
             Integer nSel = countBaseChannelSelections(baseSelections);
             Integer nProducts = 0;
@@ -309,7 +310,14 @@ public class PluginManager extends GUISupport
                     {
                         nProducts++;
                         PlotProduct pp = getProduct(pdef);
-                        selectedProducts.add(pp);
+                        if (pp.isPaired())
+                        {
+                            pairedProducts.add(pp);
+                        }
+                        else
+                        {
+                            singleProducts.add(pp);
+                        }
                         needsData |= pp.needsDataXfer();
                     }
                 }
@@ -377,7 +385,7 @@ public class PluginManager extends GUISupport
                 }
                 else
                 {
-                    ret = callPlugins(baseSelections, times, groupBy, selectedProducts, noxfer);
+                    ret = callSinglePlugins(baseSelections, times, groupBy, singleProducts, noxfer);
                     if (imageIDs.size()  >  0)
                     {
                         ImageGroupTable igt = new ImageGroupTable(db);
@@ -480,7 +488,7 @@ public class PluginManager extends GUISupport
      * @throws WebUtilException
      * @throws LdvTableException
      */
-    private boolean callPlugins(Map<Integer, BaseChanSelection> baseSelections, 
+    private boolean callSinglePlugins(Map<Integer, BaseChanSelection> baseSelections, 
                                 ArrayList<TimeInterval> times, 
                                 String groupBy, ArrayList<PlotProduct> selectedProducts,
                                 boolean noxfer) 

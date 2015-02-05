@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package viewerplugin;
+package edu.fullerton.viewerplugin;
 
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
-import viewerplugin.WindowGen.Window;
+import edu.fullerton.viewerplugin.WindowGen.Window;
 
 /**
  * Second generation Fourier spectrum calculator

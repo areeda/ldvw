@@ -20,7 +20,7 @@ package edu.fullerton.plugindefn;
 import edu.fullerton.jspWebUtils.PageFormCheckbox;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
-import viewerplugin.GUISupport;
+import edu.fullerton.viewerplugin.GUISupport;
 
 /**
  *

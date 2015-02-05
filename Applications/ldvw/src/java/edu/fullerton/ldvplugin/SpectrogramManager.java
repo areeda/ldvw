@@ -16,9 +16,9 @@
  */
 package edu.fullerton.ldvplugin;
 
-import viewerplugin.GUISupport;
-import viewerplugin.PlotProduct;
-import viewerplugin.ChanDataBuffer;
+import edu.fullerton.viewerplugin.GUISupport;
+import edu.fullerton.viewerplugin.PlotProduct;
+import edu.fullerton.viewerplugin.ChanDataBuffer;
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageFormCheckbox;

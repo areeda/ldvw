@@ -16,8 +16,8 @@
  */
 package edu.fullerton.ldvplugin;
 
-import viewerplugin.PlotProduct;
-import viewerplugin.ChanDataBuffer;
+import edu.fullerton.viewerplugin.PlotProduct;
+import edu.fullerton.viewerplugin.ChanDataBuffer;
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageFormCheckbox;
@@ -30,7 +30,7 @@ import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.BaseChanSelection;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
-import viewerplugin.GUISupport;
+import edu.fullerton.viewerplugin.GUISupport;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
