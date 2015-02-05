@@ -19,4 +19,4 @@
  * Provides general routines to support plot products.
  * 
  */
-package edu.fullerton.viewerplugin;
+package viewerplugin;

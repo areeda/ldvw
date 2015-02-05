@@ -17,7 +17,7 @@
 package edu.fullerton.ldvw;
 
 import com.ritolaaudio.simplewavio.Utils;
-import edu.fullerton.viewerplugin.ChanDataBuffer;
+import viewerplugin.ChanDataBuffer;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.ChanInfo;

@@ -33,7 +33,7 @@ import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvtables.ImageTable;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
-import edu.fullerton.viewerplugin.GUISupport;
+import viewerplugin.GUISupport;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

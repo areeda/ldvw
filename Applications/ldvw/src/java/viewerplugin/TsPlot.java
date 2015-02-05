@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edu.fullerton.viewerplugin;
+package viewerplugin;
 
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
@@ -226,6 +226,12 @@ public class TsPlot extends PluginSupport implements PlotProduct
     public boolean isStackable()
     {
         return true;
+    }
+
+    @Override
+    public boolean isPaired()
+    {
+        return false;
     }
 
     @Override

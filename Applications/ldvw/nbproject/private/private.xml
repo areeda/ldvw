@@ -98,15 +98,6 @@
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
         </group>
         <group>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/PluginController.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/TimeSeriesManager.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/CoherenceDefn.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/CoherencegramManager.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/TimeAndPlotSelector.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/ExternalPlotManager.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/PluginManager.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/CoherencegramDefn.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/TimeSeriesDefn.java</file>
             <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/GWpyBaseDefn.java</file>
         </group>
     </open-files>

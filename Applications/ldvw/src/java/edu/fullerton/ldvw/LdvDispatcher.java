@@ -28,7 +28,7 @@ import edu.fullerton.ldvservlet.ServletSupport;
 import edu.fullerton.ldvtables.ChannelTable;
 import edu.fullerton.ldvtables.ImageTable;
 import edu.fullerton.ldvtables.ViewUser;
-import edu.fullerton.viewerplugin.GUISupport;
+import viewerplugin.GUISupport;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashSet;

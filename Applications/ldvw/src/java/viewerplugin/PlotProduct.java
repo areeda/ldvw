@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edu.fullerton.viewerplugin;
+package viewerplugin;
 
-import edu.fullerton.viewerplugin.ChanDataBuffer;
+import viewerplugin.ChanDataBuffer;
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageItem;
@@ -51,10 +51,16 @@ public interface PlotProduct
      * flag to say whether we can accept all data sets at one time or one for each call default is
      * one per call, override in the plugin if you can take multiples
      *
-     * @return true if you want a bunch of datasets
+     * @return true if you want a bunch of datasets for each plot
      */
     boolean isStackable();
     
+    /**
+     * Flag to say whether this product needs 2 datasets for each calculation such as coherence
+     * 
+     * @return true if pairs of datasets are needed for each result.
+     */
+    boolean isPaired();
     /**
      * If the parameterMap contains our enable key, we're selected.
      * @return true if this plot is selected

@@ -16,7 +16,7 @@
  */
 package edu.fullerton.ldvw;
 
-import edu.fullerton.viewerplugin.GUISupport;
+import viewerplugin.GUISupport;
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.*;
 import edu.fullerton.ldvjutils.ImageCoordinate;

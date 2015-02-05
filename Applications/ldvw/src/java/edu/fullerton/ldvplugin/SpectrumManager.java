@@ -24,7 +24,7 @@ import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.plugindefn.SpectrumDefn;
-import edu.fullerton.viewerplugin.ChanDataBuffer;
+import viewerplugin.ChanDataBuffer;
 import java.util.ArrayList;
 
 /**
@@ -53,6 +53,12 @@ public class SpectrumManager extends ExternalPlotManager
     public boolean isStackable()
     {
         return true;
+    }
+
+    @Override
+    public boolean isPaired()
+    {
+        return false;
     }
 
     @Override

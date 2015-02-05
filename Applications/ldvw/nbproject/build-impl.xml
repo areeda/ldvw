@@ -865,9 +865,6 @@ exists or setup the property manually. For example like this:
         <ant antfile="${project.ViewerConfig}/build.xml" inheritall="false" target="jar">
             <property name="deploy.on.save" value="false"/>
         </ant>
-        <ant antfile="${project.ViewerPlugin}/build.xml" inheritall="false" target="jar">
-            <property name="deploy.on.save" value="false"/>
-        </ant>
         <ant antfile="${project.jaDatabaseSupport}/build.xml" inheritall="false" target="jar">
             <property name="deploy.on.save" value="false"/>
         </ant>
@@ -895,9 +892,6 @@ exists or setup the property manually. For example like this:
             <property name="deploy.on.save" value="false"/>
         </ant>
         <ant antfile="${project.ViewerConfig}/build.xml" inheritall="false" target="jar">
-            <property name="deploy.on.save" value="false"/>
-        </ant>
-        <ant antfile="${project.ViewerPlugin}/build.xml" inheritall="false" target="jar">
             <property name="deploy.on.save" value="false"/>
         </ant>
         <ant antfile="${project.jaDatabaseSupport}/build.xml" inheritall="false" target="jar">
@@ -1064,7 +1058,6 @@ exists or setup the property manually. For example like this:
         <copyfiles files="${reference.simpleWave.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.NDSProxyClient.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.ViewerConfig.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
-        <copyfiles files="${reference.ViewerPlugin.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.ViewUtils.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.LdvJUtils.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.jspWebUtils.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
@@ -1090,7 +1083,6 @@ exists or setup the property manually. For example like this:
         <copyfiles files="${reference.simpleWave.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${reference.NDSProxyClient.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${reference.ViewerConfig.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
-        <copyfiles files="${reference.ViewerPlugin.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${reference.ViewUtils.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${reference.LdvJUtils.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
         <copyfiles files="${reference.jspWebUtils.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
@@ -1524,7 +1516,6 @@ exists or setup the property manually. For example like this:
         <ant antfile="${project.NDSProxyClient}/build.xml" inheritall="false" target="clean"/>
         <ant antfile="${project.ViewUtils}/build.xml" inheritall="false" target="clean"/>
         <ant antfile="${project.ViewerConfig}/build.xml" inheritall="false" target="clean"/>
-        <ant antfile="${project.ViewerPlugin}/build.xml" inheritall="false" target="clean"/>
         <ant antfile="${project.jaDatabaseSupport}/build.xml" inheritall="false" target="clean"/>
         <ant antfile="${project.jspWebUtils}/build.xml" inheritall="false" target="clean"/>
         <ant antfile="${project.ldvTables}/build.xml" inheritall="false" target="clean"/>

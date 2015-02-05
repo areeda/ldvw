@@ -26,7 +26,7 @@ import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
-import edu.fullerton.viewerplugin.ChanDataBuffer;
+import viewerplugin.ChanDataBuffer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

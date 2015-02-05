@@ -42,7 +42,7 @@ import edu.fullerton.ldvplugin.HelpManager;
 import edu.fullerton.ldvtables.ChannelIndex;
 import edu.fullerton.ldvtables.ViewUser;
 import static edu.fullerton.ldvw.ChannelSelector.getListSelector;
-import edu.fullerton.viewerplugin.GUISupport;
+import viewerplugin.GUISupport;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;

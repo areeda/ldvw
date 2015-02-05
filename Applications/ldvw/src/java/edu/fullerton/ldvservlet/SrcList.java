@@ -43,7 +43,7 @@ import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.ndsproxyclient.ChanSourceData;
 import edu.fullerton.ldvw.Epochs;
-import edu.fullerton.viewerplugin.PluginSupport;
+import viewerplugin.PluginSupport;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.IOException;

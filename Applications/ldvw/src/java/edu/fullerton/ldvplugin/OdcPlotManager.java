@@ -37,8 +37,8 @@ import edu.fullerton.ldvtables.ImageTable;
 import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.ldvw.TimeAndPlotSelector;
-import edu.fullerton.viewerplugin.ChanDataBuffer;
-import edu.fullerton.viewerplugin.PlotProduct;
+import viewerplugin.ChanDataBuffer;
+import viewerplugin.PlotProduct;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -46,8 +46,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,8 +57,6 @@ import java.util.regex.Pattern;
  */
 public class OdcPlotManager extends ExternalPlotManager implements PlotProduct
 {
-    private int width;
-    private int height;
     
     public OdcPlotManager( Database db, Page vpage, ViewUser vuser)
     {
@@ -437,6 +433,12 @@ public class OdcPlotManager extends ExternalPlotManager implements PlotProduct
         return false;
     }
 
+    @Override
+    public boolean isPaired()
+    {
+        return false;
+    }
+    
     @Override
     public boolean needsImageDescriptor()
     {

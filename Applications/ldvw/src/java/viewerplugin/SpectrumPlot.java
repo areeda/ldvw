@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edu.fullerton.viewerplugin;
+package viewerplugin;
 
 import com.areeda.jaDatabaseSupport.Database;
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
@@ -33,8 +33,8 @@ import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvjutils.TimeAndDate;
 import edu.fullerton.ldvjutils.TimeInterval;
 import edu.fullerton.ldvtables.ViewUser;
-import edu.fullerton.viewerplugin.SpectrumCalc.Scaling;
-import edu.fullerton.viewerplugin.WindowGen.Window;
+import viewerplugin.SpectrumCalc.Scaling;
+import viewerplugin.WindowGen.Window;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.File;
@@ -289,6 +289,12 @@ public class SpectrumPlot extends PluginSupport implements PlotProduct
     public boolean isStackable()
     {
         return true;
+    }
+
+    @Override
+    public boolean isPaired()
+    {
+        return false;
     }
 
     @Override

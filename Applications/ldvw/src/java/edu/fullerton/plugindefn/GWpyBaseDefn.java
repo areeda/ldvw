@@ -74,7 +74,6 @@ public abstract class GWpyBaseDefn extends PluginController
         p = ParameterFactory.buildParam(PluginParameter.Type.STANDARD, "geometry", null, null);
         p.setArgumentName("geometry");
         addParameter(p);
-
     }
     
     /**
@@ -84,13 +83,13 @@ public abstract class GWpyBaseDefn extends PluginController
     protected void addFFT()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Seconds per fft", "secpfft",
-                                        "Default is 1.0");
+                                        "Default = 1.0");
         p.setArgumentName("secpfft");
         p.setnDecimals(3);
         addParameter(p);
 
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Overlap", "ovlap",
-                                        "Overlap fraction [0-1), default is 0.5");
+                                        "Overlap fraction [0-1), default = 0.5");
         p.setArgumentName("overlap");
         p.setnDecimals(2);
         addParameter(p);
@@ -102,7 +101,7 @@ public abstract class GWpyBaseDefn extends PluginController
     protected void addPreFilter()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "High pass filter", "hpfilt",
-                                        "Cut off frequency, default is no filter.");
+                                        "Cut off frequency, default = no filter");
         p.setArgumentName("highpass");
         p.setnDecimals(2);
         addParameter(p);
@@ -110,7 +109,7 @@ public abstract class GWpyBaseDefn extends PluginController
     protected void addLogFaxis()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.SWITCH, "Linear F-axis", "nologf",
-                                        "Default is log");
+                                        "Default = log");
         p.setArgumentName("nologf");
         addParameter(p);
         addFaxisLimits();
@@ -148,19 +147,19 @@ public abstract class GWpyBaseDefn extends PluginController
     protected void addXaxisLimits()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "X-minimum", "xmin",
-                                        "Seconds (float) from start) or GPS, default = earliest sample time");
+                                        "Seconds (float) from start or GPS, default = auto");
         p.setArgumentName("xmin");
         p.setnDecimals(3);
         addParameter(p);
 
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "X-maximum", "xmax",
-                                        "Seconds (float) from start) or GPS, default = last sample time");
+                                        "Seconds (float) from start or GPS, default = auto");
         p.setArgumentName("xmax");
         p.setnDecimals(3);
         addParameter(p);
 
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "X-axis zero", "epoch",
-                                        "Seconds (float) from start) or GPS, default = first sample time");
+                                        "Seconds (float) from start)or GPS, default = auto");
         p.setArgumentName("epoch");
         p.setnDecimals(3);
         addParameter(p);
@@ -199,13 +198,13 @@ public abstract class GWpyBaseDefn extends PluginController
     protected void addIntAxisLimits()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Colorbar-minimum", "imin",
-                                        "Default determined by data");
+                                        "Default = auto");
         p.setArgumentName("imin");
         p.setnDecimals(3);
         addParameter(p);
 
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Colorbar-maximum", "imax",
-                                        "Default determined by data");
+                                        "Default = auto");
         p.setArgumentName("imax");
         p.setnDecimals(3);
         addParameter(p);

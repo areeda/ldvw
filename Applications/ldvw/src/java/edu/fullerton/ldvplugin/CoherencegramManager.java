@@ -25,7 +25,7 @@ import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.plugindefn.CoherencegramDefn;
 import edu.fullerton.plugindefn.SpectrogramDefn;
-import edu.fullerton.viewerplugin.ChanDataBuffer;
+import viewerplugin.ChanDataBuffer;
 import java.util.ArrayList;
 
 /**
@@ -50,8 +50,23 @@ public class CoherencegramManager extends ExternalPlotManager
         return ret;
     }
 
+    /**
+     * Only one pair can be displayed.
+     * 
+     * @return 
+     */
     @Override
     public boolean isStackable()
+    {
+        return false;
+    }
+    /**
+     * We need 2 datasets to calculate coherence
+     * 
+     * @return 
+     */
+    @Override
+    public boolean isPaired()
     {
         return true;
     }
@@ -72,5 +87,6 @@ public class CoherencegramManager extends ExternalPlotManager
         PageItemList ret = def.getSelector(enableKey, nSel);
         return ret;
     }
+
 
 }

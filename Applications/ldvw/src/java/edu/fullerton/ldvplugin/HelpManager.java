@@ -31,7 +31,7 @@ import edu.fullerton.ldvjutils.HelpInfo;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.HelpTextTable;
 import edu.fullerton.ldvtables.ViewUser;
-import edu.fullerton.viewerplugin.GUISupport;
+import viewerplugin.GUISupport;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;

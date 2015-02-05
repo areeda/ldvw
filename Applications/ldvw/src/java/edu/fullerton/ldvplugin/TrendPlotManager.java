@@ -26,16 +26,11 @@ import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.plugindefn.TrendPlotDefinition;
-import edu.fullerton.plugindefn.WplotDefinition;
-import edu.fullerton.viewerplugin.ChanDataBuffer;
-import edu.fullerton.viewerplugin.PlotProduct;
-import java.io.File;
+import viewerplugin.ChanDataBuffer;
+import viewerplugin.PlotProduct;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.commons.io.FilenameUtils;
 
 /**
  * Control the external TrendPlot program
@@ -111,6 +106,12 @@ public class TrendPlotManager extends ExternalPlotManager implements PlotProduct
 
     @Override
     public boolean isStackable()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isPaired()
     {
         return false;
     }

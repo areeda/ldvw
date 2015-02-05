@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package edu.fullerton.viewerplugin;
+package viewerplugin;
 
 import edu.fullerton.ldvjutils.TimeInterval;
 import com.areeda.jaDatabaseSupport.Database;

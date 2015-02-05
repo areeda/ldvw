@@ -26,14 +26,12 @@ import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.plugindefn.CrossSpectrumDefinition;
-import edu.fullerton.viewerplugin.ChanDataBuffer;
-import edu.fullerton.viewerplugin.PlotProduct;
+import viewerplugin.ChanDataBuffer;
+import viewerplugin.PlotProduct;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -41,10 +39,8 @@ import java.util.logging.Logger;
  */
 public class CrossSpectrumManager extends ExternalPlotManager implements PlotProduct
 {
-    private int width;
-    private int height;
     private File tempFile;
-    private CrossSpectrumDefinition csd;
+    private final CrossSpectrumDefinition csd;
 
     public CrossSpectrumManager(Database db, Page vpage, ViewUser vuser)
     {
@@ -120,13 +116,6 @@ public class CrossSpectrumManager extends ExternalPlotManager implements PlotPro
     }
 
     @Override
-    public void setSize(int width, int height)
-    {
-        this.width = width;
-        this.height = height;
-    }
-
-    @Override
     public String getProductName()
     {
         return "Cross Spectrum";
@@ -161,6 +150,12 @@ public class CrossSpectrumManager extends ExternalPlotManager implements PlotPro
 
     @Override
     public boolean hasImages()
+    {
+        return true;
+    }
+
+    @Override
+    public boolean isPaired()
     {
         return true;
     }

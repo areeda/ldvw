@@ -19,7 +19,7 @@ package edu.fullerton.plugindefn;
 
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
-import edu.fullerton.viewerplugin.GUISupport;
+import viewerplugin.GUISupport;
 import java.util.ArrayList;
 
 /**
