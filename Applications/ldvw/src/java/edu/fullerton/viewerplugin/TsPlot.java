@@ -64,6 +64,7 @@ import org.jfree.data.xy.XYSeriesCollection;
  */
 public class TsPlot extends PluginSupport implements PlotProduct
 {
+    private final String nameSpace = "ts";
     private boolean addLinFit;
     private String timeAxis;
     private String xAxisLabel="Time";
@@ -520,5 +521,11 @@ public class TsPlot extends PluginSupport implements PlotProduct
     public void setChanList(List<BaseChanSelection> baseChans)
     {
         // we don't need this for our plot, but it's part of the interface
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
 }
