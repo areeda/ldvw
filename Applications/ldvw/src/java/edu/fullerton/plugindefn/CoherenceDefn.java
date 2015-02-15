@@ -18,7 +18,8 @@
 package edu.fullerton.plugindefn;
 
 /**
- *
+ * Define the user interface for the GWpy Coherence plots
+ * 
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
 public class CoherenceDefn extends GWpyBaseDefn
@@ -41,6 +42,7 @@ public class CoherenceDefn extends GWpyBaseDefn
             addTimeChannel();
 
             // the remaining parameters are form elements for the user to decide
+            addRefChan();
             addFFT();
             addPreFilter();
             addLogFaxis();
