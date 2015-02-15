@@ -41,6 +41,7 @@ public class CoherencegramDefn extends GWpyBaseDefn
             addTimeChannel();
 
             // the remaining parameters are form elements for the user to decide
+            addRefChan();
             addFFT();
             addPreFilter();
             addLogFaxis();
