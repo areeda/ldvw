@@ -41,6 +41,7 @@ public class CrossSpectrumManager extends ExternalPlotManager implements PlotPro
 {
     private File tempFile;
     private final CrossSpectrumDefinition csd;
+    private final String nameSpace="csp";
 
     public CrossSpectrumManager(Database db, Page vpage, ViewUser vuser)
     {
@@ -158,6 +159,12 @@ public class CrossSpectrumManager extends ExternalPlotManager implements PlotPro
     public boolean isPaired()
     {
         return true;
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
     
 }
