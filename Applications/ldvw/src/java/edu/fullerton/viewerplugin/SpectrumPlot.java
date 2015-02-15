@@ -68,7 +68,7 @@ import org.jfree.data.xy.XYSeriesCollection;
  */
 public class SpectrumPlot extends PluginSupport implements PlotProduct
 {
-
+    private final String nameSpace = "sp";
     private boolean wantStacked = false;
     private float secperfft = 1.0f;
     private float overlap = 0.5f;
@@ -769,6 +769,12 @@ public class SpectrumPlot extends PluginSupport implements PlotProduct
     public void setChanList(List<BaseChanSelection> baseChans)
     {
         // we don't need this for our plot, but it's part of the interface
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
 
     private class genPlotInfo
