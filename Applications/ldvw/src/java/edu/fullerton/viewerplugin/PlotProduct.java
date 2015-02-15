@@ -97,6 +97,11 @@ public interface PlotProduct
     String getProductName();
     
     /**
+     * The namespace is the prefix for all form parameters for this product
+     * @return the prefix string
+     */
+    String getNameSpace();
+    /**
      * Return html object that displays all user settable parameters
      * @return the html object
      */
