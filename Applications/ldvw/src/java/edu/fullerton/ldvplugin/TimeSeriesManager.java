@@ -33,7 +33,8 @@ import java.util.ArrayList;
  */
 public class TimeSeriesManager extends ExternalPlotManager 
 {
-
+    private final String nameSpace = "gwts";
+    
     public TimeSeriesManager(Database db, Page vpage, ViewUser vuser)
     {
         super(db, vpage, vuser);
@@ -87,6 +88,12 @@ public class TimeSeriesManager extends ExternalPlotManager
         PageItemList ret = tsd.getSelector(enableKey, nSel);
         return ret;
 
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
 
 }

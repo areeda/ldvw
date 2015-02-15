@@ -57,6 +57,7 @@ import java.util.regex.Pattern;
  */
 public class OdcPlotManager extends ExternalPlotManager implements PlotProduct
 {
+    private final String nameSpace="odc";
     
     public OdcPlotManager( Database db, Page vpage, ViewUser vuser)
     {
@@ -474,5 +475,11 @@ public class OdcPlotManager extends ExternalPlotManager implements PlotProduct
     public String getProductName()
     {
         return "ODC Plot";
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
 }
