@@ -33,7 +33,8 @@ import java.util.ArrayList;
  */
 public class GWSpectrogramManager extends ExternalPlotManager
 {
-
+    private final String nameSpace="gwspgm";
+    
     public GWSpectrogramManager(Database db, Page vpage, ViewUser vuser)
     {
         super(db, vpage, vuser);
@@ -74,6 +75,12 @@ public class GWSpectrogramManager extends ExternalPlotManager
         spd.setFormParameters(paramMap);
         PageItemList ret = spd.getSelector(enableKey, nSel);
         return ret;
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
 
 }
