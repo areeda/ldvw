@@ -39,8 +39,7 @@ import java.util.TreeMap;
  */
 public class TrendPlotManager extends ExternalPlotManager implements PlotProduct
 {
-    private int width;
-    private int height;
+    private final String nameSpace = "trndplt";
     
     public TrendPlotManager(Database db, Page vpage, ViewUser vuser)
     {
@@ -167,6 +166,12 @@ public class TrendPlotManager extends ExternalPlotManager implements PlotProduct
     public boolean hasImages()
     {
         return false;
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
     
 }
