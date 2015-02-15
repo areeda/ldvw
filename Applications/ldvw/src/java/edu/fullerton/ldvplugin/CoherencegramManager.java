@@ -34,7 +34,8 @@ import java.util.ArrayList;
  */
 public class CoherencegramManager extends ExternalPlotManager
 {
-
+    private final String nameSpace = "gwcohgm";
+    
     public CoherencegramManager(Database db, Page vpage, ViewUser vuser)
     {
         super(db, vpage, vuser);
@@ -82,11 +83,18 @@ public class CoherencegramManager extends ExternalPlotManager
     {
         CoherencegramDefn def = new CoherencegramDefn();
         def.init();
+        def.setBaseSelections(baseChans);
         this.enableKey = enableKey;
         def.setFormParameters(paramMap);
         PageItemList ret = def.getSelector(enableKey, nSel);
         return ret;
     }
 
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
+    }
 
+    
 }
