@@ -40,7 +40,8 @@ import org.apache.commons.io.FilenameUtils;
  */
 public class WplotManager extends ExternalPlotManager 
 {
-
+    private final String nameSpace="wplt";
+    
     public WplotManager(Database db, Page vpage, ViewUser vuser)
     {
         super(db, vpage, vuser);
@@ -196,5 +197,11 @@ public class WplotManager extends ExternalPlotManager
     public boolean hasImages()
     {
         return true;
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
 }
