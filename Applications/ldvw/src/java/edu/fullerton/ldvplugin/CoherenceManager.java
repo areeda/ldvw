@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -48,6 +47,7 @@ import java.util.regex.Pattern;
 public class CoherenceManager extends ExternalPlotManager implements PlotProduct
 {
     private final String name = "Coherence";
+    private final String nameSpace = "coh";
     private boolean logXaxis=true, logYaxis=false;
     private final String prog = "/usr/local/ldvw/bin/gw_coher.py";
 
@@ -317,8 +317,8 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
             String[] chlistStr = new String[0];
             chlistStr = chlist.toArray(chlistStr);
 
-            prevVal = getPrevValue("coh_Ref", 0, chlist.get(0));
-            PageFormSelect refChan = new PageFormSelect("coh_Ref", chlistStr);
+            prevVal = getPrevValue("coh_refchan", 0, chlist.get(0));
+            PageFormSelect refChan = new PageFormSelect("coh_refchan", chlistStr);
             refChan.setSelected(prevVal);
             ptr = GUISupport.getObjRow(refChan, "Reference Channel:", "");
             product.addRow(ptr);
@@ -345,7 +345,7 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
     {
         this.paramMap = parameterMap;
         // decode the reference channel name + optional server
-        String[] coh_ref = paramMap.get("coh_Ref");
+        String[] coh_ref = paramMap.get("coh_refchan");
         if (coh_ref != null && coh_ref.length == 1)
         {
             int atIdx = coh_ref[0].indexOf("@");
@@ -575,5 +575,11 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
     public boolean isPaired()
     {
         return true;
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
 }
