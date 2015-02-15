@@ -303,39 +303,44 @@ public class TimeAndPlotSelector extends GUISupport
         String durStr=getPrevValue("duration", 0, "20");
         timeSpecTbl.addRow(GUISupport.getTxtRow("duration", "Duration", "(day HH:MM:SS or sec)", 
                                                 itemWidth, durStr, durHelpBtn));
-
-        PageTableRow rpt = new PageTableRow();
-        PageItemString rptLbl = new PageItemString("Repeat every:");
-        rptLbl.setAlign(PageItem.Alignment.RIGHT);
-        rpt.setClassName("repeatOptions");
-        rpt.addStyle("display", "none");
-        rpt.add(rptLbl);
-        
+        // repeat options
         PageItemList rptLst = new PageItemList();
 
-        PageFormText pft = new PageFormText("repeatDur", "");
-        pft.setMaxLen(255);
-        pft.setSize(itemWidth-10); 
+        PageTableRow rptInterval = new PageTableRow();
+        PageItemString rptLbl = new PageItemString("Repeat every:");
+        rptLbl.setAlign(PageItem.Alignment.RIGHT);
+        rptInterval.setClassName("repeatOptions");
+        rptInterval.addStyle("display", "none");
+        rptInterval.add(rptLbl);
+        
+        
+        PageFormText rptDur = new PageFormText("repeatDur", "");
+        rptDur.setMaxLen(255);
+        rptDur.setSize(itemWidth-10); 
         String val=getPrevValue("repeatDur", 0, "0");
-        pft.setDefaultValue(val);
-        rptLst.add(pft);
+        rptDur.setDefaultValue(val);
+        rptInterval.add(rptDur);
 
+        
         PageFormSelect rptUnit = new PageFormSelect("repeatUnit");
         rptUnit.add(durUnits);
         val = getPrevValue("repeatUnit", 0, durUnits[0]);
         rptUnit.setSelected(val);
         rptLst.add(rptUnit);
-        rpt.add(rptLst);
-        rpt.add("");
-        rpt.setClassAll("noborder");
-        timeSpecTbl.addRow(rpt);
+        rptInterval.add(rptLst);
+        rptInterval.add("");
+        rptInterval.setClassAll("noborder");
+        rptInterval.setClassName("repeatOptions");
+        timeSpecTbl.addRow(rptInterval);
         
+        PageTableRow rptCountRow = new PageTableRow();
         val = getPrevValue("rptCnt", 0, "1");
-        rpt = getLabelTxtRow("rptCnt", "Repeat count:", "" , itemWidth, val);
-        rpt.setClassName("repeatOptions");
-        rpt.addStyle("display", "none");
-        timeSpecTbl.addRow(rpt);
+        rptCountRow = getLabelTxtRow("rptCnt", "Repeat count:", "" , itemWidth, val);
+        rptCountRow.setClassName("repeatOptions");
+        rptCountRow.addStyle("display", "none");
+        timeSpecTbl.addRow(rptCountRow);
         
+        // show hidden (advanced) options
         PageTableRow opt = new PageTableRow();
         opt.add();
         
