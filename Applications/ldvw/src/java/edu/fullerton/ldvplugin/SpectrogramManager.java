@@ -44,7 +44,8 @@ import java.util.ArrayList;
 public class SpectrogramManager extends ExternalPlotManager implements PlotProduct
 {
     private final String name = "Spectrogram";
-
+    private final String nameSpace = "spg";
+    
     /**
      * Manage the external Spectrogram program
      * @param db
@@ -393,6 +394,10 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
         return true;
     }
 
-    
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
+    }
 
 }
