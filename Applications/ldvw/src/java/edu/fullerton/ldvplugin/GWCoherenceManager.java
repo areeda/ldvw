@@ -34,7 +34,8 @@ import java.util.ArrayList;
  */
 public class GWCoherenceManager extends ExternalPlotManager
 {
-
+    private final String nameSpace = "gwcoh";
+    
     public GWCoherenceManager(Database db, Page vpage, ViewUser vuser)
     {
         super(db, vpage, vuser);
@@ -71,10 +72,17 @@ public class GWCoherenceManager extends ExternalPlotManager
     {
         CoherenceDefn def = new CoherenceDefn();
         def.init();
+        def.setBaseSelections(baseChans);
         this.enableKey = enableKey;
         def.setFormParameters(paramMap);
         PageItemList ret = def.getSelector(enableKey, nSel);
         return ret;
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
 
 }
