@@ -95,7 +95,7 @@ public abstract class GWpyBaseDefn extends PluginController
         addParameter(p);
     }
     /**
-     * Prefiltering options
+     * Pre-filtering options
      */
     // @todo add other filters available from GWpy
     protected void addPreFilter()
@@ -106,6 +106,9 @@ public abstract class GWpyBaseDefn extends PluginController
         p.setnDecimals(2);
         addParameter(p);
     }
+    /**
+     * Default frequency axis defaults to log, let them make it liniear.
+     */
     protected void addLogFaxis()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.SWITCH, "Linear F-axis", "nologf",
@@ -114,6 +117,9 @@ public abstract class GWpyBaseDefn extends PluginController
         addParameter(p);
         addFaxisLimits();
     }
+    /**
+     * Let them specify limits of Frequency axis.  May be X or Y.
+     */
     protected void addFaxisLimits()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "F-minimum", "fmin",
@@ -128,6 +134,9 @@ public abstract class GWpyBaseDefn extends PluginController
         p.setnDecimals(0);
         addParameter(p);
     }
+    /**
+     * Y-axis defaults to log let them specify linear
+     */
     protected void addLogYaxis()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.SWITCH, "Linear Y-axis", "nology",
@@ -136,6 +145,9 @@ public abstract class GWpyBaseDefn extends PluginController
         addParameter(p);
         addYaxisLimits();
     }
+    /**
+     * X-axis defaults to linear let them specify log.
+     */
     protected void addLinearXaxis()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.SWITCH, "Log X-axis", "logx",
@@ -144,6 +156,9 @@ public abstract class GWpyBaseDefn extends PluginController
         addParameter(p);
         addXaxisLimits();
     }
+    /**
+     * Allow them to specify X-axis limits
+     */
     protected void addXaxisLimits()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "X-minimum", "xmin",
@@ -164,6 +179,9 @@ public abstract class GWpyBaseDefn extends PluginController
         p.setnDecimals(3);
         addParameter(p);
     }
+    /**
+     * Y-axis defaults to linear.  Let them make it log.
+     */
     protected void addLinearYaxis()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.SWITCH, "Log Y", "logy",
@@ -172,6 +190,9 @@ public abstract class GWpyBaseDefn extends PluginController
         addParameter(p);
         addYaxisLimits();
     }
+    /**
+     * Allow them to make fix the Y-axis limits
+     */
     protected void addYaxisLimits()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Y-minimum", "ymin",
@@ -186,6 +207,9 @@ public abstract class GWpyBaseDefn extends PluginController
         p.setnDecimals(3);
         addParameter(p);
     }
+    /**
+     * Intensity axis defaults to log let them make it linear
+     */
     protected void addLogIntensity()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.SWITCH, "Linear color bar", "nologi",
@@ -195,6 +219,9 @@ public abstract class GWpyBaseDefn extends PluginController
 
         addIntAxisLimits();
     }
+    /**
+     * The Intensity axis aka Colorbar.  Let them set the limits
+     */
     protected void addIntAxisLimits()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Colorbar-minimum", "imin",
@@ -214,5 +241,17 @@ public abstract class GWpyBaseDefn extends PluginController
         p.setArgumentName("norm");
         addParameter(p);
     }
+    /** 
+     * paired products like coherence need a reference channel
+     */
+    protected void addRefChan()
+    {
+        p = ParameterFactory.buildParam(PluginParameter.Type.REFCHAN, "Reference channel", 
+                                        "refchan", "Calculation always uses this channel.");
+        p.setArgumentName("ref");
+        addParameter(p);
+        
+    }
+    
     
 }
