@@ -19,7 +19,9 @@ package edu.fullerton.plugindefn;
 
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.BaseChanSelection;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Base class for all possible parameters to a plugin
@@ -40,11 +42,11 @@ public abstract class PluginParameter
 
     public final String fpRegex = "^((\\d+\\.?\\d*)|(\\.\\d+))([Ee][+-]?\\d+)?$";
     protected String[] lastVal; // parameter value from submitted form
-    
+    protected List<BaseChanSelection> baseSelections;
     
     public enum Type 
     {
-        SWITCH, LIST, NUMBER, STRING, NUMBERARRAY, STANDARD
+        SWITCH, LIST, NUMBER, STRING, NUMBERARRAY, STANDARD, REFCHAN
     }
 
     public PluginParameter(String formLabel, String formName, String comment)
@@ -141,6 +143,20 @@ public abstract class PluginParameter
         return this;
     }
 
+    /**
+     * Base channel selections are used by some parameters such as the reference chan selector
+     */
+    
+    public List<BaseChanSelection> getBaseSelections()
+    {
+        return baseSelections;
+    }
+
+    public void setBaseSelections(List<BaseChanSelection> baseSelections)
+    {
+        this.baseSelections = baseSelections;
+    }
+    
     abstract PageTableRow getSelectorRow(String namespace) throws WebUtilException;
 
     
