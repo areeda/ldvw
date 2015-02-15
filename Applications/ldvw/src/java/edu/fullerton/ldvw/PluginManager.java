@@ -82,6 +82,12 @@ public class PluginManager extends GUISupport
     
     private final boolean allowTestData = false;  // Should UI have test data options?
     private final ArrayList<Integer> imageIDs;    // list of images we produced
+    
+    // For paired products (like coherence) each product divides channels into reference and other
+    private BaseChanSelection refChan;
+    private List<BaseChanSelection> otherChans;
+
+
    
     private class ProductDefn
     {
@@ -227,7 +233,7 @@ public class PluginManager extends GUISupport
                 pPil.setUseDiv(false);
                 pfDiv.add(pPil);
             }
-            catch (Exception ex)
+            catch (java.lang.NoClassDefFoundError | Exception ex)
             {
                 String ermsg = "Error creating class or getting selector for " + clsName +
                                " " + ex.getClass().getSimpleName() + " - " + ex.getLocalizedMessage();
@@ -289,6 +295,7 @@ public class PluginManager extends GUISupport
             ArrayList<PlotProduct> pairedProducts = new ArrayList<>();
 
             Integer nSel = countBaseChannelSelections(baseSelections);
+            Integer minSel = 1;
             Integer nProducts = 0;
 
             if (paramMap.containsKey("download"))
@@ -313,6 +320,7 @@ public class PluginManager extends GUISupport
                         if (pp.isPaired())
                         {
                             pairedProducts.add(pp);
+                            minSel = 2;
                         }
                         else
                         {
@@ -330,15 +338,23 @@ public class PluginManager extends GUISupport
 
             ArrayList<TimeInterval> times = tps.getTimesFromForm();
             boolean gotProblem = false;
-            if (nSel == 0)
+            if (nSel < minSel)
             {
-                vpage.add("No Channels were selected.");
+                if (nSel == 0)
+                {
+                    vpage.add("No Channels are selected.");
+                }
+                else
+                {
+                    vpage.add(String.format("At least %1$d channels must be selected for "
+                            + "one or more of the plots requested.", minSel));
+                }
                 vpage.addBlankLines(1);
                 gotProblem = true;
             }
             if (nProducts == 0)
             {
-                vpage.add("No graphs were selected.");
+                vpage.add("No plots were selected.");
                 vpage.addBlankLines(1);
                 gotProblem = true;
             }
@@ -385,7 +401,14 @@ public class PluginManager extends GUISupport
                 }
                 else
                 {
-                    ret = callSinglePlugins(baseSelections, times, groupBy, singleProducts, noxfer);
+                    if (!singleProducts.isEmpty())
+                    {
+                        ret = callSinglePlugins(baseSelections, times, groupBy, singleProducts, noxfer);
+                    }
+                    if (!pairedProducts.isEmpty())
+                    {
+                        ret &= callPairedPlugins(baseSelections, times, groupBy, pairedProducts, noxfer);
+                    }
                     if (imageIDs.size()  >  0)
                     {
                         ImageGroupTable igt = new ImageGroupTable(db);
@@ -597,7 +620,208 @@ public class PluginManager extends GUISupport
         }
         return ret;
     }
+    /**
+     * products and datasets have been defined, so make the graphs and send them to their browser
+     *
+     * @param selections set of channel #'s, only one type of selections can be used
+     * @param baseSelections map of base channel selection objects, may be empty if selections is
+     * not
+     * @param times List of start time, duration
+     * @param groupBy How we want stacked plots
+     * @param selectedProducts List of what products we want
+     * @return
+     * @throws SQLException
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     * @throws WebUtilException
+     * @throws LdvTableException
+     */
+    private boolean callPairedPlugins(Map<Integer, BaseChanSelection> baseSelections,
+                                      ArrayList<TimeInterval> times,
+                                      String groupBy, ArrayList<PlotProduct> selectedProducts,
+                                      boolean noxfer)
+            throws SQLException, IOException, NoSuchAlgorithmException, WebUtilException, LdvTableException
+    {
+        boolean ret = true; // flag: if true viewer should send html
+        // Not stackable and group by None are treated the same
+        if (groupBy.equalsIgnoreCase("none"))
+        {
+            plotSinglePairs(baseSelections, times, selectedProducts);
+        }
+        else
+        {
+            List<PlotProduct> stackable = new ArrayList<>();
+            List<PlotProduct> notStackable = new ArrayList<>();
 
+            // divide products into stackable and not
+            for(PlotProduct p: selectedProducts)
+            {
+                if (p.isStackable())
+                {
+                    stackable.add(p);
+                }
+                else
+                {
+                    notStackable.add(p);
+                }
+            }
+            if (! notStackable.isEmpty())
+            {
+                plotSinglePairs(baseSelections, times, notStackable);
+            }
+            if (!stackable.isEmpty())
+            {
+                for(PlotProduct p : stackable)
+                {
+                    findRefChan(baseSelections, p);
+
+                    if (groupBy.equalsIgnoreCase("all"))
+                    {
+                        
+                        ArrayList<ChanDataBuffer> dbufs = ChanDataBuffer.dataBufFactory(db,
+                                                 baseSelections, times, vpage, vuser, true);
+                        doSinglePlot(p, dbufs);
+                    }
+                    else if (groupBy.equalsIgnoreCase("time")  )
+                    {
+                        Map<Integer, BaseChanSelection> baseSel = new HashMap<>();
+                        baseSel.put(refChan.getIndexID(), refChan);
+                        for(BaseChanSelection bcs: otherChans)
+                        {
+                            baseSel.put(bcs.getIndexID(), bcs);
+                        }
+                        for(TimeInterval ti: times)
+                        {
+                            List<TimeInterval> oneTime = new ArrayList<>();
+                            oneTime.add(ti);
+                            plotStackedPairs(baseSel,oneTime,stackable);
+                        }
+                    }
+                    else if (groupBy.equalsIgnoreCase("channel"))
+                    {
+                        for (BaseChanSelection bcs : otherChans)
+                        {
+                            Map<Integer, BaseChanSelection> baseSel = new HashMap<>();
+                            baseSel.put(refChan.getIndexID(), refChan);
+                            baseSel.put(bcs.getIndexID(), bcs);
+                            
+                            for(PlotProduct plt: stackable)
+                            {
+                                ArrayList<ChanDataBuffer> dbufs = ChanDataBuffer.dataBufFactory(db,
+                                                         baseSel, times, vpage, vuser, true);
+
+                                doSinglePlot(plt, dbufs);
+                            }
+                        }                        
+                    }
+                }
+            }
+        }        
+        return ret;
+    }
+    private void findRefChan(Map<Integer, BaseChanSelection> baseSelections, PlotProduct p) throws WebUtilException
+    {
+        String refKey = p.getNameSpace() + "_refchan";
+        String[] refChanNames = paramMap.get(refKey);
+        if (refChanNames == null || refChanNames.length == 0)
+        {
+            String ermsg = "Plot manager: paired plot (" + p.getProductName() + " requested "
+                           + "but no reference channel defined";
+            throw new WebUtilException(ermsg);
+        }
+        String refChanName = refChanNames[0];
+        otherChans = new ArrayList<>();
+        refChan = null;
+        for(BaseChanSelection bcs: baseSelections.values())
+        {
+            if (refChanName.equals(bcs.getName()))
+            {
+                refChan = bcs;
+            }
+            else
+            {
+                otherChans.add(bcs);
+            }
+        }
+        if (refChan == null)
+        {
+            String ermsg = "Plot manager: paired plot (" + p.getProductName() + " requested "
+                           + "but no reference channel found";
+            throw new WebUtilException(ermsg);
+        }
+        if (otherChans.isEmpty())
+        {
+            String ermsg = "Plot manager: paired plot (" + p.getProductName() + " requested "
+                           + "but no auxiliary channels found";
+            throw new WebUtilException(ermsg);
+        }
+    }
+    /**
+     * Plot a paired product (like coherence) one pair at at time
+     * @param baseSelections all selected channels one must be listed as reference in the parmeters
+     * @param times all selected times
+     * @param selectedProducts appropriate products, may be all or only non-stackable
+     * @throws WebUtilException
+     * @throws LdvTableException
+     * @throws SQLException 
+     */
+    private void plotSinglePairs(Map<Integer, BaseChanSelection> baseSelections,
+                           List<TimeInterval> times, List<PlotProduct> selectedProducts) 
+            throws WebUtilException, LdvTableException, SQLException
+    {
+        for (PlotProduct p : selectedProducts)
+        {
+            findRefChan(baseSelections, p);
+            for (TimeInterval ti : times)
+            {
+                ArrayList<TimeInterval> time1 = new ArrayList<>();
+                time1.add(ti);
+                Map<Integer, BaseChanSelection> base1 = new HashMap<>();
+                base1.put(refChan.getIndexID(), refChan);
+                ArrayList<ChanDataBuffer> refdbuf = ChanDataBuffer.dataBufFactory(db,
+                                                        base1, time1, vpage, vuser, true);
+                for (BaseChanSelection baseSel2 : otherChans)
+                {
+                    ArrayList<ChanDataBuffer> dbuf = new ArrayList<>();
+                    dbuf.addAll(refdbuf);
+                    base1.clear();
+                    base1.put(baseSel2.getIndexID(), baseSel2);
+                    ArrayList<ChanDataBuffer> auxDbuf = ChanDataBuffer.dataBufFactory(db,
+                                                               base1, time1, vpage, vuser, true);
+                    dbuf.addAll(auxDbuf);
+                    doSinglePlot(p, dbuf);
+                }
+            }
+        }
+    }
+    /**
+     * For stacked displays like coherence but not coherence-spectrograms plot all channels on one graph
+     * 
+     * @param baseSelections
+     * @param times
+     * @param selectedProducts
+     * @throws WebUtilException
+     * @throws LdvTableException
+     * @throws SQLException 
+     */
+    private void plotStackedPairs(Map<Integer, BaseChanSelection> baseSelections,
+                              List<TimeInterval> times, List<PlotProduct> selectedProducts)
+            throws WebUtilException, LdvTableException, SQLException
+    {
+        for (PlotProduct p : selectedProducts)
+        {
+            for (TimeInterval ti : times)
+            {
+                ArrayList<TimeInterval> time1 = new ArrayList<>();
+                time1.add(ti);
+                Map<Integer, BaseChanSelection> base1 = new HashMap<>();
+                ArrayList<ChanDataBuffer> dbufs = ChanDataBuffer.dataBufFactory(db, 
+                                                   baseSelections, time1, vpage, vuser, true);
+
+                doSinglePlot(p, dbufs);
+            }
+        }
+    }
     /**
      * Determine if this product is selected and if so extract its parameters
      *
@@ -1227,16 +1451,16 @@ public class PluginManager extends GUISupport
     /**
      * Create an accordion pane for this plot product
      * @param prod product object
-     * @param paramName the form parameter name if they enable this plot
+     * @param enableKey the form parameter name if they enable this plot
      * @param nSel the number of time intervals * number of channels so we know how to handle multiples
      * @param multDisp a list of the standard ways to handle multiple displays (if the product allows it)
      * @return the object to add to the page
      * @throws WebUtilException I probably have a bug in html object generation.
      */
-    private PageItemList getSelectorContent(PlotProduct prod, String paramName, int nSel, String[] multDisp) throws WebUtilException
+    private PageItemList getSelectorContent(PlotProduct prod, String enableKey, int nSel, String[] multDisp) throws WebUtilException
     {
         PageItemList ret = new PageItemList();
-        PageItem spPI = prod.getSelector(paramName, nSel, multDisp);
+        PageItem spPI = prod.getSelector(enableKey, nSel, multDisp);
         spPI.setClassName("plotSelector");
         PageItemString accordionLabel = new PageItemString(prod.getProductName() + ":");
         String weight = prod.isSelected() ? "bold" : "normal";
