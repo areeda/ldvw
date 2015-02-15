@@ -33,7 +33,7 @@ public class CrossSpectrumDefinition  extends PluginController
         {
             setName("Cross Spectrum Plot");
             setDescription("for long term trends from frames, accepts gaps in data");
-            setNamespace("trndplt");
+            setNamespace("csp");
 
             String note = "<br>Note:  Cross spectral analysis requires 2 channels<br><br>";
             setNotes(new PageItemString(note, false));
