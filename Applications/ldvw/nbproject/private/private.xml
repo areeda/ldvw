@@ -1,21 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="52">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="53">
         <file>
-            <url>src/java/edu/fullerton/ldvplugin/CoherenceManager.java</url>
-            <bookmark id="38">
+            <url>src/java/edu/fullerton/ldvw/PluginManager.java</url>
+            <bookmark id="50">
                 <name/>
-                <line>98</line>
+                <line>600</line>
                 <key/>
             </bookmark>
-            <bookmark id="36">
+            <bookmark id="53">
                 <name/>
-                <line>267</line>
-                <key/>
-            </bookmark>
-            <bookmark id="48">
-                <name/>
-                <line>396</line>
+                <line>686</line>
                 <key/>
             </bookmark>
         </file>
@@ -24,56 +19,6 @@
             <bookmark id="15">
                 <name/>
                 <line>131</line>
-                <key/>
-            </bookmark>
-        </file>
-        <file>
-            <url>src/java/edu/fullerton/ldvw/LdvDispatcher.java</url>
-            <bookmark id="39">
-                <name/>
-                <line>352</line>
-                <key/>
-            </bookmark>
-        </file>
-        <file>
-            <url>src/java/edu/fullerton/plugindefn/PluginController.java</url>
-            <bookmark id="52">
-                <name/>
-                <line>101</line>
-                <key/>
-            </bookmark>
-        </file>
-        <file>
-            <url>src/java/edu/fullerton/ldvw/PluginManager.java</url>
-            <bookmark id="47">
-                <name/>
-                <line>212</line>
-                <key/>
-            </bookmark>
-            <bookmark id="49">
-                <name/>
-                <line>310</line>
-                <key/>
-            </bookmark>
-            <bookmark id="50">
-                <name/>
-                <line>599</line>
-                <key/>
-            </bookmark>
-        </file>
-        <file>
-            <url>src/java/edu/fullerton/ldvw/BaseChannelSelector.java</url>
-            <bookmark id="41">
-                <name/>
-                <line>145</line>
-                <key/>
-            </bookmark>
-        </file>
-        <file>
-            <url>src/java/edu/fullerton/ldvplugin/SpectrogramManager.java</url>
-            <bookmark id="42">
-                <name/>
-                <line>252</line>
                 <key/>
             </bookmark>
         </file>
@@ -98,7 +43,13 @@
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
         </group>
         <group>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/GWpyBaseDefn.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/PluginParameter.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/PluginController.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/PluginRefChanParameter.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/TimeAndPlotSelector.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/CoherencegramManager.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/PluginManager.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/View.java</file>
         </group>
     </open-files>
 </project-private>
