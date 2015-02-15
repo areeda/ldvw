@@ -23,6 +23,7 @@ import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.BaseChanSelection;
 import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
@@ -67,6 +68,7 @@ public abstract class PluginController
     private ViewUser vuser;
     private File tempFile;
     private String dashStr;
+    private List<BaseChanSelection> baseSelections;
     
     PluginController()
     {
@@ -120,7 +122,7 @@ public abstract class PluginController
         String prefix = getNamespace() + "_";
         for(PluginParameter p : parameters)
         {
-            if (p.getType() != PluginParameter.Type.STANDARD)
+            if (p.getType() != PluginParameter.Type.STANDARD )
             {
                 p.setLastVal(paramMap.get(prefix + p.getFormName()));
                 if (p.getType() == PluginParameter.Type.SWITCH)
@@ -129,6 +131,10 @@ public abstract class PluginController
                     {
                         p.setVal(true);
                     }
+                }
+                if (p.getType() == PluginParameter.Type.REFCHAN)
+                {
+                    p.setBaseSelections(baseSelections);
                 }
                 ptr = p.getSelectorRow(getNamespace());
                 product.addRow(ptr);
@@ -217,6 +223,9 @@ public abstract class PluginController
                 case NUMBERARRAY:
                     arg = getNumberArrayParameter(p);
                     break;
+                case REFCHAN:
+                    arg = getSingleParam(p);
+                    break;
                 case STANDARD:
                     arg = getStandardParameter(p, dbuf);
                     break;
@@ -276,6 +285,21 @@ public abstract class PluginController
     public Map<String, PluginAttribute> getAttributes()
     {
         return attributes;
+    }
+
+    /**
+     * Channel selections are used by reference channels
+     * 
+     * @return list of selected channels
+     */
+    public List<BaseChanSelection> getBaseSelections()
+    {
+        return baseSelections;
+    }
+
+    public void setBaseSelections(List<BaseChanSelection> baseSelections)
+    {
+        this.baseSelections = baseSelections;
     }
 
     /**
@@ -534,6 +558,10 @@ public abstract class PluginController
                     ret.add(argName);
                     ret.add(vuser.getCn());
                 }
+                break;
+                
+            case "refchan":
+                // we pass reference channel to the program as the first channel not a separate arg
                 break;
                 
             case "server":
@@ -846,5 +874,13 @@ public abstract class PluginController
         boolean ret = paramMap.containsKey(key);
         return ret;
     }
-    
+
+    public String getNameSpace()
+    {
+        if (!inited)
+        {
+            init();
+        }
+        return getNameSpace();
+    }
 }
