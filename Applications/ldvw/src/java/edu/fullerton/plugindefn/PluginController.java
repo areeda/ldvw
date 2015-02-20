@@ -100,7 +100,7 @@ public abstract class PluginController
             init();
         }
         String enableText = "Generate " + getName();
-        enableText += nSel > 1 ? "s<br><br>" : "<br><br>";
+        enableText += "<br><br>";
         boolean enabled = getPrevValue(enableKey);
         PageFormCheckbox cb = new PageFormCheckbox(enableKey, enableText, enabled);
         cb.setId(enableKey + "_cb");
