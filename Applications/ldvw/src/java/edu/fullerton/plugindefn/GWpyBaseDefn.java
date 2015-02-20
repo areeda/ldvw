@@ -174,7 +174,7 @@ public abstract class GWpyBaseDefn extends PluginController
         addParameter(p);
 
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "X-axis zero", "epoch",
-                                        "Seconds (float) from start)or GPS, default = auto");
+                                        "Seconds (float) from start or GPS, default = auto");
         p.setArgumentName("epoch");
         p.setnDecimals(3);
         addParameter(p);
