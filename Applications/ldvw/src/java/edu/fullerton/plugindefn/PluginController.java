@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -407,6 +408,7 @@ public abstract class PluginController
         {
             case "baseChannel":
             {
+                HashSet<String> chans = new HashSet<>();
                 if (p.getListStyle().equalsIgnoreCase("dmt"))
                 {
                     val.append(argName).append("=");
@@ -424,13 +426,17 @@ public abstract class PluginController
                     {
                         cname=cname.substring(0, dotPos);
                     }
-                    if (p.getListStyle().equalsIgnoreCase("dmt"))
+                    if (!chans.contains(cname))
                     {
-                        val.append(cname).append(" ");
-                    }
-                    else
-                    {
-                        ret.add(cname);
+                        chans.add(cname);
+                        if (p.getListStyle().equalsIgnoreCase("dmt"))
+                        {
+                            val.append(cname).append(" ");
+                        }
+                        else
+                        {
+                            ret.add(cname);
+                        }
                     }
                 }
                 if (p.getListStyle().equalsIgnoreCase("dmt"))
@@ -447,7 +453,7 @@ public abstract class PluginController
                 {
                     ret.add(argName);
                 }
-
+                HashSet<String> chans = new HashSet<>();
                 for (ChanDataBuffer buf : dbuf)
                 {
                     if (p.getListStyle().equalsIgnoreCase("python"))
@@ -469,7 +475,11 @@ public abstract class PluginController
                                 nameStr += ",online";
                                 break;
                         }
-                        ret.add(nameStr);
+                        if (!chans.contains(nameStr))
+                        {
+                            ret.add(nameStr);
+                            chans.add(nameStr);
+                        }
                     }
                     else if (useEquals)
                     {
@@ -485,8 +495,8 @@ public abstract class PluginController
                 break;
                 
             case "duration":
-                for (ChanDataBuffer buf : dbuf)
                 {
+                    ChanDataBuffer buf = dbuf.get(0);
                     Long duration = buf.getTimeInterval().getDuration();
                     if (useEquals)
                     {
@@ -517,19 +527,26 @@ public abstract class PluginController
                 break;
                 
             case "end":
+            {
+                HashSet<Long> endSet = new HashSet<>();
                 for (ChanDataBuffer buf : dbuf)
                 {
                     Long endGps = buf.getTimeInterval().getStopGps();
-                    if (useEquals)
+                    if (!endSet.contains(endGps))
                     {
-                        ret.add(getCmdArg(p.getArgumentName(), endGps.toString()));
-                    }
-                    else
-                    {
-                        ret.add(argName);
-                        ret.add(endGps.toString());
+                        endSet.add(endGps);
+                        if (useEquals)
+                        {
+                            ret.add(getCmdArg(p.getArgumentName(), endGps.toString()));
+                        }
+                        else
+                        {
+                            ret.add(argName);
+                            ret.add(endGps.toString());
+                        }
                     }
                 }
+            }
                 break;
                 
             case "geometry":
@@ -583,6 +600,8 @@ public abstract class PluginController
                 break;
                 
             case "start":
+            {
+                HashSet<Long> starts = new HashSet<>();
                 if (!useEquals)
                 {
                     ret.add(argName);
@@ -590,19 +609,26 @@ public abstract class PluginController
                 for(ChanDataBuffer buf : dbuf)
                 {
                     Long startGps = buf.getTimeInterval().getStartGps();
-                    
-                    if (useEquals)
+                    if (!starts.contains(startGps))
                     {
-                        ret.add(getCmdArg(p.getArgumentName(), startGps.toString()));
-                    }
-                    else
-                    {
-                        ret.add(startGps.toString());
+                        starts.add(startGps);
+                        if (useEquals)
+                        {
+                            ret.add(getCmdArg(p.getArgumentName(), startGps.toString()));
+                        }
+                        else
+                        {
+                            ret.add(startGps.toString());
+                        }
                     }
                 }
+            }
                 break;
                 
             case "startDbl":
+            {
+                HashSet<Double> starts = new HashSet<>();
+                
                 if (!useEquals)
                 {
                     ret.add(argName);
@@ -610,15 +636,20 @@ public abstract class PluginController
                 for (ChanDataBuffer buf : dbuf)
                 {
                     Double startGps = buf.getTimeInterval().getStartGpsD();
-                    if (useEquals)
+                    if (!starts.contains(startGps))
                     {
-                        ret.add(getCmdArg(p.getArgumentName(), String.format("%1$.4f", startGps)));
-                    }
-                    else
-                    {
-                        ret.add(String.format("%1$.4f", startGps));
+                        starts.add(startGps);
+                        if (useEquals)
+                        {
+                            ret.add(getCmdArg(p.getArgumentName(), String.format("%1$.4f", startGps)));
+                        }
+                        else
+                        {
+                            ret.add(String.format("%1$.4f", startGps));
+                        }
                     }
                 }
+            }
                 break;
                 
             case "tempDir":
