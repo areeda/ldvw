@@ -478,6 +478,11 @@ public class BaseChannelSelector extends GUISupport
         PageFormButton nextBtn = new PageFormButton("submitAct", ">", "next");
         nextBtn.setEnabled(curPage < nPages);
         pgCntrlRow.add(nextBtn);
+        
+        PageFormButton selRaw = new PageFormButton("selRaw", "Select raw", "selraw");
+        selRaw.setType("button");
+        selRaw.addEvent("onclick", "setChkBoxByClass('rawSel',true)");
+        pgCntrlRow.add(selRaw);
 
         PageFormButton selAll = new PageFormButton("selAll", "Select all", "selall");
         selAll.setType("button");
@@ -715,6 +720,10 @@ public class BaseChannelSelector extends GUISupport
             {
                 PageFormCheckbox cb = new PageFormCheckbox(typSelName, type + ". ");
                 cb.setClassName("selBox");
+                if (type.equalsIgnoreCase("raw"))
+                {
+                    cb.setClassName("rawSel");
+                }
                 if (selections.containsKey(typSelName))
                 {
                     cb.setChecked(true);
@@ -1065,6 +1074,11 @@ public class BaseChannelSelector extends GUISupport
             {
                 PageFormCheckbox cb = new PageFormCheckbox(typSelName, type + ". ");
                 cb.setClassName("selBox");
+                if (type.equalsIgnoreCase("raw"))
+                {
+                    cb.setClassName("rawSel");
+                }
+                
                 cb.setChecked(bcs.isSelected(type));
                     
                 typSelList.add(cb);
