@@ -648,6 +648,11 @@ public class TimeAndPlotSelector extends GUISupport
         PageTable selClrBar = new PageTable();
         PageTableRow selClrRow = new PageTableRow();
 
+        PageFormButton selRaw = new PageFormButton("selRaw", "Select raw", "selraw");
+        selRaw.setType("button");
+        selRaw.addEvent("onclick", "setChkBoxByClass('rawSel',true)");
+        selClrRow.add(selRaw);
+
         PageFormButton selAll = new PageFormButton("selAll", "Select all", "selall");
         selAll.setType("button");
         selAll.addEvent("onclick", "setSelByClasses('selBox', true, '.trendChoice', 1)");
