@@ -82,16 +82,22 @@ public abstract class GWpyBaseDefn extends PluginController
     // @todo add window and scaling
     protected void addFFT()
     {
+        addFFT(1.0f, 0.5f);
+    }
+    protected void addFFT(float secpfftDefault, float overlapDefault)
+    {
+        
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Seconds per fft", "secpfft",
-                                        "Default = 1.0");
+                                        String.format("Default = %1$.1f", secpfftDefault));
         p.setArgumentName("secpfft");
         p.setnDecimals(3);
         addParameter(p);
 
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Overlap", "ovlap",
-                                        "Overlap fraction [0-1), default = 0.5");
+                                        String.format("Overlap fraction [0-1), default = %1$.1f",
+                                                      overlapDefault));
         p.setArgumentName("overlap");
-        p.setnDecimals(2);
+        p.setnDecimals(3);
         addParameter(p);
     }
     /**
@@ -208,12 +214,24 @@ public abstract class GWpyBaseDefn extends PluginController
         addParameter(p);
     }
     /**
-     * Intensity axis defaults to log let them make it linear
+     * Intensity axis defaults to log let them make it linear, if they want
      */
     protected void addLogIntensity()
     {
         p = ParameterFactory.buildParam(PluginParameter.Type.SWITCH, "Linear color bar", "nologi",
                                         "Default is log");
+        p.setArgumentName("lincolors");
+        addParameter(p);
+
+        addIntAxisLimits();
+    }
+    /**
+     * Intensity axis defaults to linear let them make it log, if they want
+     */
+    protected void addLinearIntensity()
+    {
+        p = ParameterFactory.buildParam(PluginParameter.Type.SWITCH, "Log color bar", "logi",
+                                        "Default is linear");
         p.setArgumentName("lincolors");
         addParameter(p);
 
