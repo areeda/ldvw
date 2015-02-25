@@ -43,10 +43,8 @@
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
         </group>
         <group>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/PluginController.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/TimeSeriesDefn.java</file>
             <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/View.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/GWpyBaseDefn.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/ViewManager.java</file>
         </group>
     </open-files>
 </project-private>
