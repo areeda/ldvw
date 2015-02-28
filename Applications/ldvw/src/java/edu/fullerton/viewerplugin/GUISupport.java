@@ -145,7 +145,9 @@ public class GUISupport
                         }
                         if (cnum == 0)
                         {
-                            throw new WebUtilException("Channel requested by name not found");
+                            String ermsg = String.format("Channel requested by name [%1$s] not found",
+                                                         cname);
+                            throw new WebUtilException(ermsg);
                         }
                         selections.add(cnum);
                     }
