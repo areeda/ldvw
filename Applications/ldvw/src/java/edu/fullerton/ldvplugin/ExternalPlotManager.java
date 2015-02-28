@@ -555,6 +555,7 @@ public abstract class ExternalPlotManager extends ExternalProgramManager impleme
     /**
      * External programs that are based on the PluginController/PluginManager classes all make their
      * plots the same way.  This does the work for the Manager class.
+     * 
      * @param pc - PluginController contains the form to argument transforms
      * @param dbuf - describes the input data
      * @param compact - flag to make labels as short as possible
@@ -569,28 +570,18 @@ public abstract class ExternalPlotManager extends ExternalProgramManager impleme
             pc.setFormParameters(paramMap);
             List<String> cmd = pc.getCommandArray(dbuf, paramMap);
             String cmdStr = pc.getCommandLine(dbuf, paramMap);
+            vpage.addLine("Command used to generate plot:");
             vpage.add(cmdStr);
             vpage.addBlankLines(2);
             if (runExternalProgram(cmd, ""))
             {
-                String txtOutput = String.format("%1$s Output:<br>%2$s", getProductName(), getStdout());
-                vpage.add(new PageItemString(txtOutput, false));
-                vpage.addBlankLines(1);
-                txtOutput = String.format("%1$s <br>Stderr: %2$s", getProductName(), getStderr());
-                vpage.add(new PageItemString(txtOutput, false));
-                vpage.addBlankLines(1);
                 File img = pc.getTempFile();
                 Integer imgNum = addImg2Db(img, db, vuser.getCn());
                 ret.add(imgNum);
             }
             else
             {
-                int stat = getStatus();
-                String stderr = getStderr();
-                vpage.add(String.format("%1$s returned and error: %2$d", getProductName(), stat));
-                vpage.addBlankLines(1);
-                PageItemString ermsg = new PageItemString(stderr, false);
-                vpage.add(ermsg);
+                sendExternalOutput();
             }
         }
         catch (LdvTableException ex)
@@ -600,6 +591,17 @@ public abstract class ExternalPlotManager extends ExternalProgramManager impleme
             throw new WebUtilException(ermsg);
         }
         return ret;
+    }
+    private void sendExternalOutput()
+    {
+        int stat = getStatus();
+        String txtOutput = String.format("%1$s: Status: %2$d Output:<br>%3$s", 
+                                         getProductName(), stat, getStdout());
+        vpage.add(new PageItemString(txtOutput, false));
+        vpage.addBlankLines(1);
+        txtOutput = String.format("%1$s <br>Stderr: %2$s", getProductName(), getStderr());
+        vpage.add(new PageItemString(txtOutput, false));
+        vpage.addBlankLines(1);        
     }
     /**
      * flag to say whether we can accept all data sets at one time or one for each call default is
