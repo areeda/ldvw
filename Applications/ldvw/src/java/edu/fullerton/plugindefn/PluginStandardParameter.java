@@ -66,6 +66,6 @@ class PluginStandardParameter extends PluginParameter
     @Override
     public String getListStyle()
     {
-        return listStyle;
+        return listStyle == null ? "" : listStyle;
     }
 }
