@@ -94,11 +94,6 @@ public class TimeAndPlotSelector extends GUISupport
     {
         Integer stepNo = 1;     /// numbering for what to do
 
-        PluginManager pmanage = new PluginManager(db, vpage, vuser, paramMap);
-        pmanage.setContextPath(contextPath);
-        pmanage.setServletPath(servletPath);
-        pmanage.setParamMap(paramMap);
-
         PageItem chanSelector;
         if (selType.equalsIgnoreCase("selchan"))
         {
@@ -108,13 +103,18 @@ public class TimeAndPlotSelector extends GUISupport
         {
             chanSelector = getBaseChanSelector();
         }
-        if (chanSelector == null)
+        if (nSel == 0)
         {
             vpage.addBlankLines(3);
             vpage.add("No channels are selected.  Please use back button.");            
         }
         else
         {
+            PluginManager pmanage = new PluginManager(db, vpage, vuser, paramMap);
+            pmanage.setContextPath(contextPath);
+            pmanage.setServletPath(servletPath);
+            pmanage.setParamMap(paramMap);
+
             PageForm pf = new PageForm();
             pf.setName("timePlotSelect");
             pf.setMethod("get");
@@ -653,14 +653,14 @@ public class TimeAndPlotSelector extends GUISupport
         selRaw.addEvent("onclick", "setChkBoxByClass('rawSel',true)");
         selClrRow.add(selRaw);
 
-        PageFormButton selAll = new PageFormButton("selAll", "Select all", "selall");
+        PageFormButton selAll = new PageFormButton("selTrnd", "Select m-trend", "seltrnd");
         selAll.setType("button");
-        selAll.addEvent("onclick", "setSelByClasses('selBox', true, '.trendChoice', 1)");
+        selAll.addEvent("onclick", "setSelByClasses('selBox', true, '.m_trendChoice', 1)");
         selClrRow.add(selAll);
 
         PageFormButton clrAll = new PageFormButton("selAll", "Clear all", "clrall");
         clrAll.setType("button");
-        clrAll.addEvent("onclick", "setSelByClasses('selBox', false, '.trendChoice', 0)");
+        clrAll.addEvent("onclick", "setSelByClasses('selBox', false, '.m_trendChoice', 0)");
         selClrRow.add(clrAll);
 
         PageFormButton selMore = new PageFormButton("selMore", "Select more", "selMore");
