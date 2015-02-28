@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
  */
 public class CoherenceManager extends ExternalPlotManager implements PlotProduct
 {
-    private final String name = "Coherence";
+    private final String name = "Coherence (deprecated)";
     private final String nameSpace = "coh";
     private boolean logXaxis=true, logYaxis=false;
     private final String prog = "/usr/local/ldvw/bin/gw_coher.py";
@@ -258,7 +258,11 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
         cb.addEvent("onclick", fun);
         ret.add(cb);
         
+        ret.addBlankLines(2);
+        ret.addLine("This plot is superceded by the GWpy version and will be "
+                    + "removed in a future version");
         ret.addBlankLines(1);
+
         ret.add("Set appropriate parameters below:");
         ret.addBlankLines(1);
 
