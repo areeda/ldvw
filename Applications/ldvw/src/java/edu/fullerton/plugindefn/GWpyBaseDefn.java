@@ -40,7 +40,7 @@ public abstract class GWpyBaseDefn extends PluginController
     protected void addCommonAttributes()
     {
         addAttribute(new PluginAttribute("needsDataXfer", false));
-        addAttribute(new PluginAttribute("program", "/usr/local/ldvw/bin/gwpy-ldvw.py"));
+        addAttribute(new PluginAttribute("program", "/usr/local/ldvw/bin/gwpy-plot"));
         addAttribute(new PluginAttribute("useEquals", false));
         addAttribute(new PluginAttribute("nDashes", 2));
         addAttribute(new PluginAttribute("useQuotes", false));
