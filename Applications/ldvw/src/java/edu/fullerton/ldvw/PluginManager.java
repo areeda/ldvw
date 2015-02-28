@@ -115,17 +115,19 @@ public class PluginManager extends GUISupport
         // define the products we manage by enable key and class name
         // they will be added to the product accordion in the same order listed here
         productList = new ArrayList<>();
-        productList.add(new ProductDefn("doTimeSeries", "edu.fullerton.viewerplugin.TsPlot"));
         productList.add(new ProductDefn("doGwpyTs", "edu.fullerton.ldvplugin.TimeSeriesManager"));
-        productList.add(new ProductDefn("doSpectrum", "edu.fullerton.viewerplugin.SpectrumPlot"));
         productList.add(new ProductDefn("doGwpySp", "edu.fullerton.ldvplugin.SpectrumManager"));
         productList.add(new ProductDefn("doSpectrogram", "edu.fullerton.ldvplugin.SpectrogramManager"));
         productList.add(new ProductDefn("doGwSpectrogram", "edu.fullerton.ldvplugin.GWSpectrogramManager"));
-        productList.add(new ProductDefn("doCoherence", "edu.fullerton.ldvplugin.CoherenceManager"));
         productList.add(new ProductDefn("doGWCoh", "edu.fullerton.ldvplugin.GWCoherenceManager"));
         productList.add(new ProductDefn("doGwCohgram", "edu.fullerton.ldvplugin.CoherencegramManager"));
         productList.add(new ProductDefn("doWplot","edu.fullerton.ldvplugin.WplotManager"));
         productList.add(new ProductDefn("doOdc","edu.fullerton.ldvplugin.OdcPlotManager"));
+
+        // original plots are deprecated will be removed in next version
+        productList.add(new ProductDefn("doTimeSeries", "edu.fullerton.viewerplugin.TsPlot"));
+        productList.add(new ProductDefn("doSpectrum", "edu.fullerton.viewerplugin.SpectrumPlot"));
+        productList.add(new ProductDefn("doCoherence", "edu.fullerton.ldvplugin.CoherenceManager"));
     }
 
     public void setResponse(HttpServletResponse response)
@@ -388,6 +390,7 @@ public class PluginManager extends GUISupport
             {
                 if (downloadRequested)
                 {
+                    //=========== Handle download request ============
                     if (paramMap.containsKey("sp_dnld"))
                     {   // calculate spectrum and send them the results
                         ret = doSpectrumDownload(baseSelections,times);
@@ -401,6 +404,7 @@ public class PluginManager extends GUISupport
                 }
                 else
                 {
+                    //================ Handle plot request ==========
                     if (!singleProducts.isEmpty())
                     {
                         ret = callSinglePlugins(baseSelections, times, groupBy, singleProducts, noxfer);
@@ -1100,7 +1104,9 @@ public class PluginManager extends GUISupport
                     vpage.add(descStr);
                 }
                 String url = String.format("%1$s?act=getImg&imgId=%2$d", servletPath ,imgId);
-                PageItemImage piImg = new PageItemImage(url, "result image", "");
+                String altTxt = String.format("%1$s result, image #: %2$d",product.getProductName(),
+                                              imgId);
+                PageItemImage piImg = new PageItemImage(url, altTxt, "");
                 ImageCoordinateTbl ict = new ImageCoordinateTbl(db);
                 ImageCoordinate imgCord = ict.getCoordinate(imgId);
                 if (imgCord != null)
