@@ -498,6 +498,11 @@ public abstract class PluginController
                 {
                     ChanDataBuffer buf = dbuf.get(0);
                     Long duration = buf.getTimeInterval().getDuration();
+                    if (buf.getChanInfo().getcType().equalsIgnoreCase("minute-trend"))
+                    {
+                        // adjust duration to stop at last minute
+                        duration = duration / 60 * 60;
+                    }
                     if (useEquals)
                     {
                         ret.add(getCmdArg(p.getArgumentName(), duration.toString()));
@@ -609,6 +614,11 @@ public abstract class PluginController
                 for(ChanDataBuffer buf : dbuf)
                 {
                     Long startGps = buf.getTimeInterval().getStartGps();
+                    if (buf.getChanInfo().getcType().equalsIgnoreCase("minute-trend"))
+                    {
+                        // adjust start time to beginning of next minute
+                        startGps = (startGps + 59) / 60 * 60;
+                    }
                     if (!starts.contains(startGps))
                     {
                         starts.add(startGps);
