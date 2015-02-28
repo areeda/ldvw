@@ -238,7 +238,7 @@ public class TsPlot extends PluginSupport implements PlotProduct
     @Override
     public String getProductName()
     {
-        return "Time series plot";
+        return "Time series plot (deprecated)";
     }
 
     @Override
@@ -372,9 +372,11 @@ public class TsPlot extends PluginSupport implements PlotProduct
         String fun = String.format("boldTextOnCheckbox('%1$s_cb','%1$s_accLbl')", enableKey);
         cb.addEvent("onclick" ,fun);
         ret.add(cb);
+        ret.addBlankLines(2);
+        ret.addLine("This plot is superceded by the GWpy version and will be "
+                + "removed in a future version");
         ret.addBlankLines(1);
-        ret.add("Set apprpriate parameters.");
-        ret.addBlankLines(1);
+        ret.addLine("Set apprpriate parameters.");
         ret.addBlankLines(1);
         PageTable product = new PageTable();
         product.setClassName("SelectorTable");
