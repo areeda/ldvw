@@ -300,7 +300,7 @@ public class SpectrumPlot extends PluginSupport implements PlotProduct
     @Override
     public String getProductName()
     {
-        String name = "Spectrum";
+        String name = "Spectrum (deprecated)";
         return name;
     }
 
@@ -629,7 +629,11 @@ public class SpectrumPlot extends PluginSupport implements PlotProduct
         cb.addEvent("onclick", fun);
         ret.add(cb);
 
+        ret.addBlankLines(2);
+        ret.addLine("This plot is superceded by the GWpy version and will be "
+                    + "removed in a future version");
         ret.addBlankLines(1);
+
         ret.add("Set appropriate parameters.");
         ret.addBlankLines(1);
         ret.addBlankLines(1);
