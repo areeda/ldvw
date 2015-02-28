@@ -109,6 +109,6 @@ class PluginListParameter extends PluginParameter
     @Override
     public String getListStyle()
     {
-        return style;
+        return style == null ? "" : style;
     }
 }
