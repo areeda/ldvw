@@ -169,7 +169,7 @@ public abstract class PluginController
             for(String arg : args)
             {
                 Matcher m = argQuoteNeeded.matcher(arg);
-                if (useQuotes && !m.find())
+                if (useQuotes || !m.find())
                 {
                     arg = "'" + arg + "'";
                 }
@@ -198,7 +198,18 @@ public abstract class PluginController
             dashStr += '-';
         }
         String prog = getStringAttribute("program", false);
-        ret.add(prog);
+        if (prog.contains(","))
+        {
+            String[] progStrings = prog.split(",");
+            for(String ps: progStrings)
+            {
+                ret.add(ps.trim());
+            }
+        }
+        else
+        {
+            ret.add(prog);
+        }
         
         for(String constant : constants)
         {
