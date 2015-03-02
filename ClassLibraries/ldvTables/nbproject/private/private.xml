@@ -10,8 +10,6 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group name="LDVW libraries"/>
         <group name="ldvw"/>
-        <group>
-            <file>file:/home/joe/ligo/java/ldvw/ClassLibraries/ldvTables/src/edu/fullerton/ldvtables/ViewUser.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>
