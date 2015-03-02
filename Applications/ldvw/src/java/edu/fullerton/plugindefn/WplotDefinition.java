@@ -49,7 +49,7 @@ public class WplotDefinition extends PluginController
 
             addAttribute(new PluginAttribute("stackable", false));
             addAttribute(new PluginAttribute("needsDataXfer", false));
-            addAttribute(new PluginAttribute("program", "dmt_wplot"));
+            addAttribute(new PluginAttribute("program", "/usr/bin/java, -jar, /usr/local/ldvw/bin/packwplot.jar"));
             addConstant("frameType=NDS2");
             addAttribute(new PluginAttribute("useEquals", true));
             addAttribute(new PluginAttribute("nDashes", 0));
@@ -84,14 +84,14 @@ public class WplotDefinition extends PluginController
             p = ParameterFactory.buildParam(PluginParameter.Type.NUMBERARRAY, "Plot time ranges", "plttimes",
                                              "One or more plot durations separated by commas");
             p.setArgumentName("plotTimeRanges");
-            p.setStringDefault("1, 4, 16");
+            p.setStringDefault("1, 4, 16, 32");
             p.setnDecimals(0);  // these are integers
             addParameter(p);
 
             p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Sample frequency", "smplfrq", 
                             "Frequency to which the raw time series is down-sampled before analysis.");
             p.setArgumentName("sampleFrequency");
-            p.setStringDefault("4096");
+            p.setStringDefault("2048");
             p.setnDecimals(0);
             addParameter(p);
             
