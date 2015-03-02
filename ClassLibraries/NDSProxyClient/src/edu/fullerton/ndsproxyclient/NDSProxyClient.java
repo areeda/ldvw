@@ -217,6 +217,11 @@ public class NDSProxyClient
                     lastError = line;
                     throw new NDSException("Error, can't connect to " + server + " " + lastError);
                 }
+                else
+                {
+                    lastError = "partial buffer read: [" + line + "]";
+                    throw new NDSException("Error, can't connect to " + server + " " + lastError);
+                }
             } while(!done);
             
         }
