@@ -105,18 +105,14 @@ public class WplotManager extends ExternalPlotManager
             
             List<String> cmd = wpd.getCommandArray(dbuf,paramMap);
             String cmdStr = wpd.getCommandLine(dbuf, paramMap);
-            vpage.add(cmdStr);
-            vpage.addBlankLines(2);
+            if (!paramMap.containsKey("embed"))
+            {
+                vpage.add(cmdStr);
+                vpage.addBlankLines(2);
+            }
             ArrayList<Integer> ret = new ArrayList<>();
             if (runExternalProgram(cmd, ""))
-            {
-                String txtOutput = String.format("%1$s Output:<br>%2$s",getProductName(),getStdout());
-                vpage.add(new PageItemString(txtOutput,false));
-                vpage.addBlankLines(1);
-                txtOutput = String.format("%1$s <br>Stderr: %2$s", getProductName(), getStderr());
-                vpage.add(new PageItemString(txtOutput, false));
-                vpage.addBlankLines(1);
-                
+            {                
                 File outDir = wpd.getTempDir();
                 ArrayList<File> imgs = getAllImgFiles(outDir);
                 for(File file : imgs)
