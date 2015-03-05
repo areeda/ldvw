@@ -25,14 +25,6 @@
             </bookmark>
         </file>
         <file>
-            <url>src/java/edu/fullerton/ldvw/ChanSourceData.java</url>
-            <bookmark id="15">
-                <name/>
-                <line>131</line>
-                <key/>
-            </bookmark>
-        </file>
-        <file>
             <url>src/java/edu/fullerton/ldvw/BaseChannelSelector.java</url>
             <bookmark id="54">
                 <name/>
@@ -47,6 +39,14 @@
             <bookmark id="56">
                 <name/>
                 <line>1094</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>src/java/edu/fullerton/ldvw/ChanSourceData.java</url>
+            <bookmark id="15">
+                <name/>
+                <line>131</line>
                 <key/>
             </bookmark>
         </file>
@@ -70,12 +70,6 @@
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/PluginManager.java</file>
             <file>file:/home/joe/NetBeansProjects/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/ServletSupport.java</file>
         </group>
-        <group>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvplugin/WplotManager.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/plugindefn/WplotDefinition.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/PluginManager.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvservlet/View.java</file>
-            <file>file:/home/joe/ligo/java/ldvw/Applications/ldvw/src/java/edu/fullerton/ldvw/ViewManager.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>
