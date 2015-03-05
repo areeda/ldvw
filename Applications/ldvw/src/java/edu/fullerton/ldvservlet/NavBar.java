@@ -64,6 +64,9 @@ public class NavBar
         },
         {
             "Release notes", "https://ligodv.areeda.com/ligodv/dokuwiki/doku.php?id=ldvrelnotes"
+        },
+        {
+            "gwpy-plot docs", "https://ligodv.areeda.com/gwpy/cli/index.html"
         }
     };
     // Commands only available to admin group
