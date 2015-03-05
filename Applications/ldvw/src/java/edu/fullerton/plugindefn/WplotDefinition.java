@@ -51,6 +51,7 @@ public class WplotDefinition extends PluginController
             addAttribute(new PluginAttribute("needsDataXfer", false));
             addAttribute(new PluginAttribute("program", "/usr/bin/java, -jar, /usr/local/ldvw/bin/packwplot.jar"));
             addConstant("frameType=NDS2");
+            addConstant("maximumSignificants=100000");
             addAttribute(new PluginAttribute("useEquals", true));
             addAttribute(new PluginAttribute("nDashes", 0));
             addAttribute(new PluginAttribute("listType", "dmt"));
