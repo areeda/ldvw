@@ -178,9 +178,14 @@ public abstract class GWpyBaseDefn extends PluginController
         p.setArgumentName("xmax");
         p.setnDecimals(3);
         addParameter(p);
-
+        addEpoch();
+    }
+    
+    protected void addEpoch()
+    {
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "X-axis zero", "epoch",
-                                        "Seconds (float) from start or GPS, default = auto");
+                                        "Seconds (float) from start or GPS time, default = auto,"
+                                                + "0 for GPS labels");
         p.setArgumentName("epoch");
         p.setnDecimals(3);
         addParameter(p);

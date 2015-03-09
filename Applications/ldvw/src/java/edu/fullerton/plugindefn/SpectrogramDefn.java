@@ -45,6 +45,7 @@ public class SpectrogramDefn extends GWpyBaseDefn
 
             // the remaining parameters are form elements for the user to decide
             addFFT();
+            addEpoch();
             addPreFilter();
             addLogFaxis();
             addLogYaxis();
