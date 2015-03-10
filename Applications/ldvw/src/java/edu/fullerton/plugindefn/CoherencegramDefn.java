@@ -43,6 +43,7 @@ public class CoherencegramDefn extends GWpyBaseDefn
             // the remaining parameters are form elements for the user to decide
             addRefChan();
             addFFT(0.5f, 0.9f);
+            addEpoch();
             addPreFilter();
             addLogFaxis();
             addLogYaxis();
