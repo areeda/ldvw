@@ -6,5 +6,6 @@
 # NetBeans generated files
 build/
 dist/
+store/
 
 /Applications/packwplot/nbproject/private/
