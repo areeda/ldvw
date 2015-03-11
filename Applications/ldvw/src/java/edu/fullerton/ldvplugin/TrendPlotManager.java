@@ -26,16 +26,11 @@ import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.plugindefn.TrendPlotDefinition;
-import edu.fullerton.plugindefn.WplotDefinition;
 import edu.fullerton.viewerplugin.ChanDataBuffer;
 import edu.fullerton.viewerplugin.PlotProduct;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.commons.io.FilenameUtils;
 
 /**
  * Control the external TrendPlot program
@@ -44,8 +39,7 @@ import org.apache.commons.io.FilenameUtils;
  */
 public class TrendPlotManager extends ExternalPlotManager implements PlotProduct
 {
-    private int width;
-    private int height;
+    private final String nameSpace = "trndplt";
     
     public TrendPlotManager(Database db, Page vpage, ViewUser vuser)
     {
@@ -116,6 +110,12 @@ public class TrendPlotManager extends ExternalPlotManager implements PlotProduct
     }
 
     @Override
+    public boolean isPaired()
+    {
+        return false;
+    }
+
+    @Override
     public boolean needsImageDescriptor()
     {
         return false;
@@ -166,6 +166,12 @@ public class TrendPlotManager extends ExternalPlotManager implements PlotProduct
     public boolean hasImages()
     {
         return false;
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
     
 }

@@ -23,6 +23,8 @@ import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.BaseChanSelection;
+import edu.fullerton.ldvjutils.ChanInfo;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.viewerplugin.ChanDataBuffer;
@@ -31,8 +33,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -52,6 +56,7 @@ public abstract class PluginController
     private String namespace;
     
     private final ArrayList<PluginParameter> parameters;
+    private final ArrayList<String> constants;
     private final HashMap<String, PluginAttribute> attributes;
     
     boolean inited = false;
@@ -63,11 +68,15 @@ public abstract class PluginController
     private PageItemString notes = null;
     private ViewUser vuser;
     private File tempFile;
+    private String dashStr;
+    private List<BaseChanSelection> baseSelections;
     
     PluginController()
     {
         parameters = new ArrayList<>();
         attributes = new HashMap<>();
+        constants = new ArrayList<>();
+        tempDir = null;
     }
 
     /**
@@ -92,7 +101,7 @@ public abstract class PluginController
             init();
         }
         String enableText = "Generate " + getName();
-        enableText += nSel > 1 ? "s<br><br>" : "<br><br>";
+        enableText += "<br><br>";
         boolean enabled = getPrevValue(enableKey);
         PageFormCheckbox cb = new PageFormCheckbox(enableKey, enableText, enabled);
         cb.setId(enableKey + "_cb");
@@ -114,7 +123,7 @@ public abstract class PluginController
         String prefix = getNamespace() + "_";
         for(PluginParameter p : parameters)
         {
-            if (p.getType() != PluginParameter.Type.STANDARD)
+            if (p.getType() != PluginParameter.Type.STANDARD )
             {
                 p.setLastVal(paramMap.get(prefix + p.getFormName()));
                 if (p.getType() == PluginParameter.Type.SWITCH)
@@ -123,6 +132,10 @@ public abstract class PluginController
                     {
                         p.setVal(true);
                     }
+                }
+                if (p.getType() == PluginParameter.Type.REFCHAN)
+                {
+                    p.setBaseSelections(baseSelections);
                 }
                 ptr = p.getSelectorRow(getNamespace());
                 product.addRow(ptr);
@@ -138,57 +151,105 @@ public abstract class PluginController
      * @param paramMap form parameters
      * @return the command to run
      * @throws edu.fullerton.jspWebUtils.WebUtilException
+     * @throws edu.fullerton.ldvjutils.LdvTableException
      */
-    public String getCommandLine(ArrayList<ChanDataBuffer> dbuf, Map<String, String[]> paramMap) throws WebUtilException, LdvTableException
+    public String getCommandLine(ArrayList<ChanDataBuffer> dbuf, Map<String, String[]> paramMap) 
+            throws WebUtilException, LdvTableException
     {
+        StringBuilder cmd = new StringBuilder();
+        List<String> args = getCommandArray(dbuf, paramMap);
+        if (args == null || args.isEmpty())
+        {
+            throw new WebUtilException("No external command for this program.");
+        }
+        else
+        {
+            Pattern argQuoteNeeded = Pattern.compile("^[\\d\\w-=/]+$");
+            
+            for(String arg : args)
+            {
+                Matcher m = argQuoteNeeded.matcher(arg);
+                if (useQuotes || !m.find())
+                {
+                    arg = "'" + arg + "'";
+                }
+                cmd.append(arg).append(" ");
+            }
+        }
+        return cmd.toString();
+    }
+    public List<String> getCommandArray(ArrayList<ChanDataBuffer> dbuf, 
+                        Map<String, String[]> paramMap) throws WebUtilException, LdvTableException
+    {
+        ArrayList<String> ret = new ArrayList<>();
+        
         if (!inited)
         {
             init();
         }
         setFormParameters(paramMap);
-        StringBuilder cmd = new StringBuilder();
-        String prog = getStringAttribute("program", false);
-        cmd.append(prog);
         
         useEquals = getBoolAttribute("useEquals", false);
         useQuotes = getBoolAttribute("useQuotes", true);
         nDashes = getIntAttribute("nDashes", 2);
+        dashStr = "";
+        for(int i=0;i<nDashes;i++)
+        {
+            dashStr += '-';
+        }
+        String prog = getStringAttribute("program", false);
+        if (prog.contains(","))
+        {
+            String[] progStrings = prog.split(",");
+            for(String ps: progStrings)
+            {
+                ret.add(ps.trim());
+            }
+        }
+        else
+        {
+            ret.add(prog);
+        }
         
+        for(String constant : constants)
+        {
+            ret.add(constant);
+        }
+            
         for (PluginParameter p : parameters)
         {
             PluginParameter.Type type = p.getType();
+            ArrayList<String> arg = new ArrayList<>();
             switch(type)
             {
                 case LIST:
-                    String lparam = getListParameter(p);
-                    cmd.append(lparam);
+                    arg = getListParameter(p);
                     break;
                 case SWITCH:
-                    if (hasParam(p))
-                    {
-                        cmd.append("--").append(p.getArgumentName()).append(" ");
-                    }
+                    arg = getSwitchParameter(p);
                     break;
                 case NUMBER:
-                    String singleParam=getSingleParam(p);
-                    cmd.append(singleParam);
-                    break;
                 case STRING:
-                    unimplemented("string parameters not available yet");
+                    arg = getSingleParam(p);
                     break;
                 case NUMBERARRAY:
-                    String naparam = getNumberArrayParameter(p);
-                    cmd.append(naparam);
+                    arg = getNumberArrayParameter(p);
+                    break;
+                case REFCHAN:
+                    arg = getSingleParam(p);
                     break;
                 case STANDARD:
-                    String sparam = getStandardParameter(p, dbuf);
-                    cmd.append(sparam);
+                    arg = getStandardParameter(p, dbuf);
                     break;
                 default:
-                    throw new AssertionError(type.name());
+                    throw new AssertionError("Unknown parameter type: " + type.name());
+            }
+            if (arg != null && !arg.isEmpty())
+            {
+                ret.addAll(arg);
             }
         }
-        return cmd.toString();
+        return ret;
     }
     
     public String getName()
@@ -238,6 +299,29 @@ public abstract class PluginController
         return attributes;
     }
 
+    /**
+     * Channel selections are used by reference channels
+     * 
+     * @return list of selected channels
+     */
+    public List<BaseChanSelection> getBaseSelections()
+    {
+        return baseSelections;
+    }
+
+    public void setBaseSelections(List<BaseChanSelection> baseSelections)
+    {
+        this.baseSelections = baseSelections;
+    }
+
+    /**
+     * Constants are arguments to the program that don't depend on the form parameters
+     * @param constant the arument to add
+     */
+    public void addConstant(String constant)
+    {
+        constants.add(constant);
+    }
     public void addAttribute(PluginAttribute attribute)
     {
         attributes.put(attribute.getName(), attribute);
@@ -312,13 +396,39 @@ public abstract class PluginController
         }
         return ret;
     }
-    private String getStandardParameter(PluginParameter p, ArrayList<ChanDataBuffer> dbuf) throws WebUtilException, LdvTableException
+    /**
+     * Standard parameters are the global ones on the page defining the data to be plotted.
+     * @param p
+     * @param dbuf
+     * @return
+     * @throws WebUtilException
+     * @throws LdvTableException 
+     */
+    private ArrayList<String> getStandardParameter(PluginParameter p, ArrayList<ChanDataBuffer> dbuf) throws WebUtilException, LdvTableException
     {
-        String ret = "";
+        ArrayList<String> ret = new ArrayList<>();
         String pname = p.getFormLabel();
+        String argName = dashStr + p.getArgumentName();
+        if (dbuf == null || dbuf.isEmpty())
+        {
+            throw new IllegalArgumentException("No data specified for getStandardParameter.");
+        }
+        StringBuilder val = new StringBuilder();
+
         switch(pname)
         {
             case "baseChannel":
+            {
+                HashSet<String> chans = new HashSet<>();
+                if (p.getListStyle().equalsIgnoreCase("dmt"))
+                {
+                    val.append(argName).append("=");
+                    val.append("[");
+                }
+                else
+                {
+                    ret.add(argName);
+                }
                 for(ChanDataBuffer buf : dbuf)
                 {
                     String cname = buf.getChanInfo().getChanName();
@@ -327,24 +437,92 @@ public abstract class PluginController
                     {
                         cname=cname.substring(0, dotPos);
                     }
-                    ret += getCmdArg(p.getArgumentName(), cname);
+                    if (!chans.contains(cname))
+                    {
+                        chans.add(cname);
+                        if (p.getListStyle().equalsIgnoreCase("dmt"))
+                        {
+                            val.append(cname).append(" ");
+                        }
+                        else
+                        {
+                            ret.add(cname);
+                        }
+                    }
                 }
+                if (p.getListStyle().equalsIgnoreCase("dmt"))
+                {
+                    val.append("]");
+                    ret.add(val.toString());
+                }
+            }
                 break;
                 
             case "channel":
+            {
+                if (p.getListStyle().equalsIgnoreCase("python"))
+                {
+                    ret.add(argName);
+                }
+                HashSet<String> chans = new HashSet<>();
                 for (ChanDataBuffer buf : dbuf)
                 {
-                    ret += getCmdArg(p.getArgumentName(), buf.getChanInfo().getChanName());
+                    if (p.getListStyle().equalsIgnoreCase("python"))
+                    {
+                        ChanInfo ci = buf.getChanInfo();
+                        String nameStr = ci.getChanName();
+                        switch (ci.getcType())
+                        {
+                            case "minute-trend":
+                                nameStr += ",m-trend";
+                                break;
+                            case "second-trend":
+                                nameStr += ",s-trend";
+                                break;
+                            case "RDS":
+                                nameStr += ",reduced";
+                                break;
+                            case "online":
+                                nameStr += ",online";
+                                break;
+                        }
+                        if (!chans.contains(nameStr))
+                        {
+                            ret.add(nameStr);
+                            chans.add(nameStr);
+                        }
+                    }
+                    else if (useEquals)
+                    {
+                        ret.add(getCmdArg(p.getArgumentName(),buf.getChanInfo().getChanName()));
+                    }
+                    else
+                    {
+                        ret.add(argName);
+                        ret.add(buf.getChanInfo().getChanName());
+                    }
                 }
+            }
                 break;
                 
             case "duration":
-                for (ChanDataBuffer buf : dbuf)
                 {
-                    Long endGps = buf.getTimeInterval().getStopGps();
-                    Long startGps = buf.getTimeInterval().getStartGps();
-                    Long duration = endGps-startGps;
-                    ret += getCmdArg(p.getArgumentName(), duration.toString());
+                    ChanDataBuffer buf = dbuf.get(0);
+                    Long duration = buf.getTimeInterval().getDuration();
+                    if (buf.getChanInfo().getcType().equalsIgnoreCase("minute-trend"))
+                    {
+                        // adjust duration to stop at last minute
+                        duration = duration / 60 * 60;
+                    }
+                    if (useEquals)
+                    {
+                        ret.add(getCmdArg(p.getArgumentName(), duration.toString()));
+                    }
+                    else
+                    {
+                        ret.add(argName);
+                        ret.add(duration.toString());
+                    }
                 }
                 break;
            
@@ -352,59 +530,165 @@ public abstract class PluginController
                 String email = vuser.getMail();
                 if (email != null && ! email.isEmpty())
                 {
-                    ret += getCmdArg(p.getArgumentName(), email);
+                    if (useEquals)
+                    {
+                        ret.add(getCmdArg(p.getArgumentName(), email));
+                    }
+                    else
+                    {
+                        ret.add(argName);
+                        ret.add(email);
+                    }
                 }
                 break;
                 
             case "end":
+            {
+                HashSet<Long> endSet = new HashSet<>();
                 for (ChanDataBuffer buf : dbuf)
                 {
                     Long endGps = buf.getTimeInterval().getStopGps();
-                    ret += getCmdArg(p.getArgumentName(), endGps.toString());
+                    if (!endSet.contains(endGps))
+                    {
+                        endSet.add(endGps);
+                        if (useEquals)
+                        {
+                            ret.add(getCmdArg(p.getArgumentName(), endGps.toString()));
+                        }
+                        else
+                        {
+                            ret.add(argName);
+                            ret.add(endGps.toString());
+                        }
+                    }
                 }
+            }
                 break;
                 
             case "geometry":
                 String[] geom = paramMap.get("geom");
-                if (geom != null)
+                if (geom != null && geom.length > 0)
                 {
-                    ret += getCmdArg(p.getArgumentName(), geom[0]);
+                    if (useEquals)
+                    {
+                        ret.add(getCmdArg(p.getArgumentName(), geom[0]));
+                    }
+                    else
+                    {
+                        ret.add(argName);
+                        ret.add(geom[0].toString());
+                    }
                 }
                 break;
                 
             case "userName":
-                ret += getCmdArg(p.getArgumentName(), vuser.getCn());
+                if (useEquals)
+                {
+                    ret.add(getCmdArg(p.getArgumentName(), vuser.getCn()));
+                }
+                else
+                {
+                    ret.add(argName);
+                    ret.add(vuser.getCn());
+                }
+                break;
+                
+            case "refchan":
+                // we pass reference channel to the program as the first channel not a separate arg
                 break;
                 
             case "server":
+                if (!useEquals)
+                {
+                    ret.add(argName);
+                }
                 for(ChanDataBuffer buf : dbuf)
                 {
-                    ret += getCmdArg(p.getArgumentName(), buf.getChanInfo().getServer());
+                    if (useEquals)
+                    {
+                        ret.add(getCmdArg(p.getArgumentName(), buf.getChanInfo().getServer()));
+                    }
+                    else
+                    {
+                        ret.add(buf.getChanInfo().getServer() );
+                    }
                 }
                 break;
                 
             case "start":
+            {
+                HashSet<Long> starts = new HashSet<>();
+                if (!useEquals)
+                {
+                    ret.add(argName);
+                }
                 for(ChanDataBuffer buf : dbuf)
                 {
                     Long startGps = buf.getTimeInterval().getStartGps();
-                    ret += getCmdArg(p.getArgumentName(), startGps.toString());
+                    if (buf.getChanInfo().getcType().equalsIgnoreCase("minute-trend"))
+                    {
+                        // adjust start time to beginning of next minute
+                        startGps = (startGps + 59) / 60 * 60;
+                    }
+                    if (!starts.contains(startGps))
+                    {
+                        starts.add(startGps);
+                        if (useEquals)
+                        {
+                            ret.add(getCmdArg(p.getArgumentName(), startGps.toString()));
+                        }
+                        else
+                        {
+                            ret.add(startGps.toString());
+                        }
+                    }
                 }
+            }
                 break;
                 
             case "startDbl":
+            {
+                HashSet<Double> starts = new HashSet<>();
+                
+                if (!useEquals)
+                {
+                    ret.add(argName);
+                }
                 for (ChanDataBuffer buf : dbuf)
                 {
                     Double startGps = buf.getTimeInterval().getStartGpsD();
-                    ret += getCmdArg(p.getArgumentName(), String.format("%1$.4f", startGps));
+                    if (!starts.contains(startGps))
+                    {
+                        starts.add(startGps);
+                        if (useEquals)
+                        {
+                            ret.add(getCmdArg(p.getArgumentName(), String.format("%1$.4f", startGps)));
+                        }
+                        else
+                        {
+                            ret.add(String.format("%1$.4f", startGps));
+                        }
+                    }
                 }
+            }
                 break;
                 
             case "tempDir":
                 try
                 {
-                    tempDir = Files.createTempDirectory("ldvw_").toFile();
-                    
-                    ret = getCmdArg(p.getArgumentName(),tempDir.getAbsolutePath());
+                    if (tempDir == null)
+                    {
+                        tempDir = Files.createTempDirectory("ldvw_").toFile();
+                    }
+                    if (useEquals)
+                    {
+                        ret.add(getCmdArg(p.getArgumentName(),tempDir.getAbsolutePath()));
+                    }
+                    else
+                    {
+                        ret.add(argName);
+                        ret.add(tempDir.getAbsolutePath());
+                    }
                 }
                 catch (IOException ex)
                 {
@@ -416,8 +700,19 @@ public abstract class PluginController
                 String extension = p.getFormName();
                 try
                 {
-                    tempFile = Files.createTempFile("ldvw", extension).toFile();
-                    ret = getCmdArg(p.getArgumentName(), tempFile.getAbsolutePath());
+                    if (tempFile == null)
+                    {
+                        tempFile = Files.createTempFile("ldvw", extension).toFile();
+                    }
+                    if (useEquals)
+                    {
+                        ret.add(getCmdArg(p.getArgumentName(), tempFile.getAbsolutePath()));
+                    }
+                    else
+                    {
+                        ret.add(argName);
+                        ret.add(tempFile.getAbsolutePath());
+                    }
                 }
                 catch (IOException ex)
                 {
@@ -459,17 +754,16 @@ public abstract class PluginController
             {
                 ret += value;
             }
-            ret += " ";
         }
-        return " " + ret + " ";
+        return ret;
     }
 
-    private String getListParameter(PluginParameter p) throws WebUtilException
+    private ArrayList<String> getListParameter(PluginParameter p) throws WebUtilException
     {
+        ArrayList<String> ret = new ArrayList<>();
         String formName = getNamespace() + "_" + p.getFormName();
         String[] vals = paramMap.get(formName);
         String argName = p.getArgumentName();
-        String ret = " ";
         String listType = p.getListStyle();
         if (listType.isEmpty())
         {
@@ -490,12 +784,9 @@ public abstract class PluginController
                 if (vals.length > 1)
                 {
                     t = bracket1 + t + bracket2;
-                    ret = getCmdArg(argName, t);
                 }
-                else
-                {
-                    ret = getCmdArg(argName, t);
-                }
+                ret.add(getCmdArg(argName, t));
+
                 break;
             case "":
             default:
@@ -515,8 +806,9 @@ public abstract class PluginController
         paramMap = pmap;
     }
 
-    private String getNumberArrayParameter(PluginParameter p) throws WebUtilException
+    private ArrayList<String> getNumberArrayParameter(PluginParameter p) throws WebUtilException
     {
+        ArrayList<String> ret = new ArrayList<>();
         String formName = getNamespace() + "_" + p.getFormName();
         String[] vals = paramMap.get(formName);
         
@@ -530,17 +822,40 @@ public abstract class PluginController
         {
             val="["+val+"]";
         }
-        return getCmdArg(p.getArgumentName(), val);
+        ret.add(getCmdArg(p.getArgumentName(), val));
+        return ret;
     }
 
+    /**
+     * check if parameter exists
+     * @param p - name of the paramter (without the namespace)
+     * @return true if it's in the map
+     */
     private boolean hasParam(PluginParameter p)
     {
         String formName = getNamespace() + "_" + p.getFormName();
         String[] vals = paramMap.get(formName);
         return vals != null;
     }
-    private String getSingleParam(PluginParameter p)
+    /**
+     * Return argument for this parameter if applicable
+     *
+     * @param p a switch parameter
+     * @return list containing zero or one item
+     */
+    private ArrayList<String> getSwitchParameter(PluginParameter p)
     {
+        ArrayList<String> ret = new ArrayList<>();
+        if (hasParam(p))
+        {
+            String arg = dashStr + p.getArgumentName();
+            ret.add(arg);
+        }
+        return ret;
+    }
+    private ArrayList<String> getSingleParam(PluginParameter p)
+    {
+        ArrayList<String> ret = new ArrayList<>();
         String formName = getNamespace() + "_" + p.getFormName();
         String[] vals = paramMap.get(formName);
 
@@ -549,7 +864,20 @@ public abstract class PluginController
             p.setStringVal(vals[0]);
         }
         String val = p.getStringVal();
-        return getCmdArg(p.getArgumentName(), val);
+        if (val != null && !val.isEmpty())
+        {
+            if (useEquals)
+            {
+                String arg = p.getArgumentName() + "=" + val;
+                ret.add(arg);
+            }
+            else
+            {
+                ret.add(dashStr + p.getArgumentName());
+                ret.add(val);
+            }
+        }
+        return ret;
     }
 
     public void setNotes(PageItemString notes)
@@ -598,5 +926,13 @@ public abstract class PluginController
         boolean ret = paramMap.containsKey(key);
         return ret;
     }
-    
+
+    public String getNameSpace()
+    {
+        if (!inited)
+        {
+            init();
+        }
+        return getNameSpace();
+    }
 }

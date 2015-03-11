@@ -43,7 +43,6 @@ import java.awt.image.WritableRaster;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -1470,11 +1469,12 @@ public class Spectrogram
             String val;
             Double v;
             int nvals = 0;
+            String fltPat = "[+\\-]?(([1-9][0-9]*\\.?[0-9]*)|(\\.[0-9]+))([Ee][+-]?[0-9]+)?";
             while ((rowAsTokens = csvReader.readNext()) != null)
             {
                 val = rowAsTokens.length == 2 ? rowAsTokens[1] : rowAsTokens[0];
                 val = val.trim();
-                if (val.matches("^[+\\-\\.\\d]+$"))
+                if (val.matches(fltPat))
                 {
                     v = Double.parseDouble(val);
                     data.add(v);

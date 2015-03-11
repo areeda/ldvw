@@ -68,13 +68,18 @@ class PluginNumberArrayParameter extends PluginParameter
         for(String v : vals)
         {
             v = v.trim();
+            Double dval = null;
             if (v.matches(fpRegex))
             {
-                values.add(Double.parseDouble(v));
+                dval = Double.parseDouble(v);
             }
             else if (v.equalsIgnoreCase("inf"))
             {
-                values.add(Double.POSITIVE_INFINITY);
+                dval = Double.POSITIVE_INFINITY;
+            }
+            if (!values.contains(dval))
+            {
+                values.add(dval);
             }
         }
         return this;

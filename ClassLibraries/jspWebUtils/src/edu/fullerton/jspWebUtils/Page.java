@@ -107,6 +107,11 @@ public class Page
     {
         add(new PageItemBlanks(n));
     }
+    /**
+     * Add a text string (without escaping possible html tags) and terminate with a <br> so
+     * it displays as separate line.
+     * @param s - String to add, escaping special characters is caller's responsibility.
+     */
     public void addLine(String s)
     {
         add(new PageItemString(s, false));

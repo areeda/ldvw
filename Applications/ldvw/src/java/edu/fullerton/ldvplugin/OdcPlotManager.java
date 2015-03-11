@@ -46,8 +46,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,8 +57,7 @@ import java.util.regex.Pattern;
  */
 public class OdcPlotManager extends ExternalPlotManager implements PlotProduct
 {
-    private int width;
-    private int height;
+    private final String nameSpace="odc";
     
     public OdcPlotManager( Database db, Page vpage, ViewUser vuser)
     {
@@ -438,6 +435,12 @@ public class OdcPlotManager extends ExternalPlotManager implements PlotProduct
     }
 
     @Override
+    public boolean isPaired()
+    {
+        return false;
+    }
+    
+    @Override
     public boolean needsImageDescriptor()
     {
         return false;
@@ -472,5 +475,11 @@ public class OdcPlotManager extends ExternalPlotManager implements PlotProduct
     public String getProductName()
     {
         return "ODC Plot";
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
 }

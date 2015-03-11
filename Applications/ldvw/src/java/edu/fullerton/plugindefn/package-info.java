@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Joseph Areeda <joseph.areeda at ligo.org>
+ * Copyright (C) 2014-15 Joseph Areeda <joseph.areeda at ligo.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,12 @@
  */
 
 /**
- * classes that define external plugin plot products.  Both UI set up and execution definitions.
- * utilities to create the UI forms and command lines.
+ * Classes that define external plugin plot products.  Both UI set up and execution definitions.
+ * utilities to create the UI forms and command lines.  Most of are derived from PluginController
+ * or PluginParameter.
+ * 
+ * The general concept is to develop a plugin framework that can eventually have a UI to define
+ * user written plugins.
  * 
  */
 package edu.fullerton.plugindefn;

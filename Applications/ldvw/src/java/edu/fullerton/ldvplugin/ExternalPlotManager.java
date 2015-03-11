@@ -22,13 +22,16 @@ import edu.fullerton.jspWebUtils.PageItem;
 import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageItemString;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import edu.fullerton.ldvjutils.BaseChanSelection;
 import edu.fullerton.ldvjutils.ImageCoordinate;
 import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ImageCoordinateTbl;
 import edu.fullerton.ldvtables.ImageTable;
 import edu.fullerton.ldvtables.ViewUser;
+import edu.fullerton.plugindefn.PluginController;
 import edu.fullerton.viewerplugin.ChanDataBuffer;
 import edu.fullerton.viewerplugin.ExternalProgramManager;
+import edu.fullerton.viewerplugin.PlotProduct;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -48,16 +51,19 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
 
 /**
- * A base class for plot generators that are external programs
+ * An abstract base class for plot generators that are external programs
  *
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
-public class ExternalPlotManager extends ExternalProgramManager
+public abstract class ExternalPlotManager extends ExternalProgramManager implements PlotProduct
 {
     protected Map<String, String[]> paramMap;
     protected String contextPath;
@@ -65,8 +71,12 @@ public class ExternalPlotManager extends ExternalProgramManager
     protected Database db;
     protected Page vpage;
     protected ViewUser vuser;
-    private ImageCoordinate imgCoord;
+    protected ImageCoordinate imgCoord;
     protected String enableKey;
+    protected String dispFormat;
+    protected int width;
+    protected int height;
+    protected List<BaseChanSelection> baseChans;
     
     public ExternalPlotManager( Database db, Page vpage, ViewUser vuser)
     {
@@ -85,13 +95,21 @@ public class ExternalPlotManager extends ExternalProgramManager
 
     public void setParammap(Map<String, String[]> parammap)
     {
-        this.paramMap = parammap;
+        paramMap = new TreeMap<>();
+        paramMap.putAll(parammap);
     }
 
+    @Override
     public void setParameters(Map<String, String[]> parameterMap)
     {
         setParammap(parameterMap);
     }
+    @Override
+    public void setChanList(List<BaseChanSelection> baseChans)
+    {
+        this.baseChans = baseChans;
+    }
+
     public void setContextPath(String contextPath)
     {
         this.contextPath = contextPath;
@@ -102,6 +120,7 @@ public class ExternalPlotManager extends ExternalProgramManager
         this.servletPath = servletPath;
     }
 
+    @Override
     public boolean isSelected()
     {
         boolean ret = false;
@@ -111,6 +130,12 @@ public class ExternalPlotManager extends ExternalProgramManager
         }
         return ret;
     }
+    /**
+     * The enable key is the parameter name of the checkbox that activates this progduct
+     * 
+     * @return key name
+     */
+    @Override
     public String getEnableKey()
     {
         return enableKey;
@@ -513,5 +538,157 @@ public class ExternalPlotManager extends ExternalProgramManager
         ret.add(err);
         
         return ret;
+    }
+
+    /**
+     * Create one or more plots from data provided
+     *
+     * @param dbuf data buffers with full descriptors
+     * @param compact flag that image is small so minimize text added
+     * @return list of image IDs of product images saved to the database
+     * @throws WebUtilException
+     */
+    @Override
+    public abstract ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbuf, boolean compact) 
+            throws WebUtilException;
+
+    /**
+     * External programs that are based on the PluginController/PluginManager classes all make their
+     * plots the same way.  This does the work for the Manager class.
+     * 
+     * @param pc - PluginController contains the form to argument transforms
+     * @param dbuf - describes the input data
+     * @param compact - flag to make labels as short as possible
+     * @return list of image IDs now in our database
+     */
+    public ArrayList<Integer> makePcPlot(PluginController pc, ArrayList<ChanDataBuffer> dbuf, 
+                                         boolean compact) throws WebUtilException
+    {
+        ArrayList<Integer> ret = new ArrayList<>();
+        try
+        {
+            pc.setFormParameters(paramMap);
+            List<String> cmd = pc.getCommandArray(dbuf, paramMap);
+            String cmdStr = pc.getCommandLine(dbuf, paramMap);
+            vpage.addLine("Command used to generate plot:");
+            vpage.add(cmdStr);
+            vpage.addBlankLines(2);
+            if (runExternalProgram(cmd, ""))
+            {
+                File img = pc.getTempFile();
+                Integer imgNum = addImg2Db(img, db, vuser.getCn());
+                ret.add(imgNum);
+            }
+            else
+            {
+                sendExternalOutput();
+            }
+        }
+        catch (LdvTableException ex)
+        {
+            String ermsg = getProductName() + " failed to save image.  LdvTableException: "
+                           + ex.getLocalizedMessage();
+            throw new WebUtilException(ermsg);
+        }
+        return ret;
+    }
+    private void sendExternalOutput()
+    {
+        int stat = getStatus();
+        String txtOutput = String.format("%1$s: Status: %2$d Output:<br>%3$s", 
+                                         getProductName(), stat, getStdout());
+        vpage.add(new PageItemString(txtOutput, false));
+        vpage.addBlankLines(1);
+        txtOutput = String.format("%1$s <br>Stderr: %2$s", getProductName(), getStderr());
+        vpage.add(new PageItemString(txtOutput, false));
+        vpage.addBlankLines(1);        
+    }
+    /**
+     * flag to say whether we can accept all data sets at one time or one for each call default is
+     * one per call, override in the plugin if you can take multiples
+     *
+     * @return true if you want a bunch of datasets
+     */
+    @Override
+    public abstract boolean isStackable();
+
+    /**
+     * Determines whether the PluginManager creates an image description for each image in the list
+     * or if the product itself creates the description
+     *
+     * @return true if the PluginManager should do it, false if the product does it
+     */
+    @Override
+    public boolean needsImageDescriptor()
+    {
+        return true;
+    }
+    
+    /**
+     * Set the dimensions of the resulting image
+     *
+     * @param width in pixels
+     * @param height in pixels
+     */
+    @Override
+    public void setSize(int width, int height)
+    {
+        this.width = width;
+        this.height = height;
+    }
+
+    /**
+     * Get the external name of this product for selection and results page
+     *
+     * @return descriptive name
+     */
+    @Override
+    public abstract String getProductName();
+
+    /**
+     * Return html object that displays all user settable parameters
+     *
+     * @param enableKey - parameter name for the switch that enables this product
+     * @param nSel - number of input datasets available
+     * @param multDisp - I'm not sure
+     * @todo figure out if we still need/want multDisp parameter
+     * @return the html object
+     * @throws edu.fullerton.jspWebUtils.WebUtilException
+     */
+    @Override
+    public abstract PageItem getSelector(String enableKey, int nSel, String[] multDisp) 
+            throws WebUtilException;
+
+    /**
+     * Does this product want the PlotManager to get data, or does it do it itself
+     *
+     * @return true if PlotManager is to get the data
+     */
+    @Override
+    public boolean needsDataXfer()
+    {
+        return false;
+    }
+
+    /**
+     * Stacked/single selector
+     * 
+     * @param dispFormat 
+     */
+    @Override
+    public void setDispFormat(String dispFormat)
+    {
+        this.dispFormat = dispFormat;
+    }
+
+    /**
+     * Some products run in the background and do not return a list of images to display.
+     *
+     * @return true if caller should expect a non-empty list of images.
+     */
+    @Override
+    public boolean hasImages()
+    {
+        return true;
     }
 }

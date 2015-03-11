@@ -397,14 +397,14 @@ class ImageHistory extends GUISupport
         }
         else
         {
-            imgCnt = (int) imgTbl.getDistinctRecordCount(userWanted);
+            imgCnt = (int) imgTbl.getRecordCount(userWanted);
             gotGroup = false;
         }
         // if that didn't work try all images for this user
         if (imgCnt == 0 && !groupWanted.isEmpty() && !groupWanted.equalsIgnoreCase("all"))
         {
             groupWanted="All";
-            imgCnt = (int) imgTbl.getDistinctRecordCount(userWanted);
+            imgCnt = (int) imgTbl.getRecordCount(userWanted);
             gotGroup = false;
         }
         // if that didn't work try all images for all users
@@ -415,7 +415,7 @@ class ImageHistory extends GUISupport
             )
         {
             userWanted = "All";
-            imgCnt = (int) imgTbl.getDistinctRecordCount(userWanted);
+            imgCnt = (int) imgTbl.getRecordCount(userWanted);
             gotGroup = false;
         }
         if (imgCnt > 0)

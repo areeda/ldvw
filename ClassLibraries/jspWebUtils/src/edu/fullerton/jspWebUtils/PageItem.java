@@ -86,7 +86,11 @@ abstract public class PageItem
 
     public void setClassName(String className)
     {
-        this.className = className;
+        if (!this.className.isEmpty())
+        {
+            this.className += " ";
+        }
+        this.className += className;
     }
 
     public String getId()

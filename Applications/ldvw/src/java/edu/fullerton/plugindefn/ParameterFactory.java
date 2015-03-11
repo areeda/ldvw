@@ -25,12 +25,12 @@ public class ParameterFactory
 {
 
     /**
-     * 
-     * @param type
-     * @param formLabel
-     * @param formName
-     * @param comment
-     * @return
+     * Object factory for plugin parameters
+     * @param type - parameter type specifies how will appear in the selector form and on command line
+     * @param formLabel label for the line in the selector
+     * @param formName the actual form parameter name is namespace + formName
+     * @param comment right column of selector, helps users know what to enter
+     * @return almost fully formed object, some objects need more data
      */
     public static PluginParameter buildParam(PluginParameter.Type type, String formLabel, 
                                              String formName, String comment)
@@ -56,8 +56,11 @@ public class ParameterFactory
             case NUMBERARRAY:
                 ret = new PluginNumberArrayParameter(formLabel, formName, comment);
                 break;
+            case REFCHAN:
+                ret = new PluginRefChanParameter(formLabel, formName, comment);
+                break;
             default:
-                throw new IllegalArgumentException("Unknown parameter type: " + type.name());
+                throw new IllegalArgumentException("ParameterFactory: Unknown parameter type: " + type.name());
         }
         ret.setType(type);
         return ret;

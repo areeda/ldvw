@@ -478,15 +478,20 @@ public class BaseChannelSelector extends GUISupport
         PageFormButton nextBtn = new PageFormButton("submitAct", ">", "next");
         nextBtn.setEnabled(curPage < nPages);
         pgCntrlRow.add(nextBtn);
+        
+        PageFormButton selRaw = new PageFormButton("selRaw", "Select raw", "selraw");
+        selRaw.setType("button");
+        selRaw.addEvent("onclick", "setChkBoxByClass('rawSel',true)");
+        pgCntrlRow.add(selRaw);
 
-        PageFormButton selAll = new PageFormButton("selAll", "Select all", "selall");
+        PageFormButton selAll = new PageFormButton("selMtrnd", "Select m-trend", "selmtrnd");
         selAll.setType("button");
-        selAll.addEvent("onclick", "setSelByClasses('selBox',true, '.trendChoice',1)");
+        selAll.addEvent("onclick", "setSelectByClass('.m_trendChoice',1)");
         pgCntrlRow.add(selAll);
 
-        PageFormButton clrAll = new PageFormButton("selAll", "Clear all", "clrall");
+        PageFormButton clrAll = new PageFormButton("clrAll", "Clear all", "clrall");
         clrAll.setType("button");
-        clrAll.addEvent("onclick", "setSelByClasses('selBox',false, '.trendChoice',0)");
+        clrAll.addEvent("onclick", "setSelByClasses('selBox',false, '.m_trendChoice',0)");
         pgCntrlRow.add(clrAll);
 
         PageFormButton selMore = new PageFormButton("selMore", "Select more", "selMore");
@@ -707,7 +712,14 @@ public class BaseChannelSelector extends GUISupport
             if (type.toLowerCase().contains("trend"))
             {
                 PageFormSelect trndLst = new PageFormSelect(typSelName, trendSelChoices);
-                trndLst.setClassName("trendChoice");
+                if (type.toLowerCase().contains("minute"))
+                {
+                    trndLst.setClassName("m_trendChoice");
+                }
+                else
+                {
+                    trndLst.setClassName("s_trendChoice");
+                }
                 typSelList.add(type + ": ");
                 typSelList.add(trndLst);
             }
@@ -715,6 +727,10 @@ public class BaseChannelSelector extends GUISupport
             {
                 PageFormCheckbox cb = new PageFormCheckbox(typSelName, type + ". ");
                 cb.setClassName("selBox");
+                if (type.equalsIgnoreCase("raw"))
+                {
+                    cb.setClassName("rawSel");
+                }
                 if (selections.containsKey(typSelName))
                 {
                     cb.setChecked(true);
@@ -1056,7 +1072,14 @@ public class BaseChannelSelector extends GUISupport
             if (type.toLowerCase().contains("trend"))
             {
                 PageFormSelect trndLst = new PageFormSelect(typSelName, bcs.getTrendSelChoices());
-                trndLst.setClassName("trendChoice");
+                if (type.toLowerCase().contains("minute"))
+                {
+                    trndLst.setClassName("m_trendChoice");
+                }
+                else
+                {
+                    trndLst.setClassName("s_trendChoice");
+                }
                 trndLst.setSelected(bcs.getTrendSelectString(type));
                 typSelList.add(type + ": ");
                 typSelList.add(trndLst);
@@ -1065,6 +1088,11 @@ public class BaseChannelSelector extends GUISupport
             {
                 PageFormCheckbox cb = new PageFormCheckbox(typSelName, type + ". ");
                 cb.setClassName("selBox");
+                if (type.equalsIgnoreCase("raw"))
+                {
+                    cb.setClassName("rawSel");
+                }
+                
                 cb.setChecked(bcs.isSelected(type));
                     
                 typSelList.add(cb);

@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -47,11 +46,9 @@ import java.util.regex.Pattern;
  */
 public class CoherenceManager extends ExternalPlotManager implements PlotProduct
 {
-    private final String name = "Coherence";
-    private Integer width;
-    private Integer height;
+    private final String name = "Coherence (deprecated)";
+    private final String nameSpace = "coh";
     private boolean logXaxis=true, logYaxis=false;
-    private String dispFormat;
     private final String prog = "/usr/local/ldvw/bin/gw_coher.py";
 
     private String ref_name;
@@ -64,7 +61,6 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
     private Float fmax;
     private String yLabel="Coherence";
     private int lineThickness;
-    private List<BaseChanSelection> baseChans;
     /**
      * Manage the external program that calculates coherence of two series
      * @param db
@@ -262,7 +258,11 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
         cb.addEvent("onclick", fun);
         ret.add(cb);
         
+        ret.addBlankLines(2);
+        ret.addLine("This plot is superceded by the GWpy version and will be "
+                    + "removed in a future version");
         ret.addBlankLines(1);
+
         ret.add("Set appropriate parameters below:");
         ret.addBlankLines(1);
 
@@ -321,8 +321,8 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
             String[] chlistStr = new String[0];
             chlistStr = chlist.toArray(chlistStr);
 
-            prevVal = getPrevValue("coh_Ref", 0, chlist.get(0));
-            PageFormSelect refChan = new PageFormSelect("coh_Ref", chlistStr);
+            prevVal = getPrevValue("coh_refchan", 0, chlist.get(0));
+            PageFormSelect refChan = new PageFormSelect("coh_refchan", chlistStr);
             refChan.setSelected(prevVal);
             ptr = GUISupport.getObjRow(refChan, "Reference Channel:", "");
             product.addRow(ptr);
@@ -349,8 +349,8 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
     {
         this.paramMap = parameterMap;
         // decode the reference channel name + optional server
-        String[] coh_ref = paramMap.get("coh_Ref");
-        if (coh_ref.length == 1)
+        String[] coh_ref = paramMap.get("coh_refchan");
+        if (coh_ref != null && coh_ref.length == 1)
         {
             int atIdx = coh_ref[0].indexOf("@");
             if (atIdx > 0)
@@ -399,10 +399,6 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
         return false;
     }
 
-    public void setChanList(List<BaseChanSelection> baseChans)
-    {
-        this.baseChans = baseChans;
-    }
 
     /**
      * Get the data buffer for the reference channel.  
@@ -577,5 +573,17 @@ public class CoherenceManager extends ExternalPlotManager implements PlotProduct
     public boolean hasImages()
     {
         return true;
+    }
+
+    @Override
+    public boolean isPaired()
+    {
+        return true;
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
 }

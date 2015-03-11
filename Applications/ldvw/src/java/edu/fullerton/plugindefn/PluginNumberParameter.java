@@ -92,7 +92,7 @@ class PluginNumberParameter extends PluginParameter
             String fmt = String.format("%%1$.%1$df", nDecimals);
 
 
-            if (val.isNaN() && !stringDef.isEmpty())
+            if (val.isNaN() && stringDef != null && !stringDef.isEmpty())
             {
                 setStringVal(stringDef);
             }

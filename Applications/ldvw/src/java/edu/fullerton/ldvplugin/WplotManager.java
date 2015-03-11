@@ -26,9 +26,9 @@ import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.plugindefn.WplotDefinition;
 import edu.fullerton.viewerplugin.ChanDataBuffer;
-import edu.fullerton.viewerplugin.PlotProduct;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.io.FilenameUtils;
@@ -38,11 +38,10 @@ import org.apache.commons.io.FilenameUtils;
  * 
  * @author Joseph Areeda <joseph.areeda at ligo.org>
  */
-public class WplotManager extends ExternalPlotManager implements PlotProduct
+public class WplotManager extends ExternalPlotManager 
 {
-    private int width;
-    private int height;
-
+    private final String nameSpace="wplt";
+    
     public WplotManager(Database db, Page vpage, ViewUser vuser)
     {
         super(db, vpage, vuser);
@@ -60,6 +59,7 @@ public class WplotManager extends ExternalPlotManager implements PlotProduct
     public PageItemList getSelector(String enableKey,int nSel, String[] multDisp) throws WebUtilException
     {
         WplotDefinition wpd = new WplotDefinition();
+        wpd.init();
         this.enableKey = enableKey;
         wpd.setFormParameters(paramMap);
         PageItemList ret = wpd.getSelector(enableKey, nSel);
@@ -67,7 +67,8 @@ public class WplotManager extends ExternalPlotManager implements PlotProduct
     }
 
     @Override
-    public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbuf, boolean compact) throws WebUtilException
+    public ArrayList<Integer> makePlot(ArrayList<ChanDataBuffer> dbuf, boolean compact) 
+            throws WebUtilException
     {
         try
         {
@@ -102,19 +103,16 @@ public class WplotManager extends ExternalPlotManager implements PlotProduct
             
             wpd.setFormParameters(paramMap);
             
-            String cmd = wpd.getCommandLine(dbuf,paramMap);
-            vpage.add(cmd);
-            vpage.addBlankLines(2);
-            ArrayList<Integer> ret = new ArrayList<>();
-            if (runExternalProgram(cmd))
+            List<String> cmd = wpd.getCommandArray(dbuf,paramMap);
+            String cmdStr = wpd.getCommandLine(dbuf, paramMap);
+            if (!paramMap.containsKey("embed"))
             {
-                String txtOutput = String.format("%1$s Output:<br>%2$s",getProductName(),getStdout());
-                vpage.add(new PageItemString(txtOutput,false));
-                vpage.addBlankLines(1);
-                txtOutput = String.format("%1$s <br>Stderr: %2$s", getProductName(), getStderr());
-                vpage.add(new PageItemString(txtOutput, false));
-                vpage.addBlankLines(1);
-                
+                vpage.add(cmdStr);
+                vpage.addBlankLines(2);
+            }
+            ArrayList<Integer> ret = new ArrayList<>();
+            if (runExternalProgram(cmd, ""))
+            {                
                 File outDir = wpd.getTempDir();
                 ArrayList<File> imgs = getAllImgFiles(outDir);
                 for(File file : imgs)
@@ -153,17 +151,17 @@ public class WplotManager extends ExternalPlotManager implements PlotProduct
     }
 
     @Override
-    public boolean needsImageDescriptor()
+    public boolean isPaired()
     {
         return false;
     }
 
     @Override
-    public void setSize(int width, int height)
+    public boolean needsImageDescriptor()
     {
-        this.width = width;
-        this.height = height;
+        return false;
     }
+
 
     @Override
     public String getProductName()
@@ -177,11 +175,6 @@ public class WplotManager extends ExternalPlotManager implements PlotProduct
         return false;
     }
 
-    @Override
-    public void setDispFormat(String dispFormat)
-    {
-        // ignore it because we can't control it
-    }
 
     @Override
     public void setParameters(Map<String, String[]> parameterMap)
@@ -200,5 +193,11 @@ public class WplotManager extends ExternalPlotManager implements PlotProduct
     public boolean hasImages()
     {
         return true;
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+        return nameSpace;
     }
 }

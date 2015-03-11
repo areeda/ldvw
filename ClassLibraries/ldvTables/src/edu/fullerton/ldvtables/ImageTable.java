@@ -99,12 +99,13 @@ public class ImageTable extends Table
         int ret = 0;
 
         String md5 = Utils.md5sum(bis);
-        String ckdup = "SELECT myId, imgMd5 FROM " + getName() + " WHERE imgMd5='" + md5 + "'";
-        ResultSet crs = db.executeQuery(ckdup);
-        if (crs != null && crs.next())
-        {
-            ret = crs.getInt("myId");
-        }
+        // allow duplicate images
+//        String ckdup = "SELECT myId, imgMd5 FROM " + getName() + " WHERE imgMd5='" + md5 + "'";
+//        ResultSet crs = db.executeQuery(ckdup);
+//        if (crs != null && crs.next())
+//        {
+//            ret = crs.getInt("myId");
+//        }
 
         if (ret == 0)
         {
@@ -210,10 +211,9 @@ public class ImageTable extends Table
         {
             usrSrch = " WHERE user = \"" + userWanted + "\" ";
         }
-        String subq = String.format("(SELECT DISTINCT imgMd5,myId,user,lastAccess,mime,created from %1$s %2$s group by imgMd5) as t2", getName(),usrSrch);
 
-        String q = String.format("select myId, user,lastAccess,mime from %1$s  order by created desc limit %2$d,%3$d",
-                                 subq, strt, stop - strt);
+        String q = String.format("select myId, user,lastAccess,mime from %1$s %2$s "
+                + "order by created desc limit %3$d,%4$d", getName(), usrSrch, strt, stop - strt);
         try
         {
             ResultSet rs = db.executeQuery(q);
@@ -231,12 +231,12 @@ public class ImageTable extends Table
         return ret;
     }
 
-    public long getDistinctRecordCount(String userName) throws LdvTableException
+    public long getRecordCount(String userName) throws LdvTableException
     {
         long ret = 0;
         try
         {
-            String q = "select count(DISTINCT imgMd5) as nrec from " + getName();
+            String q = "select count(*) as nrec from " + getName();
             if (userName != null && userName.length() > 0 
                 && !userName.equalsIgnoreCase("all") && !userName.equalsIgnoreCase("any"))
             {

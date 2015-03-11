@@ -29,10 +29,21 @@ import edu.fullerton.viewerplugin.GUISupport;
 class PluginSwitchParameter extends PluginParameter
 {
     boolean val=false;
-    
+    /**
+     * Rendered as an html checkbox in a 3 column row
+     * | __blank__ | [] name | comment
+     * @param name
+     * @param formName
+     * @param comment 
+     */
     PluginSwitchParameter(String name, String formName, String comment)
     {
         super(name,formName,comment);
+        if (name == null || name.isEmpty())
+        {
+            throw new IllegalArgumentException("formName can't be null for a switch "
+                    + "otherwise we end up with a naked checkbox");
+        }
     }
     
     @Override
@@ -54,9 +65,9 @@ class PluginSwitchParameter extends PluginParameter
     PageTableRow getSelectorRow(String namespace) throws WebUtilException
     {
         PageTableRow ptr;
-        String formItemName = namespace + "_" + getFormLabel();
-        PageFormCheckbox cbox = new PageFormCheckbox(formItemName, getComment(), getBoolValue());
-        ptr = GUISupport.getObjRow(cbox, "", "");
+        String formItemName = namespace + "_" + getArgumentName();
+        PageFormCheckbox cbox = new PageFormCheckbox(formItemName, getFormLabel(), getBoolValue());
+        ptr = GUISupport.getObjRow(cbox, "", getComment());
         return ptr;
     }
     
