@@ -67,7 +67,11 @@ public class NavBar
         },
         {
             "gwpy-plot docs", "https://ligodv.areeda.com/gwpy/cli/index.html"
+        },
+        {
+            "gwpy-info", "gwpy-info"
         }
+            
     };
     // Commands only available to admin group
     private final String[][] adminCommands =
