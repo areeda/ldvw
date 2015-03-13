@@ -56,6 +56,7 @@ public class ExternalProgramManager
     protected ArrayList<String> env;
     protected Path tmpPath = null;
     protected ArrayList<File> tmpFileDirs=null; // temporary files and directories we have created
+    protected boolean outIsHtml = false;        // if html don't muck with stdout
     
     /**
      * Use our server's keytab to get a new or refresh our Kerberos TGT
@@ -410,7 +411,11 @@ public class ExternalProgramManager
             outTxt = new StringBuilder();
             while ((line = outRdr.readLine()) != null)
             {
-                outTxt.append(line).append("<br>\n");
+                outTxt.append(line);
+                if (!outIsHtml)
+                {
+                    outTxt.append("<br>\n");
+                }
             }
 
             errTxt = new StringBuilder();
@@ -457,4 +462,15 @@ public class ExternalProgramManager
             addEnv(envList.toArray(strs));
         }
     }
+
+    public boolean isOutIsHtml()
+    {
+        return outIsHtml;
+    }
+
+    public void setOutIsHtml(boolean outIsHtml)
+    {
+        this.outIsHtml = outIsHtml;
+    }
+
 }
