@@ -14,7 +14,7 @@
         <group name="LDVW Applications"/>
         <group name="LDVW libraries"/>
         <group>
-            <file>file:/home/joe/NetBeansProjects/ldvw/Applications/Spectrogram/src/spectrogram/Spectrogram.java</file>
+            <file>file:/home/joe/ligo/java/ldvw/Applications/Spectrogram/src/spectrogram/Spectrogram.java</file>
         </group>
     </open-files>
 </project-private>
