@@ -81,7 +81,7 @@ class BugReportForm
     void addForm() throws WebUtilException
     {
         vpage.add("The LigoDV-web development team welcomes comments, suggestions, "
-                + "bug reports to help improve the product.");
+                + "and bug reports to help improve the product.");
         vpage.addBlankLines(2);
         
         frm = new PageForm();
