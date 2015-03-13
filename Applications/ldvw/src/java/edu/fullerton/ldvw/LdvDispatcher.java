@@ -29,6 +29,7 @@ import edu.fullerton.ldvtables.ChannelTable;
 import edu.fullerton.ldvtables.ImageTable;
 import edu.fullerton.ldvtables.ViewUser;
 import edu.fullerton.viewerplugin.GUISupport;
+import edu.fullerton.viewerplugin.GWpyInfo;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -138,6 +139,9 @@ public class LdvDispatcher extends GUISupport
                     break;
                 case "getjson":
                     ret = getJson();
+                    break;
+                case "gwpy-info":
+                    ret = gwpyInfo();
                     break;
                 case "imagehistory":
                     imageHistory();
@@ -760,5 +764,16 @@ public class LdvDispatcher extends GUISupport
         }
     }
 
+    private boolean gwpyInfo() throws WebUtilException
+    {
+        vpage.addLine("Current GWpy software:");
+        vpage.addBlankLines(2);
+        GWpyInfo gwpi = new GWpyInfo();
+        String gwInfo = gwpi.getGwStatus();
+        PageItemString pis = new PageItemString(gwInfo, false);
+        vpage.add(pis);
+        vpage.addBlankLines(2);
+        return true;
+    }
     
 }
