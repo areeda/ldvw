@@ -59,7 +59,7 @@ public abstract class PluginController
     private final ArrayList<String> constants;
     private final HashMap<String, PluginAttribute> attributes;
     
-    boolean inited = false;
+    protected boolean inited = false;
     private File tempDir;
     private boolean useEquals;
     private boolean useQuotes;
