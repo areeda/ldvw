@@ -243,6 +243,7 @@ public class OdcPlot
                         fullStride /= 2;
                     }
                     fullStride = Math.max(fullStride, minStride);
+                    fullStride = Math.min(fullStride,duration);
 
                     ret = ndsClient.requestData(channelName, chanInfo.getcType(), startGPS, startGPS+duration, fullStride);
                     NDSBufferStatus bufferStatus = ndsClient.getBufferStatus();
@@ -443,6 +444,10 @@ public class OdcPlot
             else if (dtyp.equalsIgnoreCase("CPX-64"))
             {
                 bytesPerSample = 8;
+            }
+            if (server == null || server.isEmpty())
+            {
+                server = chanInfo.getServer();
             }
             ret = true;
             String sRateStr = sampleRate < 1 ? String.format("%1$.3f", sampleRate) : 
@@ -1399,8 +1404,8 @@ public class OdcPlot
             "ADC Overflow Summary",
             "DAC Overflows Summary",
             "Excitation Summary",
-            "Subsystem Parity Summary",
-            "Parity Bit "
+//            "Subsystem Parity Summary",
+//            "Parity Bit "
         };
         String cn = chan.toUpperCase();
         
