@@ -264,7 +264,7 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
             }
             if (! paramMap.containsKey("spg_linintensity"))
             {
-                cmd.append("--logintensity");
+                cmd.append(" --logintensity ");
             }
             addSwitch(cmd, "spg_norm", "norm");
             addSwitch(cmd, "spg_smooth", "smooth");
