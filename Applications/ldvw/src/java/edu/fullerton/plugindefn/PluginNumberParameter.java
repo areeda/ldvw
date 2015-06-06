@@ -87,6 +87,22 @@ class PluginNumberParameter extends PluginParameter
         {
             ret = lastVal[0];
         }
+        else if (useScientific)
+        {
+             if (! val.isNaN())
+            {
+                ret += ret.isEmpty() ? "" : " ";
+                String t = String.format("%1$e", val);
+                if (t.contains("-"))
+                {
+                    ret += " " + t ;
+                }
+                else
+                {
+                    ret += t;
+                }
+            }
+        }
         else
         {
             String fmt = String.format("%%1$.%1$df", nDecimals);
