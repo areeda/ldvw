@@ -86,7 +86,7 @@ public class WplotDefinition extends PluginController
                                              "One or more plot durations separated by commas");
             p.setArgumentName("plotTimeRanges");
             p.setStringDefault("1, 4, 16, 32");
-            p.setnDecimals(0);  // these are integers
+            p.setnDecimals(2);  
             addParameter(p);
 
             p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Sample frequency", "smplfrq", 
