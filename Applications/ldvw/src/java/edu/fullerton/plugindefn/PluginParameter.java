@@ -39,8 +39,9 @@ public abstract class PluginParameter
     private Type type;
     
     protected int nDecimals;
+    protected boolean useScientific = false;
 
-    public final String fpRegex = "^((\\d+\\.?\\d*)|(\\.\\d+))([Ee][+-]?\\d+)?$";
+    public final String fpRegex = "^(([+-]?\\d+\\.?\\d*)|([+-]?\\.\\d+))([Ee][+-]?\\d+)?$";
     protected String[] lastVal; // parameter value from submitted form
     protected List<BaseChanSelection> baseSelections;
     
@@ -240,6 +241,11 @@ public abstract class PluginParameter
     public PluginParameter setnDecimals (int n)
     {
         nDecimals = n;
+        return this;
+    }
+    public PluginParameter setScientific(boolean b)
+    {
+        useScientific = b;
         return this;
     }
     /**

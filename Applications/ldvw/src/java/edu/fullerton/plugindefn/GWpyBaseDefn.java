@@ -113,6 +113,23 @@ public abstract class GWpyBaseDefn extends PluginController
         addParameter(p);
     }
     /**
+     * Band-pass filter
+     */
+    protected void addBandFilter()
+    {
+        p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Upper filter limit (Hz)", "fupper",
+                                        "Cut off frequency, default = no filter");
+        p.setArgumentName("fupper");
+        p.setnDecimals(2);
+        addParameter(p);
+        p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Lower filter limit (Hz)", "flower",
+                                        "Cut off frequency, default = no filter");
+        p.setArgumentName("flower");
+        p.setnDecimals(2);
+        addParameter(p);
+        
+    }
+    /**
      * Default frequency axis defaults to log, let them make it liniear.
      */
     protected void addLogFaxis()
@@ -209,13 +226,13 @@ public abstract class GWpyBaseDefn extends PluginController
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Y-minimum", "ymin",
                                         "Default is auto");
         p.setArgumentName("ymin");
-        p.setnDecimals(3);
+        p.setScientific(true);
         addParameter(p);
 
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Y-maximum", "ymax",
                                         "Default is auto");
         p.setArgumentName("ymax");
-        p.setnDecimals(3);
+        p.setScientific(true);
         addParameter(p);
     }
     /**

@@ -2,10 +2,11 @@
 *.swp
 .DS_Store
 .idea
+nohup.out
 *~
 # NetBeans generated files
 build/
 dist/
 store/
 
-private/
+Applications/*/nbproject/private/

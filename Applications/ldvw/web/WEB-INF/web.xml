@@ -24,6 +24,10 @@
         <servlet-name>ChanSource</servlet-name>
         <servlet-class>edu.fullerton.ldvservlet.ChanSource</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>Nagios</servlet-name>
+        <servlet-class>edu.fullerton.ldvservlet.Nagios</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>Env</servlet-name>
         <url-pattern>/env</url-pattern>
@@ -43,6 +47,10 @@
     <servlet-mapping>
         <servlet-name>ChanSource</servlet-name>
         <url-pattern>/ChanSource</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Nagios</servlet-name>
+        <url-pattern>/Nagios</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

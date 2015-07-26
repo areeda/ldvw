@@ -122,6 +122,7 @@ public class PluginManager extends GUISupport
         productList.add(new ProductDefn("doGWCoh", "edu.fullerton.ldvplugin.GWCoherenceManager"));
         productList.add(new ProductDefn("doGwCohgram", "edu.fullerton.ldvplugin.CoherencegramManager"));
         productList.add(new ProductDefn("doWplot","edu.fullerton.ldvplugin.WplotManager"));
+        productList.add(new ProductDefn("doblrms","edu.fullerton.ldvplugin.BlrmsManager"));
         productList.add(new ProductDefn("doOdc","edu.fullerton.ldvplugin.OdcPlotManager"));
 
         // original plots are deprecated will be removed in next version

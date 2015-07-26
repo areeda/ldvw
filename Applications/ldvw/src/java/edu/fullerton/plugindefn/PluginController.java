@@ -59,7 +59,7 @@ public abstract class PluginController
     private final ArrayList<String> constants;
     private final HashMap<String, PluginAttribute> attributes;
     
-    boolean inited = false;
+    protected boolean inited = false;
     private File tempDir;
     private boolean useEquals;
     private boolean useQuotes;
@@ -776,17 +776,19 @@ public abstract class PluginController
                 String bracket1 = listType.equalsIgnoreCase("dmt") ? "{" : "";
                 String bracket2 = listType.equalsIgnoreCase("dmt") ? "}" : "";
                 String t="";
-                for (String val : vals)
+                if (vals != null)
                 {
-                    t += t.isEmpty() ? "" : ",";
-                    t+= val;
+                    for (String val : vals)
+                    {
+                        t += t.isEmpty() ? "" : ",";
+                        t+= val;
+                    }
+                    if (vals.length > 1)
+                    {
+                        t = bracket1 + t + bracket2;
+                    }
+                    ret.add(getCmdArg(argName, t));
                 }
-                if (vals.length > 1)
-                {
-                    t = bracket1 + t + bracket2;
-                }
-                ret.add(getCmdArg(argName, t));
-
                 break;
             case "":
             default:

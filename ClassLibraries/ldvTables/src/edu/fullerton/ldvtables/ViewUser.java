@@ -223,7 +223,7 @@ public class ViewUser extends Table
         boolean ret = isLocalHost();
         ret |= getIsMemberOf().contains("LSCVirgoLIGOGroupMembers");
         ret |= getIsMemberOf().contains("ldvwAdmin");
-        
+        ret |= getIsMemberOf().contains("ldvwRobots");
         return ret;
     }
     public boolean isLocalHost()
