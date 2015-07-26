@@ -10,3 +10,4 @@ dist/
 store/
 
 Applications/*/nbproject/private/
+ClassLibraries/*/nbproject/private/
