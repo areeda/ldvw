@@ -39,7 +39,10 @@ public class NavBar
     private final String[][] historyMenu =
     {
         {
-            "Saved plots", "ImageHistory&amp;size=med"
+            "Saved plots (mine)", "ImageHistory&amp;size=med"
+        },
+        {
+            "Saved plots (all)", "ImageHistory&amp;size=med&amp;usrSel=All"
         },
         {
             "Upload", "upload"
