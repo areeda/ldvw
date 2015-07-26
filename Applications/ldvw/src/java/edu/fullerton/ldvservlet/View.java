@@ -32,6 +32,7 @@ import viewerconfig.ViewerConfig;
  */
 public class View extends HttpServlet
 {
+    private static final long serialVersionUID = 1L;
     private long loadTime;
 
     private final String version;
@@ -39,7 +40,7 @@ public class View extends HttpServlet
 
     public View()
     {
-        this.version = "0.3.36";
+        this.version = "0.3.37";
     }
 
     /**
