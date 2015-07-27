@@ -60,6 +60,8 @@ public class Nagios extends HttpServlet
             throws ServletException, IOException
     {
         response.setContentType("application/json;charset=UTF-8");
+        response.setHeader("Pragma", "no-cache");
+        
         try (PrintWriter out = response.getWriter())
         {
             try
@@ -82,6 +84,7 @@ public class Nagios extends HttpServlet
                     status.add(Json.createObjectBuilder()
                             .add("num_status", 0)
                             .add("txt_status", "OK, Apache, tomcat, shibboleth tested OK")
+                            .add("start_sec", 0)
                     );
                 }
                 else
@@ -90,8 +93,18 @@ public class Nagios extends HttpServlet
                             .add("num_status", 1)
                             .add("txt_status", "Warning, Apache, tomcat, OK, but shibboleth"
                                     + " did not return valid group")
+                            .add("start_sec", 0)
                     );
                 }
+                
+                // add something incase it's cached for too long
+                
+                status.add(Json.createObjectBuilder()
+                        .add("num_status", 3)
+                        .add("txt_status", "UNKNOWN, cached result is older than 10 minutes.")
+                        .add("start_sec", 600)
+                );
+                
                 builder.add("status_intervals", status);
                 JsonObject result = builder.build();
                 JsonWriter jwriter = Json.createWriter(out);
