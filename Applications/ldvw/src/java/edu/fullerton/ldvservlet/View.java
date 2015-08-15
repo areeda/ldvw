@@ -40,7 +40,7 @@ public class View extends HttpServlet
 
     public View()
     {
-        this.version = "0.3.37";
+        this.version = "0.3.38";
     }
 
     /**
