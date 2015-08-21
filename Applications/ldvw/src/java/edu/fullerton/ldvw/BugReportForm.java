@@ -28,6 +28,7 @@ import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvtables.ViewUser;
+import java.util.Date;
 import java.util.Properties;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -58,8 +59,9 @@ class BugReportForm
     private String remoteIP;
     private Properties fMailServerConfig;
     private String subj;
-    private final String[] recipients = { "joe@areeda.com", "josmith@exchange.fullerton.edu" };
+    private final String[] recipients = { "redmine@ligo.org", "joe@areeda.com" };
     private String servletPath;
+    private final boolean useHtml = false;
 
     public BugReportForm(Database db, Page vpage, ViewUser vuser, HttpServletRequest request) 
     {
@@ -174,7 +176,7 @@ class BugReportForm
             }
             vpage.add("This is what we sent to the development team:");
             vpage.addBlankLines(2);
-            
+
             PageTable report = new PageTable();
             addNextRow(report, "Name:", name);
             addNextRow(report, "Email:",email);
@@ -183,12 +185,32 @@ class BugReportForm
             addNextRow(report, "Report Type:", rptType);
             PageItemString htmlTxt = new PageItemString(rptInfo.replaceAll("\n", "<br>\n"), false);
             addNextRow(report, "Additional Info:", htmlTxt);
+            addNextRow(report, "Project:", "ldvw");
+            
             vpage.add(report);
             vpage.addBlankLines(2);
             vpage.add("Thank you for helping us to make this a better service for LIGO!");
             
-            String subject = rptType + ": " + subj;
-            sendEmail(email, subject, report.getHtml());
+            String subject = subj;
+            StringBuilder body = new StringBuilder();
+            body.append("\nName: ").append(name);
+            body.append("\nEmail: ").append(email);
+            body.append("\nRemote address: ").append(remoteIP);
+            body.append("\nAgent:").append(agent);
+            body.append("\nReport Type: ").append(rptType);
+            body.append("\n\n");
+            body.append(rptInfo);
+            body.append("\n\nProject: ldvw\n");
+            body.append("Assigned to: Joseph Areeda\n");
+            
+            if (useHtml)
+            {
+                sendEmail(email, subject, report.getHtml(),useHtml);
+            }
+            else
+            {
+                sendEmail(email,subject,body.toString(),useHtml);
+            }
         }
         else
         {
@@ -215,7 +237,8 @@ class BugReportForm
         return it;
     }
     private void sendEmail(
-            String aFromEmailAddr,String aSubject, String aBody) throws WebUtilException
+            String aFromEmailAddr,String aSubject, String aBody, boolean useHtml) 
+            throws WebUtilException
     {
         //Here, no Authenticator argument is used (it is null).
         //Authenticators are used to prompt the user for user
@@ -229,13 +252,21 @@ class BugReportForm
         {
             //the "from" address may be set in code, or set in the
             //config file under "mail.from" ; here, the latter style is used
-            message.setFrom( new InternetAddress("root@ldvw.ligo.caltech.edu") );
+            message.setFrom( new InternetAddress("joseph.areeda@ligo.org") );
             for (String toAddr : recipients)
             {
                 message.addRecipient(Message.RecipientType.TO, new InternetAddress(toAddr));
             }
             message.setSubject(aSubject);
-            message.setContent(aBody, "text/html; charset=utf-8");
+            message.setSentDate(new Date());
+            if (useHtml)
+            {
+                message.setContent(aBody, "text/html; charset=utf-8");
+            }
+            else
+            {
+                message.setText(aBody);
+            }
             Transport.send(message);
         }
         catch (MessagingException ex)
