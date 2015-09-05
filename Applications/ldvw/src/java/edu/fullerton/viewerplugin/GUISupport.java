@@ -64,7 +64,7 @@ public class GUISupport
     
     public void setParamMap(Map<String, String[]> pmap)
     {
-        paramMap = pmap;
+        paramMap = new HashMap<>(pmap);
     }
 
     public String getParameter(String pname)
