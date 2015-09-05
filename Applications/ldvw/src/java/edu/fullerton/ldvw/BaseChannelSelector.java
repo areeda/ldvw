@@ -92,6 +92,7 @@ public class BaseChannelSelector extends GUISupport
     private PageTableRow selRow2;
     private PageTableColumn cTypeCol;
     private ChannelIndex cidx;
+    private boolean currentOnly = true;
 
 
     /**
@@ -160,6 +161,7 @@ public class BaseChannelSelector extends GUISupport
 
         chanFiltSpec.setClassName("SelectorTable");
 
+        // Drop down menus for IFO, Subsystem, and Sample frequency
         addListSelector(chanFiltSpec, null, "Interferometer: ", "ifo", ChanParts.getIFOList(),
                         multipleSelections, getParameter("ifo"), true);
         addListSelector(chanFiltSpec, null, "Subsystem: ", "subsys", ChanParts.getSubSystems(), multipleSelections, getParameter("subsys"), true);
@@ -170,13 +172,15 @@ public class BaseChannelSelector extends GUISupport
         addListSelector(chanFiltSpec, compare, "Sample Frequency: ", "fs", ChanParts.getSampleRates(),
                         multipleSelections, getParameter("fs"), true);
 
+        // text box for name filter string
         PageTableRow row = new PageTableRow();
         // first column is a label for this parameter(s)
         PageItemString lbl = new PageItemString("Channel name filter: ");
         lbl.setAlign(PageItem.Alignment.RIGHT);
         row.add(lbl);
 
-        PageFormText filt = new PageFormText("chnamefilt", getParameter("chnamefilt"));
+        String chnamefilt = getParameter("chnamefilt");
+        PageFormText filt = new PageFormText("chnamefilt", chnamefilt);
         filt.setMaxLen(255);
         filt.setSize(32);
         row.add(filt);
@@ -187,7 +191,29 @@ public class BaseChannelSelector extends GUISupport
         row.add(hlpBtn);
         row.setClassAll("noborder");
         chanFiltSpec.addRow(row);
-
+        
+        // Check box for current only
+        PageFormCheckbox currentOnlyCB = new PageFormCheckbox("currentOnly", 
+                "show only currently acquired", currentOnly);
+        // this is necessary to have a check box checked by default, I think
+        if (chnamefilt == null)
+        {
+            currentOnly = true;
+        }
+        else
+        {
+            currentOnly = !getParam("currentOnly").isEmpty();
+        }
+        currentOnlyCB.setChecked(currentOnly);
+        
+        row = new PageTableRow();
+        row.add();
+        row.add(currentOnlyCB);
+        hlpBtn = hm.getHelpButton("currentOnly");
+        row.add(hlpBtn);
+        row.setClassAll("noborder");
+        chanFiltSpec.addRow(row);
+        
         PageFormSubmit getChanListBtn;
         if (mainPage)
         {
@@ -229,8 +255,12 @@ public class BaseChannelSelector extends GUISupport
         String fsStr = getParam("fs");
         String cType = getParam("ctype");
         String chnamefilt = getParam("chnamefilt");
+        String currentOnlyStr = getParam("currentOnly");
+        
+        currentOnly = ! currentOnlyStr.isEmpty();
+        
         submitAct = getParam("submitAct");
-        // do the query
+        
         selections = getBaseChanSelections();   // see if they selected any channels so far
 
         int nsel = selections.size();
@@ -241,13 +271,13 @@ public class BaseChannelSelector extends GUISupport
         {
             cidx = new ChannelIndex(db);
         }
-        int nMatch = cidx.getMatchCount(ifo, subsys, fsCmp, fs, cType, chnamefilt);
+        int nMatch = cidx.getMatchCount(ifo, subsys, fsCmp, fs, cType, chnamefilt, currentOnly);
         
         if (nMatch == 0)
         {
             // we tried the easy way and got nothing so try harder
             chnamefilt = "*" + chnamefilt + "*";
-            nMatch = cidx.getMatchCount(ifo, subsys, fsCmp, fs, cType, chnamefilt);
+            nMatch = cidx.getMatchCount(ifo, subsys, fsCmp, fs, cType, chnamefilt, currentOnly);
             
             if (nMatch == 0)
             {
@@ -276,7 +306,8 @@ public class BaseChannelSelector extends GUISupport
             int nPages = (nMatch + cnt - 1) / cnt;
             int curPage = strt / cnt + 1;
 
-            ArrayList<ChanIndexInfo> matches = cidx.search(ifo, subsys, fsCmp, fs, cType, chnamefilt, strt, cnt);
+            ArrayList<ChanIndexInfo> matches = cidx.search(ifo, subsys, fsCmp, fs, cType, 
+                                                           chnamefilt, strt, cnt, currentOnly);
             
             vpage.add(String.format("%1$,d channels match query.", nMatch));
             vpage.includeJS("setChkBoxByClass.js");
@@ -950,6 +981,12 @@ public class BaseChannelSelector extends GUISupport
         return ret;
     }
 
+    /**
+     * Prepare a table of Channel specs from selections
+     * @param baseSelections selections to add to table
+     * @return item to be added to Page
+     * @throws WebUtilException 
+     */
     PageItem getSelector(Map<Integer, BaseChanSelection> baseSelections) throws WebUtilException
     {
         PageTable ret = new PageTable();
@@ -1147,6 +1184,7 @@ public class BaseChannelSelector extends GUISupport
         dontCopy.add("selmore");
         dontCopy.add("chnamefilt");
         dontCopy.add("strt");
+        dontCopy.add("currentonly");
         
         boolean selmore = paramMap.containsKey("selMore");
         // don't copy these keys, note we convert to lower case before we check
