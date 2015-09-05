@@ -127,7 +127,8 @@ public class ChanSource extends HttpServlet
                 ChannelTable ctbl = new ChannelTable(servletSupport.getDb());
                 ChannelIndex cindx = new ChannelIndex(servletSupport.getDb());
                 String ctype = type == null ? "" : type;
-                ArrayList<ChanIndexInfo> ciiList = cindx.search("", "", ">=", 0.f, ctype, name, 0, 20);
+                ArrayList<ChanIndexInfo> ciiList = cindx.search("", "", ">=", 0.f, ctype, name, 
+                                                                0, 20, false);
                 ChanPointerTable cptrs = new ChanPointerTable(servletSupport.getDb());
                 
                 response.setContentType("text/plain;charset=UTF-8");
