@@ -57,6 +57,7 @@ public class ChannelIndex extends Table
         new Column("cisAvail",  CType.CHAR,     1,                  Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
         new Column("nServers",  CType.INTEGER,  Integer.SIZE / 8,   Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE,  Boolean.FALSE),
         new Column("epochs",    CType.INTEGER,  Integer.SIZE / 8,   Boolean.FALSE,  Boolean.TRUE,  Boolean.FALSE,  Boolean.FALSE),
+        new Column("isCurrent", CType.BOOLEAN,  1,                  Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE,  Boolean.FALSE)
 
     };
     // bulk insert
@@ -199,10 +200,25 @@ public class ChannelIndex extends Table
         }
     }
     
+    /**
+     * Given the form parameters find matching channel index records
+     * @param ifo
+     * @param subsys
+     * @param fsCmp
+     * @param fs
+     * @param cType
+     * @param cnamePat
+     * @param strt
+     * @param limit
+     * @param currentOnly
+     * @return a list of matching records
+     * @throws LdvTableException 
+     */
     public ArrayList<ChanIndexInfo> search(String ifo, String subsys, String fsCmp, Float fs, 
-                                           String cType, String cnamePat, int strt, int limit) throws LdvTableException
+                                           String cType, String cnamePat, int strt, int limit,
+                                           boolean currentOnly) throws LdvTableException
     {
-        String where = getWhere(ifo, subsys, fsCmp, fs, cType, cnamePat);
+        String where = getWhere(ifo, subsys, fsCmp, fs, cType, cnamePat, currentOnly);
         return getSearchResults(where,strt, limit);
     }
     /**
@@ -214,17 +230,19 @@ public class ChannelIndex extends Table
      * @param fs
      * @param cType
      * @param cnamePat
+     * @param currentOnly show only current channels
      * @return
      * @throws LdvTableException 
      * @see #getWhere(java.lang.String, java.lang.String, java.lang.String, java.lang.Float, java.lang.String, java.lang.String) 
      * 
      */
     public int getMatchCount(String ifo, String subsys, String fsCmp, Float fs,
-                             String cType, String cnamePat) throws LdvTableException
+                             String cType, String cnamePat, boolean currentOnly) 
+                             throws LdvTableException
     {
         int ret = 0;
         
-        String where = getWhere(ifo, subsys, fsCmp, fs, cType, cnamePat);
+        String where = getWhere(ifo, subsys, fsCmp, fs, cType, cnamePat, currentOnly);
         String q = "SELECT count(*) AS cnt FROM " + getName() + " ";
         if (!where.isEmpty())
         {
@@ -252,10 +270,11 @@ public class ChannelIndex extends Table
      * @param fs
      * @param cType
      * @param cnamePat pattern to match against channel name 
+     * @param currentOnly only match currently acquired channels
      * @return where clause for mysql (without the keyword WHERE)
      */
     private String getWhere(String ifo, String subsys, String fsCmp, Float fs, 
-                            String cType, String cnamePat)
+                            String cType, String cnamePat, boolean currentOnly)
     {
         String where = "";
 
@@ -297,14 +316,34 @@ public class ChannelIndex extends Table
                 where += " " + fld + " = 'T' ";
             }
         }
+        
+        if (currentOnly)
+        {
+            where += where.isEmpty() ? "" : " AND ";
+            where += "isCurrent>0 ";
+        }
         where = getNamePatWhere(ifo, subsys, cnamePat, where);
         return where;
     }
-    private String getNamePatWhere(String ifo, String subsys, String cnamePat, String where)
+    /**
+     * Convert the relevant input parameters into an SQL compare operation and add it to current
+     * where clause
+     * @param ifo
+     * @param subsys
+     * @param cnamePat
+     * @param oldWhere existing where clause, may be empty or null
+     * @return 
+     */
+    private String getNamePatWhere(String ifo, String subsys, String cnamePat, String oldWhere)
     {
+        String where = oldWhere;
         
         if (!cnamePat.isEmpty())
         {
+            if (where == null)
+            {
+                where = "";
+            }
             if (needRegex(cnamePat))
             {
                 where += where.isEmpty() ? "" : " AND ";
@@ -356,7 +395,7 @@ public class ChannelIndex extends Table
 
     private ArrayList<ChanIndexInfo> getSearchResults(String where, int strt, int count) throws LdvTableException 
     {
-        ArrayList<ChanIndexInfo> ret = new ArrayList<ChanIndexInfo>();
+        ArrayList<ChanIndexInfo> ret = new ArrayList<>();
         String q = "SELECT * FROM " + getName() + " ";
         if (! where.isEmpty())
         {
@@ -383,6 +422,13 @@ public class ChannelIndex extends Table
         
         return ret;
     }
+    /**
+     * Get the information on a Channel Index record by ID
+     * @param id record key
+     * @return the database record or null if not found
+     * @throws LdvTableException
+     * @throws SQLException 
+     */
     public ChanIndexInfo getInfo(int id) throws LdvTableException, SQLException
     {
         ChanIndexInfo ret=null;
