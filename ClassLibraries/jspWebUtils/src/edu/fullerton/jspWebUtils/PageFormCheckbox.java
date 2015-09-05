@@ -17,19 +17,21 @@
 package edu.fullerton.jspWebUtils;
 
 /**
- *
+ * A item that appears as a check box on a form, returns a boolean
  * @author Joseph Areeda <joe@areeda.com>
  */
 public class PageFormCheckbox extends PageFormItem
 {
-    private String text;
+    private final String text;
     private boolean checked;
+    private String value;
     
     public PageFormCheckbox(String name, String txt)
     {
         this.name = name;
         text = txt;
         checked = false;
+        value = "";
     }
 
     public PageFormCheckbox(String name, String txt, boolean checked)
@@ -48,10 +50,48 @@ public class PageFormCheckbox extends PageFormItem
         this.checked = checked;
     }
 
+    /**
+     * Value is the parameter key returned from form
+     * @return current value may be empty but not null
+     */
+    public String getValue()
+    {
+        return value;
+    }
+
+    /**
+     * Value is the parameter key returned from form
+     * If empty then text is used
+     * @param value 
+     */
+    public void setValue(String value)
+    {
+        if (value == null)
+        {
+            this.value = "";
+        }
+        else
+        {
+            this.value = value;
+        }
+    }
+
+    /**
+     * get the HTML representation of this item
+     * @return html
+     */
     @Override
     public String getHtml()
     {
-        String ret = "<input type=\"checkbox\" name=\"" + name + "\" value=\"" + text + "\" ";
+        String ret = "<input type=\"checkbox\" name=\"" + name + "\" value=\"";
+        if (value == null || value.isEmpty())
+        {
+            ret += text + "\" ";
+        }
+        else
+        {
+            ret += value + "\" ";
+        }
         if (checked)
         {
             ret += "checked";
