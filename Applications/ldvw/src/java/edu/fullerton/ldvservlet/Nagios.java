@@ -71,8 +71,7 @@ public class Nagios extends HttpServlet
                 builder.add("nagios_shib_scraper_ver", "0.1");
                 long now = TimeAndDate.nowAsGPS();
                 builder.add("created_gps", now);
-                builder.add("author", Json.createArrayBuilder()
-                    .add(Json.createObjectBuilder()
+                builder.add("author", (Json.createObjectBuilder()
                         .add("name", "Joseph Areeda")
                         .add("email", "joseph.areeda@ligo.org")
                         .add("created_by", "https://ldvw.ligo.caltech.edu/ldvw/Nagios")
