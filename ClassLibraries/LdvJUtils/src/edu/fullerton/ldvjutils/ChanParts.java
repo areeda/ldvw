@@ -47,10 +47,9 @@ public class ChanParts
     
     private static final String[] servers =
     {
-        "nds.ligo.caltech.edu", //"ldas-pcdev4.ligo.caltech.edu",
-        "nds2.ligo-wa.caltech.edu", //"ldas-pcdev1.ligo-wa.caltech.edu", 
-        
-        "nds.ligo-la.caltech.edu", //"ldas-pcdev1.ligo-la.caltech.edu",
+        "nds.ligo.caltech.edu", 
+        "nds.ligo-wa.caltech.edu",        
+        "nds.ligo-la.caltech.edu",
         "nds40.ligo.caltech.edu"
     };
 
