@@ -40,7 +40,7 @@ public class ChannelIndex extends Table
         //         name,        type            length              can't be null   index         unique        auto inc
         new Column("indexID",   CType.INTEGER,  Integer.SIZE / 8,   Boolean.TRUE,   Boolean.TRUE,  Boolean.TRUE,  Boolean.TRUE),
         new Column("name",      CType.CHAR,     64,                 Boolean.TRUE,   Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE),
-        new Column("nameHash",  CType.INTEGER,  Integer.SIZE / 8,   Boolean.TRUE,   Boolean.TRUE,  Boolean.TRUE,  Boolean.FALSE),
+        new Column("nameHash",  CType.INTEGER,  Integer.SIZE / 8,   Boolean.TRUE,   Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE),
         new Column("ifo",       CType.CHAR,     8,                  Boolean.TRUE,   Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE),
         new Column("subsys",    CType.CHAR,     32,                 Boolean.TRUE,   Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE),
         new Column("minRawRate",CType.FLOAT,    Float.SIZE / 8,     Boolean.FALSE,  Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE),
@@ -57,7 +57,7 @@ public class ChannelIndex extends Table
         new Column("cisAvail",  CType.CHAR,     1,                  Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
         new Column("nServers",  CType.INTEGER,  Integer.SIZE / 8,   Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE,  Boolean.FALSE),
         new Column("epochs",    CType.INTEGER,  Integer.SIZE / 8,   Boolean.FALSE,  Boolean.TRUE,  Boolean.FALSE,  Boolean.FALSE),
-        new Column("isCurrent", CType.BOOLEAN,  1,                  Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE,  Boolean.FALSE)
+        new Column("isCurrent", CType.CHAR,     1,                  Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE,  Boolean.FALSE)
 
     };
     // bulk insert
