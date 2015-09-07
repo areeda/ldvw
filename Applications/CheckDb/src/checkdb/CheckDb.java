@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -70,7 +69,7 @@ public class CheckDb
             Logger.getLogger(CheckDb.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    private int verbose = 2;
+    private final int verbose = 2;
     private String configFile="";
     private final long startTime;
     private long lastTime;
@@ -83,8 +82,8 @@ public class CheckDb
     private BufferedWriter out=null;
     private ChannelIndex cidx;
     private ChanPointerTable cpt;
-    private String programName = "CheckDb";
-    private String version = "0.1.0";
+    private final String programName = "CheckDb";
+    private final String version = "0.1.0";
     
     private void doAll(String[] args) throws WebUtilException
     {
@@ -104,7 +103,7 @@ public class CheckDb
                         System.out.format("%1$s%n", ifoSubsys);
                     }
                 }
-                    chanstats = new TreeMap<>();
+                chanstats = new TreeMap<>();
 
                 cidx = new ChannelIndex(db);
                 cidx.recreate();
