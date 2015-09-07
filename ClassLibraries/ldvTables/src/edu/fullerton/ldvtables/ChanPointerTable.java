@@ -28,8 +28,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -40,11 +38,11 @@ public class ChanPointerTable extends Table
     private final Column[] myCols =
     {
         //         name,        type            length              can't be null   index         unique        auto inc
-        new Column("indexID",   CType.INTEGER,  Integer.SIZE / 8,   Boolean.TRUE,   Boolean.TRUE,  Boolean.TRUE,  Boolean.TRUE),
-        new Column("myId",      CType.INTEGER,  Integer.SIZE / 8,   Boolean.TRUE,   Boolean.TRUE,  Boolean.TRUE,  Boolean.FALSE),
-        new Column("cType",     CType.CHAR,     16,                 Boolean.TRUE,   Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE),
-        new Column("trendType", CType.CHAR,     6,                  Boolean.TRUE,   Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE),
-        new Column("sampleRate",CType.FLOAT,    Float.SIZE / 8,     Boolean.FALSE,  Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE),
+        new Column("indexID",   CType.INTEGER,  Integer.SIZE / 8,   Boolean.TRUE,   Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE),
+        new Column("myId",      CType.INTEGER,  Integer.SIZE / 8,   Boolean.TRUE,   Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE),
+        new Column("cType",     CType.CHAR,     16,                 Boolean.TRUE,   Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
+        new Column("trendType", CType.CHAR,     6,                  Boolean.TRUE,   Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
+        new Column("sampleRate",CType.FLOAT,    Float.SIZE / 8,     Boolean.FALSE,  Boolean.FALSE, Boolean.FALSE, Boolean.FALSE),
     };    
 
     // bulk insert
