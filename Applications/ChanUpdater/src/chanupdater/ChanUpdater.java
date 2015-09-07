@@ -148,12 +148,13 @@ public class ChanUpdater
         }
     }
     //=================================
-    private long startTime;
+    private final long startTime;
     private long lastTime;
 
     public ChanUpdater() throws SQLException, ClassNotFoundException, ViewConfigException
     {
         cLists = new ArrayList<>();
+        // @todo get server list from database
         servers = ChanParts.getServers();
         cTypes = ChanParts.getChanTypes();
         startTime = System.currentTimeMillis();
