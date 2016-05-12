@@ -152,7 +152,7 @@ public class SrcList extends HttpServlet
             if (zoom)
             {
                 searchRange=getSearchRange(request.getParameterMap());
-                String[] timrng=request.getParameterMap().get("timerange");
+                String[] timrng=(String[]) request.getParameterMap().get("timerange");
                 if (timrng != null)
                 {
                     menuChoice = timrng[0];

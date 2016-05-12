@@ -21,8 +21,8 @@ FC=gfortran
 AS=as
 
 # Macros
-CND_PLATFORM=GNU-Linux-x86
-CND_DLIB_EXT=so
+CND_PLATFORM=GNU-MacOSX
+CND_DLIB_EXT=dylib
 CND_CONF=MacDebug
 CND_DISTDIR=dist
 CND_BUILDDIR=build
@@ -59,13 +59,13 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/Users/areeda/nds2/lib -L/usr/lib/sasl2 -L/opt/local/lib /Users/areeda/nds2/lib/libndsclient.a -lsasl2 -lgssapi_krb5 -lboost_regex-mt -lpthread -lstdc++
+LDLIBSOPTIONS=-L/opt/local/lib /opt/local/lib/libndsclient.a -lsasl2 -lgssapi_krb5 -lboost_regex-mt -lpthread -lstdc++
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ndsproxyserver
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ndsproxyserver: /Users/areeda/nds2/lib/libndsclient.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ndsproxyserver: /opt/local/lib/libndsclient.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ndsproxyserver: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}

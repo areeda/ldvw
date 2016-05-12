@@ -32,7 +32,7 @@ NDSException::NDSException(int rc, const char* msg)
 {
     nds_rc = rc; // that's the error return code form an NDS call
     errMsg = msg;
-    if (!errMsg.find("\n") == errMsg.npos)
+    if (!(errMsg.find("\n") == errMsg.npos))
         errMsg += string("\n");
 }
 NDSException::NDSException(const NDSException& orig)

@@ -216,7 +216,8 @@ public class Env extends HttpServlet
             Collection<Part> parts;
             try
             {
-                parts = request.getParts();
+//                parts = request.getParts();
+                parts=null;
             }
             catch (Exception ex)
             {
@@ -311,8 +312,8 @@ public class Env extends HttpServlet
         ats.put("Character Endoding", request.getCharacterEncoding());
         ats.put("Content Type", request.getContentType());
         ats.put("Context Path", request.getContextPath());
-        ats.put("Local Address", request.getLocalAddr());
-        ats.put("Local Name", request.getLocalName());
+//        ats.put("Local Address", request.getLocalAddr());
+//        ats.put("Local Name", request.getLocalName());
         ats.put("Method", request.getMethod());
         ats.put("Path Info", request.getPathInfo());
         ats.put("Path Translated", request.getPathTranslated());

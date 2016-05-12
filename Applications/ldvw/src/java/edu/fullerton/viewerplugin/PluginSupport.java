@@ -50,7 +50,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SimpleTimeZone;
 import java.util.TreeSet;
-import org.apache.batik.dom.svg.SVGDOMImplementation;
+import org.apache.batik.anim.dom.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;

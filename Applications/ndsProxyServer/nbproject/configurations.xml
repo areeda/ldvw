@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="96">
+<configurationDescriptor version="97">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -202,12 +202,10 @@
         </ccTool>
         <linkerTool>
           <linkerAddLib>
-            <pElem>/Users/areeda/nds2/lib</pElem>
-            <pElem>/usr/lib/sasl2</pElem>
             <pElem>/opt/local/lib</pElem>
           </linkerAddLib>
           <linkerLibItems>
-            <linkerLibFileItem>/Users/areeda/nds2/lib/libndsclient.a</linkerLibFileItem>
+            <linkerLibFileItem>/opt/local/lib/libndsclient.a</linkerLibFileItem>
             <linkerLibLibItem>sasl2</linkerLibLibItem>
             <linkerLibLibItem>gssapi_krb5</linkerLibLibItem>
             <linkerLibLibItem>boost_regex-mt</linkerLibLibItem>
