@@ -12,3 +12,6 @@ store/
 Applications/*/nbproject/private/
 ClassLibraries/*/nbproject/private/
 */private/*
+# 
+*.class
+
