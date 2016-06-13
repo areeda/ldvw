@@ -1,0 +1,22 @@
+#!/bin/bash
+logfile=`mkdname $HOME/proxyLogs/proxy log`
+touch $logfile
+date >>$logfile
+
+host=$(hostname)
+if [ "${host}" == "ldvw" ]; then
+  kinit ldvw.ligo.caltech.edu -k -t /etc/grid-security/ldvw.ligo.caltech.edu.keytab -l 24:0
+elif [ ${host} == "ldvwbackend" ]; then
+  kinit ldvwbackend.ligo.caltech.edu -k -t /usr/local/ldvw/keytab/ldvwbackend.ligo.caltech.edu.keytab -l 24:0
+elif [ ${host} == "gwpac" ]; then
+  kinit gwpac.fullerton.edu -k -t /usr/local/ldvw/keytab/gwpac.keytab -l 24:0
+fi
+klist -s
+if [ $? -eq 1 ]; then 
+    kinit joseph.areeda
+fi
+
+klist &>> $logfile
+nohup ndsproxyserver --proxy &>> $logfile&
+echo "proxy server started with logfile: " $logfile
+

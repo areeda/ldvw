@@ -1,0 +1,8 @@
+#!/bin/bash
+PATH=${HOME}/bin:${PATH}
+checkndsproxy
+status=$?
+if [ ${status} -gt 0 ]; then
+    startproxy
+fi
+

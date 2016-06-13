@@ -1,0 +1,22 @@
+#!/bin/bash
+logFile=$(${HOME}/bin/mkdname chanUpd log)
+echo "Channel updating started on $(date)" >~/t/${logFile}
+
+# build the individual channel tables
+java -Xmx8g -jar /usr/local/ldvw/ChanUpdater/ChanUpdater.jar 2>&1 >> ~/t/${logFile}
+
+#build the base channel tables
+java -Xmx4g -jar /usr/local/ldvw/CheckDb/CheckDb.jar 2>&1 >> ~/t/${logFile}
+echo "Channel updating ended on $(date)" >>~/t/${logFile}
+
+# find current channels
+/usr/local/ldvw/bin/getClist
+java -jar /usr/local/ldvw/chanAvailability/chanAvailability.jar -Xmx4g
+
+# update the channel stats, these are saved
+touch /tmp/${USER}_cookies ; chmod 0600 /tmp/${USER}_cookies
+curl --insecure -c /tmp/${USER}_cookies -b /tmp/${USER}_cookies --user : --location-trusted https://ldvw-dev.ligo.caltech.edu/ldvw/view --get --data "act=ChannelStats" --negotiate |view
+
+echo "Rebuild of chan stats ended on $(date)" >>~/t/${logFile}
+rm -f ~/t/${logFile}.gz
+gzip -9 ~/t/${logFile}

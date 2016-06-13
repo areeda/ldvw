@@ -1,0 +1,65 @@
+#!/bin/bash
+PATH=/usr/sbin:${HOME}/bin:${PATH}
+reason=""
+
+verbose=2
+
+# set some limits for reasonable numbers to cause a restart
+maxEst=50
+maxWat=50
+maxOpen=800
+maxLocal=50
+
+checkndsproxy
+status=$?
+if [ ${status} -gt 0 ]; then
+    reason=${reason}"checkndsproxyfailed,"
+fi
+
+est=$(netstat | grep 31200 | grep ESTABLISHED | wc -l)
+wat=$(netstat | grep 31200 | grep WAIT | wc -l)
+
+ndspid=$(ps -ef | grep ndsproxyserver | grep -v grep | awk '{print $2}')
+
+totOpen=$(lsof -p ${ndspid} | wc -l)
+noprot=$(lsof -p ${ndspid} | grep "identify protocol"| wc -l)
+localPorts=$(netstat | grep 31300 | wc -l)
+
+if [ ${est} -gt ${maxEst} ]; then
+    reason=${reason}"Established 31200 connections > ${maxEst} (${est}),"
+fi
+
+if [ ${wat} -gt ${maxWat} ]; then
+    reason=${reason}"Waiting for disconnect on 31200 > ${maxWat} (${wat}),"
+fi
+
+if [ ${localPorts} -gt ${maxLocal} ]; then
+    reason=${reason}"Established 31300 connections > ${maxLocal} (${localPorts}),"
+fi
+
+if [ ${totOpen} -gt ${maxOpen} ]; then
+    reason=${reason}"Total open files sockets and ports > ${maxOpen} (${totOpen}),"
+fi
+
+if [ ! -z "${reason}" ]; then
+    echo "Restarting ndsproxyserver because: "
+	IFS=',' read -ra REASONS <<< "${reason}"
+	for r in "${REASONS[@]}"; do
+	    echo "    ${r}"
+    done
+	killall ndsproxyserver
+	${HOME}/bin/startproxy
+	verbose=2
+fi
+
+if [ ${verbose} -gt 1 ] ; then
+   date=$(date "+%F %R")
+   loc=$(hostname)
+   pre="${loc} ${date}:"
+   echo "${pre} ndsproxyserver pid = ${ndspid}"
+   echo "${pre} Number of open file descriptors: ${totOpen}"
+   echo "${pre} Number is close or fin wait: ${wat}"
+   echo "${pre} Number of unidentified ports: ${noprot}"
+   echo "${pre} Number of local ports to server: ${localPorts}"
+fi
+

@@ -1,0 +1,123 @@
+#!/bin/bash
+# vim: ai:nu:ts=4:sw=4:et
+
+function reportWarn()
+{
+    now=$(lalapps_tconvert now)
+    expire=$(expr 9 \* 3600)
+    cat <<EOWARN > /var/www/html/secure/kerberos.status
+{
+    "nagios_shib_scraper_ver": "0.1",
+    "created_gps": ${now},
+    "author": {
+        "name": "Joseph Areeda",
+        "email": "joseph.areeda@ligo.org",
+        "created_by": "https://ldvw.ligo.caltech.edu/ldvw/Nagios"
+    },
+    "status_intervals": [
+        {
+            "num_status": 1,
+            "txt_status": "Warn TGT obtained successfully but at least 1 kinit failed.",
+            "start_sec": 0
+        },
+        {
+            "num_status": 3,
+            "txt_status": "UNKNOWN, cached result is older than 8 hours.",
+            "start_sec": ${expire}
+        }
+    ]
+}
+EOWARN
+}
+
+
+function reportGood()
+{
+    now=$(lalapps_tconvert now)
+    expire=$(expr 9 \* 3600)
+    cat <<EOGOOD > /var/www/html/secure/kerberos.status
+{
+    "nagios_shib_scraper_ver": "0.1",
+    "created_gps": ${now},
+    "author": {
+        "name": "Joseph Areeda",
+        "email": "joseph.areeda@ligo.org",
+        "created_by": "https://ldvw.ligo.caltech.edu/ldvw/Nagios"
+    },
+    "status_intervals": [
+        {
+            "num_status": 0,
+            "txt_status": "OK, new TGT obtained successfully",
+            "start_sec": 0
+        },
+        {
+            "num_status": 3,
+            "txt_status": "UNKNOWN, cached result is older than 8 hours.",
+            "start_sec": ${expire}
+        }
+    ]
+}
+EOGOOD
+}
+
+function reportBad()
+{
+    now=$(lalapps_tconvert now)
+    expire=$(expr 9 \* 3600)
+    cat<<EOBAD > /var/www/html/secure/kerberos.status
+{
+    "nagios_shib_scraper_ver": "0.1",
+    "created_gps": 1127347336,
+    "author": {
+        "name": "Joseph Areeda",
+        "email": "joseph.areeda@ligo.org",
+        "created_by": "https://ldvw.ligo.caltech.edu/ldvw/Nagios"
+    },
+    "status_intervals": [
+        {
+            "num_status": 2,
+            "txt_status": "Error, unable to get a TGT after multiple attempts",
+            "start_sec": 0
+        },
+        {
+            "num_status": 3,
+            "txt_status": "UNKNOWN, cached result is older than 10 minutes.",
+            "start_sec": ${expire}
+        }
+    ]
+}
+EOBAD
+}
+
+shopt -s execfail
+## try to get a Kerberos TGT with retries
+warn=0
+for i in $(seq 1 3)
+do
+    kinit ldvwusr/robot/ldvw.ligo.caltech.edu -R -k -t ${HOME}/.ssh/ldvwusr.robot.ldvw.ligo.caltech.edu \
+            -l 24:0 2>>${HOME}/kinit.log || false
+    klist -s
+    if [ $? -eq 0 ]
+    then
+        break
+    else
+        now=$(date)
+        warn=1
+        echo "${now} one kinit failed" >> ${HOME}/kinit.log
+    fi
+done
+klist -s
+now=$(date)
+if [ $? -ne 0 ]
+then
+    echo "${now} kinit failed after retries" >> ${HOME}/kinit.log
+    reportBad
+elif [ ${warn} -gt 0 ]
+then
+    echo "${now} kinit failed at least once but we got a ticket" >> ${HOME}/kinit.log
+    reportWarn
+else
+    echo "${now} kinit succeeded." >> ${HOME}/kinit.log
+    reportGood
+fi
+

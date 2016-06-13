@@ -1,0 +1,20 @@
+#!/bin/bash
+# take arguments from command line and make a dated filename
+if [ $# -ne 2 -a $# -ne 1 ]; then
+	echo "mkdname - makes a name with the current date from args"
+	echo "usage:  mkdname <base> [<ext>]"
+	echo "  produces <base>_<date>.<ext> or <base>_<date>"
+	echo
+	echo "eg: mkdname backup tar"
+	echo "produces backup_20001023.tar"
+	echo
+	echo "eg: mkdname backup "
+	echo "produces backup_20001023"
+	exit
+fi
+
+if [ $# -eq 2 ]; then
+	echo $1"_"`/bin/date +%Y%m%d`"."$2
+else
+	echo $1"_"`/bin/date  +%Y%m%d`
+fi

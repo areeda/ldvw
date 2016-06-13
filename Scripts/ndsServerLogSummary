@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# try to extract useful information from nds server logs
+if [ $# -gt 0 ] ; then
+    logfiles=$@
+else
+    if [ $(hostname -f | grep -c ligo-wa.caltech.edu) -gt 0 ] ; then
+        logdir="/var/log/nds2"
+	else
+	    logdir="/usr1/nds2mgr/log"
+    fi
+    logfiles=$(ls -1tr ${logdir}/nds2*.log | tail -n 1)
+    if [ -z "${logfiles}" ] ; then
+        echo "Sorry.  I couldn't determine the last log file"
+    	exit 1
+    fi
+fi
+# process all files from command line or the one we found
+for logfile in ${logfiles}
+do
+    if [ ! -r ${logfile} ] ; then
+	    echo "File: ${logfile} does not exist or I can't read it"
+	else
+	    echo "Examining nds log file: ${logfile}"
+        # show users
+        echo "Users and number of connections per:"
+        grep "authenticated user" ${logfile} | awk '{print $NF;}' | sort | uniq -c
+        nconnections=$(grep "authenticated user" ${logfile} | wc -l)
+        echo "Total connections: ${nconnections}"
+		echo
+        
+        # show commands
+        echo "nds commands issued:"
+        grep "command:" ${logfile} | awk '{print $5}' | sort | uniq -c
+        echo
+
+        # error summary
+        echo "Errors:"
+        grep error ${logfile} | grep -v "Send to error queue" | sed 's/^.*error://' | sort | uniq -c | sort -n -k 1
+	fi
+done

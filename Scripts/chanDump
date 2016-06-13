@@ -1,0 +1,4 @@
+#!/bin/bash
+outFile=$(mkdname ${HOME}/t/chan sql.gz)
+mysqldump -p ligodv ChannelIndex ChannelPointers Channels PageItemCache | gzip >${outFile}
+echo "Channels dumped to ${outFile}"
