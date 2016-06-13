@@ -25,8 +25,6 @@ import edu.fullerton.ldvjutils.LdvTableException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Represents data we record when a new session is started
