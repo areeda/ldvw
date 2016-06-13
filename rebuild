@@ -1,0 +1,57 @@
+clsLibs="JSON LdvJUtils NDSProxyClient ViewUtils ViewerConfig ViewerPlugin j-simple-wav-io jaDatabaseSupport jspWebUtils ldvTables ndsMonitor simpleWave"
+
+jprojects="CISdbXfer ChanUpdater CheckChanSourceData CheckDb CheckDupChan JClock OdcPlot Spectrogram SpectrumApp TimeSeriesApp XferLargeFiles addimg2db chanAvailability checkNdsProxy packwplot "
+
+warprojs="ldvw":w
+
+
+origDir=$(pwd)
+base=$( cd $(dirname $0) ; pwd -P )
+
+cln=1
+bld=1
+
+for i in 0 1
+do
+	case ${i} in
+	0)
+		bdir=ClassLibraries
+		pdirs=${clsLibs}
+		;;
+	1)
+		bdir=Applications
+		pdirs=${jprojects}
+		;;
+	2)
+		bdir=Applications
+		pdirs=${warprojs}
+		;;
+	esac
+
+		for prj in ${pdirs}
+		do
+			echo ${prj}
+			cd ${base}/${bdir}
+			if [[ ! -d ${prj} || ! -e ${prj}/build.xml ]]
+			then
+				echo "error: no dir  or build script"
+			else
+			 	cd ${prj}
+				if [ ${cln} -gt 0 ]
+				then
+					ant clean > /tmp/${prj}_cln.out
+				fi
+				if [ ${bld} -gt 0 ]
+				then
+					ant jar > /tmp/${prj}_bld.out
+					if [ $? -eq 0 ]
+					then
+						echo ${prj} build successful
+					else
+						echo ${prj} build failed, $?
+					fi
+				fi
+			fi
+		done
+done
+cd ${origDir}
