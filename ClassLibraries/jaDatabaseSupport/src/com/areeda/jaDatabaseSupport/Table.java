@@ -454,6 +454,16 @@ public class Table
         allStream = myStmt.executeQuery(query);
     }
     
+    public ResultSet streamNextRs() throws SQLException
+    {
+        ResultSet  ret = null;
+        if (allStream != null && allStream.next())
+        {
+            ret = allStream;
+        }
+        return ret;
+    }
+    
     /**
      * close the currently open stream.
      *
