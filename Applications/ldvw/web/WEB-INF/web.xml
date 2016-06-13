@@ -28,6 +28,10 @@
         <servlet-name>Nagios</servlet-name>
         <servlet-class>edu.fullerton.ldvservlet.Nagios</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>SessionHistory</servlet-name>
+        <servlet-class>edu.fullerton.ldvservlet.SessionHistory</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>Env</servlet-name>
         <url-pattern>/env</url-pattern>
@@ -51,6 +55,10 @@
     <servlet-mapping>
         <servlet-name>Nagios</servlet-name>
         <url-pattern>/Nagios</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SessionHistory</servlet-name>
+        <url-pattern>/SessionHistory</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
