@@ -34,7 +34,7 @@ do
 			cd ${base}/${bdir}
 			if [[ ! -d ${prj} || ! -e ${prj}/build.xml ]]
 			then
-				echo "error: no dir  or build script"
+				echo "error: no dir  or build script for ${prj}"
 			else
 			 	cd ${prj}
 				if [ ${cln} -gt 0 ]
@@ -46,9 +46,9 @@ do
 					ant jar > /tmp/${prj}_bld.out
 					if [ $? -eq 0 ]
 					then
-						echo ${prj} build successful
+						echo ${prj} build successful >>/tmp/bld.log
 					else
-						echo ${prj} build failed, $?
+						echo ${prj} build failed, $? >>/tmp/bld.log
 					fi
 				fi
 			fi
