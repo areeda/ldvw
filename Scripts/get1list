@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# get a current list of base channel names from an nds server
+# usage:
+#   get1list <server number 0-n>
+
+timeOfInterest=$(expr $(lalapps_tconvert) - 43200)
+servers=(nds.ligo.caltech.edu nds.ligo-la.caltech.edu nds.ligo-wa.caltech.edu)
+outFiles=(/tmp/cit.clist /tmp/llo.clist /tmp/lho.clist)
+
+n=$1    
+server=${servers[${n}]}
+outFile=${outFiles[${n}]}
+echo "server: ${server} clist: ${outFile}"
+chanNamePat='[0-9A-Za-z]+:[0-9A-Za-z]+-[0-9A-Za-z]+_'
+trendCutPat='(\.max|\.min|\.rms|\.n)$'
+
+# this complicated sequence of commands gets all channels at a particular time turning trends into base channel names
+
+# get a list of all channels from the server
+nds_query -n ${server} -l -s ${timeOfInterest} >${outFile}.tmp
+
+# check for errors
+stat=$?
+nlines=0
+if [ -e ${outFile}.tmp ]
+then
+    nl=($(wc -l ${outFile}.tmp))
+    nlines=${nl[0]}
+fi
+
+if [[ ${stat} -ne 0 || ${nlines} -lt 100 ]]
+then
+    echo "Problem getting channel list from ${server} , number of lines from query: ${nlines}"
+    rm ${outFile}.tmp
+    touch ${outFile}.err
+else
+    awk '{print $1;}' ${outFile}.tmp | egrep -E ${chanNamePat} | \
+        egrep -v '(\.max|\.min|\.rms|\.n)$' | sed 's/.mean$//' > ${outFile}.names
+    sort -u ${outFile}.names > ${outFile}
+    rm -f ${outFile}.tmp ${outFile}.names ${outFile}.err
+fi

@@ -1,0 +1,40 @@
+#! /bin/bash
+#
+# script to get a list of all active NDS2 channels
+
+# directory containing this script
+mydir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+# look at a time old enough to ensure frames are at CIT
+timeOfInterest=$(expr $(lalapps_tconvert) - 43200)
+servers=(nds.ligo.caltech.edu nds.ligo-la.caltech.edu nds.ligo-wa.caltech.edu)
+outFiles=(/tmp/cit.clist /tmp/llo.clist /tmp/lho.clist)
+
+maxIdx=$(expr ${#servers[@]} - 1)
+
+# get the base channel list from all nds servers (in parallel)
+parallel ${mydir}/get1list -- $(seq 0 ${maxIdx})
+
+wait    # wait for all that to complete
+
+# merge all the lists into 1 and check for errors
+gotError=0
+declare -a allList
+next=0
+for clist in ${outFiles[@]}
+do
+    if [ -e ${clist}.err ]
+    then
+        echo "Error getting channel list, found ${clist}.err"
+        gotError=1
+    else
+        allList[${next}]="${clist}"
+        let next=${next}+1
+    fi
+done
+
+# merge all the channel lists into 1
+echo "merging ${allList}"
+cat ${allList[@]} | sort -u >/tmp/all.clist
+rm -f ${allList[@]}
+

@@ -1,0 +1,115 @@
+#!/bin/bash
+# ----------
+# Generate a ODC plot for the last n minutes or for a given period
+#----------
+#============
+# sometimes NDS2 times out and causes us problems so make sure we only run once
+    lockFile=/tmp/livePlotODC-LHO-IMC.lock
+    # create empty lock file if none exists
+    if [ -e ${lockFile} ] ; then
+        read lastPID < ${lockFile}
+        # if lastPID is not null and a process with that pid exists , exit
+        if [ ! -z "$lastPID" -a -d /proc/$lastPID ] ; then
+            lstStrt=$(stat -c %y ${lockFile}| cut -d '.' -f1)
+            echo "live plot script from $lstStrt already running, skipping this invocation."
+            exit
+        fi
+    fi
+    # save my pid in the lock file
+    echo $$ > ${lockFile}
+#===========
+
+
+tconvert=/ligotools/bin/tconvert
+eval `/ligotools/bin/use_ligotools`
+
+PATH=${PATH}:/ligotools/bin:/opt/lscsoft/gst/bin
+#========================================
+# This section will deal with command line arguments in the future 
+# but for now we just set them
+
+chan="H1:IMC-ODC_CHANNEL_OUT_DQ"
+strtDate=
+dur=360
+cnt=1
+serv="nds.ligo-wa.caltech.edu"
+age=300	        # how current do we want to be.
+log=liveODC.log
+test=0          # if > 0 don't actually run the command
+destDirBase=${HOME}/ligo/liveODC
+geom=1280x850
+
+#==================Make most of the plot command  ======================
+# generate the constant part of the command
+
+prog="java -Xmx500m -jar /usr/local/ldvw/OdcPlot/OdcPlot.jar "
+opts=" --xticks 6 "
+if [ ! -z ${geom} ]; then
+    opts="${opts} -geom ${geom}"
+fi
+
+csel="--chan ${chan} --server ${serv} "
+
+# remove the special characters from the channel name for use as our output file
+chnTxt=${chan//:/-}
+chnTxt=${chnTxt/_/-}
+
+# The add to database command ======================
+addprog="java -jar /usr/local/ldvw/addimg2db/addimg2db.jar "
+user="er4.LiveODC"
+group=${chnTxt}
+
+# create the destination directory for our output
+destDir=${destDirBase}/${chnTxt}/
+curLink=${destDir}/${chnTxt}-current-${dur}.png
+
+if [ ! -d ${destDir} ]; then
+    mkdir -p ${destDir}
+fi
+
+# calculate start time
+if [ -z ${strtDate} ]; then
+    curDat=`date`
+    now=`${tconvert} $curDat`
+    let strtGps=${now}-${age}-${dur}*cnt
+else
+    strtGps=`${tconvert} $strtDate`
+fi
+
+c=0
+while [ $c -lt $cnt ]; do
+    fcnt=`printf %03d ${c}`
+    outfile="${destDir}/${chnTxt}-${strtGps}-${dur}s.png"
+    cmd="${prog} ${opts} ${csel} --start ${strtGps} --dur ${dur} --outfile ${outfile} >>${log}"
+	tim=`date +%H:%M`
+	cdate=`${tconvert} ${strtGps}`
+	desc="${c}. ${tim} - ${strtGps} ${cdate}"
+
+    addDesc="${chan}, ${serv} ${strtGps} ${cdate} (${dur}sec)"
+    # make the add to database command
+    addCmd="${addprog}  --user ${user} --group ${group} "
+
+	if [ ! -s $outfile ]; then
+	    echo ${desc}
+            if [ ${test} -eq 0 ]; then
+	        echo ${c}. ${tim} - ${strtGps} ${cdate} >>${log}
+	        echo ${cmd} &>>${log}
+                ${cmd}
+                # link the current image to our outfile (if it got made)
+                if [ -e ${outfile} ]; then
+                    if [ -L ${curLink} ]; then
+                        unlink ${curLink}
+                    fi
+                    ln -s ${outfile} ${curLink}
+                    ${addCmd}  --desc "${addDesc}" ${outfile}
+                fi
+            else
+                echo ${cmd}
+            fi
+	else
+	    echo $desc already done.
+	fi
+
+	let strtGps=${strtGps}+${dur}
+	let c=${c}+1
+done

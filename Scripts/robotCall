@@ -1,0 +1,4 @@
+#!/bin/bash
+export X509_USER_CERT=/usr/local/ldvw/keytab/ldvw_ldvw.ligo.caltech.edu-cert.pem 
+export X509_USER_KEY=/usr/local/ldvw/keytab/ldvwkey.pem 
+

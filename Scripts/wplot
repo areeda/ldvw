@@ -1,0 +1,14 @@
+#
+#echo Arguments
+#echo $@
+#echo "========================="
+#
+#echo Environment:
+#env | sort
+#
+#echo "========================="
+#nds_query -l -n nds2.ligo-la.caltech.edu -t reduced
+#
+#echo "========================="
+args=$@
+bash -c "$args"

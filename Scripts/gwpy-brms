@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+from __future__ import division
+import sys
+import os
+
+# ------ preliminary checks and imports
+if sys.version < '2.6':
+    raise ImportError("Python versions older than 2.6 are not supported.")
+
+# if we're launched with minimum or no environment
+# variables make some guesses
+if len(os.getenv('HOME', '')) == 0:
+    os.environ['HOME'] = '/tmp/'
+
+# if launched from a terminal with no display
+if len(os.getenv('DISPLAY', '')) == 0:
+    import matplotlib
+    matplotlib.use('Agg')
+
+from gwpy.timeseries import TimeSeries
+import numpy
+import scipy
+import argparse
+
+if scipy.__version__ < '0.16':
+    raise ImportError('scipy version 0.16+ needed for filtering')
+# ----------
+filter_pad = 3 # Extra data (seconds) at start to avoid filter transients
+
+parser = argparse.ArgumentParser(description='Calculate a band-limited RMS of a channel using NDS.')
+parser.add_argument('-c', '--chan', type=str, help='Channel', required=True)
+parser.add_argument('-s','--start', type=int, help='GPS start time.', required=True)
+parser.add_argument('-d','--duration', type=int, help='duration in seconds', required=True)
+parser.add_argument('-l','--flower', type=float, help='Lower frequency of bandpass (Hz)', required=True)
+parser.add_argument('-u','--fupper', type=float, help='Upper frequency of bandpass (Hz)', required=True)
+parser.add_argument('-r','--stride', type=str, default='1', help='Stride of the output time series in seconds. Fractional expressions are allowed, e.g. 1/16.')
+parser.add_argument('-p','--out', type=str, help='Plot BRMS to file')
+parser.add_argument('-o','--output', type=str, help='Output BRMS to a CSV file')
+parser.add_argument('-t','--threshold', type=float, help='Print GPS times when BRMS is above a value')
+parser.add_argument('-g', '--geometry', help='Resulting image size (XxY)')
+
+args = parser.parse_args()
+
+stride = float(eval(args.stride))
+flower = float(args.flower)
+fupper = float(args.fupper)
+
+end_gps = args.start + filter_pad + args.duration
+data = TimeSeries.fetch(args.chan, args.start-filter_pad, end_gps)
+#bpdata = data.bandpass(flower, fupper)
+#[int(filter_pad*data.sample_rate.value):]
+
+bpdata = data.bandpass(flower,fupper)[int(filter_pad*data.sample_rate.value):]
+
+brms = bpdata.rms(stride)
+
+if args.out:
+    plt = brms.plot()
+    plt.set_title('BLRMS %.1f to %.1f Hz, %s sec stride' %
+                  (args.flower, args.fupper, args.stride))
+    plt.set_ylabel('BLRMS Counts')
+    plt.gca().legend()
+    if args.threshold:
+        plt.gca().axhline(args.threshold, color='y', ls='-')
+    plt.savefig(args.out)
+
+if args.output:
+    brms.write(args.output)
+
+if args.threshold:
+    indices = numpy.nonzero(brms >= args.threshold)[0]
+    times = brms.epoch.value + brms.dt.value*indices
+    for tt in times:
+        print "%.4f" % tt
+

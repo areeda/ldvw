@@ -1,0 +1,2 @@
+#!/bin/bash
+grid-proxy-init -cert /usr/local/ldvw/keytab/ldvw_ldvw.ligo.caltech.edu-cert.pem -key /usr/local/ldvw/keytab/ldvwkey.pem

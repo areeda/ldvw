@@ -1,0 +1,31 @@
+#!/bin/bash
+# vim: ai:ts=4:sw=4:et
+
+# one time backup of volatile tables in ldvw database
+outFile=$(mkdname ${HOME}/ligo/ldvwdb/ldvw sql.gz)
+DBNAME=ligodv
+DBHOST=localhost
+
+# the list of tables to back up 
+# note tables like Channels can be generated from NDS2 queries need not be backed up
+DBTABLES="HelpText ImageGroup Images NdsStats UseLog ViewUser"
+
+cmd="mysqldump -h ${DBHOST} "
+if [ ! -z  ${DBUSER} ]
+then
+    cmd="${cmd} -u ${DBUSER} "
+fi
+
+if [ ! -z ${DBPW} ]
+then
+    cmd="${cmd} -p${DBPW} "
+else
+    cmd="${cmd} -p "
+fi
+
+cmd="${cmd} ${DBNAME} ${DBTABLES}"
+
+${cmd} | gzip  > ${outFile}
+
+echo "DB: ${DBNAME} Tables: ${DBTABLES} backed up in ${outFile}"
+

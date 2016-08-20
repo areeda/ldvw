@@ -1,0 +1,173 @@
+#!/bin/bash
+
+prefix="java -Xmx2g -jar /usr/local/ldvw/OdcPlot/OdcPlot.jar "
+addprog="java -jar /usr/local/ldvw/addimg2db/addimg2db.jar "
+TZ=UTC
+
+outDir=${HOME}/ligo/odc/2013/ER4
+if [ ! -e ${outDir} ]; then
+    mkdir -p ${outDir}
+fi
+#============Find a version of LIGO tconvert========
+    if [ -z ${tconv} ] ; then
+        if [ ! -z `which tconvert` ] ; then
+            tconv=$(which tconvert)
+        elif [ ! -z /ligotools/bin/tconvert ]; then 
+            tconv='/ligotools/bin/tconvert'
+            export PATH=/ligotools/bin:${PATH}
+            export LIGOTOOLS=/ligotools
+        elif [ ! -z /usr/bin/lalapps_tconvert ]; then 
+            tconv=/usr/bin/lalapps_tconvert
+        else    
+            echo "can't find a tconvert to use.  exiting"
+            exit 1  
+        fi
+    fi
+#-------------------------------------------------------
+
+
+usage()
+{
+    cat << EOF
+
+	usage: $0 options
+
+	This script will run OdcPlot at the current or a specified time
+	on a 12 hour boundary.
+
+	OPTIONS:
+
+	-h  Show this message
+	-v  Verbose
+	-p  show progress dialog
+	-t  Test, show commands only, don't execute
+	-g <gps time> [default is last 12 hr boundary]
+	-d "<date> <time>" -- don't forget the quotes
+	
+EOF
+}
+VERBOSE=0
+TEST=0
+backgps=0
+
+while getopts "hvtpg:d:" OPTION
+do
+    case $OPTION in
+	   
+	   h)
+	     usage
+		 exit 1
+		 ;;
+	   v)
+	     VERBOSE=1
+		 ;;
+	   p)
+	     prefix="${prefix} --progress"
+		 ;;
+	   t)
+	     TEST=1
+             VERBOSE=1
+		 ;;
+	   g)
+	     backgps=$OPTARG
+		 ;;
+	   d)
+	     backgps=`${tconv} $OPTARG`
+		 ;;
+	   ?)
+	     usage
+		 exit 1
+	esac
+done
+
+if [ ${backgps} -lt 900000000 ] ; then
+    #Figure out what day and time it was 12 hrs ago
+    now=$(${tconv} now)
+    let backgps=${now}-43200
+else
+    echo "using preset backgps: ${backgps}"
+fi
+
+if [ $VERBOSE -gt 0 ] ; then
+    echo
+    echo "====================================="
+    echo "Running the odcPlot12hr at $(date)"
+    echo TEST=${TEST},now=${now} backgps=${backgps}
+    echo "we are using ${tconv} for our tconvert."
+fi
+
+if [ -z ${now} ]; then
+   echo "tconvert failed."
+   exit 2
+fi
+
+yr=`$tconv -f %Y $backgps`
+mo=`$tconv -f %m $backgps`
+dy=`$tconv -f %d $backgps`
+hr=`$tconv -f %H $backgps`
+ 
+
+dateStr=${yr}${mo}${dy}
+dateTxt=${yr}-${mo}-${dy}
+
+if [ $hr -gt 11 ] ; then
+    hr=12
+else
+    hr=00
+fi
+timeStr=${hr}00Z
+timeTxt=${hr}:00
+user="er4.odc"
+
+gpsCmd="${tconv} ${dateTxt} ${timeTxt}"
+gps=`$gpsCmd`
+echo $gpsCmd "->" $gps
+
+# these are 12 hr plots
+durSec=43200
+
+# Which channel/server
+server[1]=nds.ligo-wa.caltech.edu
+ifo[1]=H1
+chan[1]="H1:PSL-ODC_CHANNEL_OUTPUT"
+group[1]="ER4-H1-PSL-ODC-12hr"
+
+server[2]=nds.ligo-la.caltech.edu
+ifo[2]=L1
+chan[2]="L1:PSL-ODC_CHANNEL_OUTPUT"
+group[2]="ER4-L1-PSL-ODC-12hr"
+
+server[3]=dmt-er.ligo-la.caltech.edu
+ifo[3]=LLDQ
+chan[3]="L1:LLD-DQ_VECTOR"
+group[3]="ER4-L1-LLD-ODC-12hr"
+
+looper="1 2"
+for idx in $looper
+do
+    srv=${server[$idx]}
+    chn=${chan[$idx]}
+    ifn=${ifo[$idx]}
+    grp=${group[$idx]}
+    desc="${chn},srv:${srv}_${dateTxt}_${timeTxt}($gps}_dur:_${durSec}s"
+    outfile=$outDir/${ifn}_${dateStr}-${timeStr}.png
+    cmd="${prefix} --server $srv --chan $chn --start $gps --dur $durSec --outfile ${outfile}"
+    addCmd="${addprog} --debug --user ${user} --group ${grp} "
+    if [ $TEST -gt 0 ] || [ $VERBOSE -gt 0 ]
+    then
+        echo Channel: ${chn} to group: ${grp}
+        echo ${cmd}
+        echo
+        echo ${addCmd} --desc "${desc}" ${outfile} 
+        echo Description: \"${desc}\"
+        echo
+    fi
+    # note this is not an else.
+    if [ $TEST -eq 0 ] ; then
+        ${cmd} 
+        ${addCmd}  --desc "${desc}" ${outfile}
+    fi
+done
+
+
+
