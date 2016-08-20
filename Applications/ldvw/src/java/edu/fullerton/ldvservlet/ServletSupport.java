@@ -21,7 +21,6 @@ import com.areeda.jaDatabaseSupport.Database;
 import com.areeda.jaDatabaseSupport.Table;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageItem;
-import edu.fullerton.jspWebUtils.PageItemBSNavBar;
 import edu.fullerton.jspWebUtils.PageItemImage;
 import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageItemString;
