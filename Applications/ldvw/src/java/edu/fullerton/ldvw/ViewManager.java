@@ -19,6 +19,7 @@ package edu.fullerton.ldvw;
 
 import com.areeda.jaDatabaseSupport.Database;
 import edu.fullerton.jspWebUtils.Page;
+import edu.fullerton.jspWebUtils.PageItemHeader;
 import edu.fullerton.jspWebUtils.PageItemHrLong;
 import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageItemString;
@@ -27,8 +28,11 @@ import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvservlet.ServletSupport;
 import edu.fullerton.ldvtables.UseLog;
 import edu.fullerton.ldvtables.ViewUser;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -165,17 +169,36 @@ public class ViewManager
         {
             vuser = servletSupport.getVuser();
             uLog = servletSupport.getuLog();
+            String maintFilename  = "/usr/local/ldvw/maint.txt";
+            File maint = new File(maintFilename);
+            String maintMsg="";
+            
+            if(maint.canRead())
+            {
+                maintMsg=new String(Files.readAllBytes(Paths.get(maintFilename)));
+                vpage.setTitle("Maintenance Mode");
+                vpage.add(new PageItemHeader("Maintenance Mode", 2));
+                vpage.add(new PageItemHeader(maintMsg, 2));
+            }
 
-            if (!vuser.isValid())
+            if (!vuser.isValid() || (!maintMsg.isEmpty() && !vuser.isAdmin()))
             {
                 String erMsg = "We're sorry but you do not have privileges to access this service.<br>"
                                + "You must be included in the appropriate community.<br>"
                                + "Please send an email to our mailing list ligodv-web@gravity.phys.uwm.edu "
                                + "We will try to help but we don't control that community.<br>"
                                + "User: " + vuser.getCn() + "<br>";
-                vpage.add(new PageItemString(erMsg, false));
-       
-                vpage.setTitle("Not Authorized");
+                
+                if (!vuser.isValid())
+                {
+                    vpage.add(new PageItemString(erMsg, false));
+
+                    vpage.setTitle("Not Authorized");
+                }
+                else
+                {
+//                    vpage.add(new PageItemHeader(maintMsg, 2));
+                }
                 if (out == null)
                 {
                     out = response.getWriter();
