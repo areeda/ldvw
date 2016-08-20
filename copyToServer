@@ -1,0 +1,30 @@
+ #!/bib/bash
+ # Run from the root LDVW folder. This script will copy  the dist
+ #  folder and any subfolders of each program to the remote server
+ # using ssh/scp
+
+ progs="addimg2db
+ chanAvailability
+ ChanUpdater
+ CheckDb
+ CISdbXfer
+ Coherence
+ DataCacheManager
+ ndsMonitor
+ OdcPlot
+ Spectrogram"
+
+ srv=ldvw-dev.ligo.caltech.edu
+
+for prog in ${progs}
+do
+ 	echo -n ${prog}
+	if [ -d Applications/${prog}/dist ]
+	then
+		ssh ldvw-dev mkdir -p /usr/local/ldvw/${prog}
+		scp -r Applications/${prog}/dist/* ldvw-dev:/usr/local/ldvw/${prog}/
+	else
+		echo Applications/${prog}/dist does not exist
+	fi
+done
+
