@@ -1,4 +1,4 @@
-/*
+    /*
  * Copyright (C) 2013 Joseph Areeda <joseph.areeda at ligo.org>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -225,6 +225,7 @@ public class SpectrogramManager extends ExternalPlotManager implements PlotProdu
             ChanDataBuffer cdb = dbuf.get(0);
             ChanInfo ci;
             ci = cdb.getChanInfo();
+
             cmd.append(" --chan ").append(ci.getChanName());
             cmd.append(" --server ").append(ci.getServer());
             cmd.append(" --ctype ").append(ci.getcType());
