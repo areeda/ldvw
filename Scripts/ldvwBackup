@@ -1,0 +1,2 @@
+mysqldump -p ligodv HelpText ImageCoordinates ImageGroup Images InternalErrorLog NdsStats PageItemCache Servers \
+     Sessions UseLog ViewUser 

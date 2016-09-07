@@ -36,5 +36,5 @@ done
 # merge all the channel lists into 1
 echo "merging ${allList}"
 cat ${allList[@]} | sort -u >/tmp/all.clist
-rm -f ${allList[@]}
+#rm -f ${allList[@]}
 

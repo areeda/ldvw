@@ -1,0 +1,39 @@
+#!/bin/bash
+
+mdump=mysqldump
+sys=$(uname -s)
+if [ "x${sys}x" == "xDarwinx" ]
+then
+	mdump=mysqldump5
+	echo "Working on a Mac"
+fi
+bkdir=${HOME}/bkups/
+
+usr=dumper
+pw='db15b7e98d575c6fbc11e046e5285df6'
+
+strt=$(date '+%s')	# script start time seconds
+dow=$(date '+%a')	# eg Mon
+wkn=$(date '+%V')	# week num
+
+fbase="${bkdir}/ldvw_db_${wkn}_${dow}_"
+fname=$(/usr/local/ldvw/bin/mkdname ${fbase} sql.bz2)
+logname=$(/usr/local/ldvw/bin/mkdname ${fbase} log)
+
+echo "Starting db backup  to $fname" >>${logname}
+
+mkdir -p ${bkdir}
+
+${mdump} -u ${usr} -p${pw} ligodv HelpText ImageCoordinates ImageGroup Images InternalErrorLog NdsStats PageItemCache Servers \
+     Sessions UseLog ViewUser | bzip2 >${fname}
+
+fini=$(date '+%s')
+elap=$(expr ${fini} - ${strt})
+emin=$(expr ${elap} / 60)
+esec=$(expr ${elap} % 60)
+estr=$( printf '%02d:%02d' $emin $esec)
+
+echo "backup completed at $(date). Elapsed: $estr"
+echo "backup completed at $(date). Elapsed: $estr" >>${logname}
+
+

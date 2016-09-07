@@ -4,7 +4,13 @@
 # usage:
 #   get1list <server number 0-n>
 
-timeOfInterest=$(expr $(lalapps_tconvert) - 43200)
+# standard times
+GPSnow=$(lalapps_tconvert now) # get GPS time right now 
+UTCstartToday=$(lalapps_tconvert -f "%Y-%m-%d 00:00:00" ${GPSnow}) # get UTC start of today
+GPSstartToday=$(lalapps_tconvert ${UTCstartToday}) # get GPS start of today 
+GPSstartYesterday=$(expr ${GPSstartToday} - 24 \* 3600)
+
+timeOfInterest=${GPSstartToday}
 servers=(nds.ligo.caltech.edu nds.ligo-la.caltech.edu nds.ligo-wa.caltech.edu)
 outFiles=(/tmp/cit.clist /tmp/llo.clist /tmp/lho.clist)
 
@@ -18,7 +24,11 @@ trendCutPat='(\.max|\.min|\.rms|\.n)$'
 # this complicated sequence of commands gets all channels at a particular time turning trends into base channel names
 
 # get a list of all channels from the server
+st=$(date +%s)
 nds_query -n ${server} -l -s ${timeOfInterest} >${outFile}.tmp
+en=$(date +%s)
+el=$(expr $en - $st)
+echo "query for ${server} took ${el} sec"
 
 # check for errors
 stat=$?
@@ -35,8 +45,20 @@ then
     rm ${outFile}.tmp
     touch ${outFile}.err
 else
+	st=$(date +%s)
     awk '{print $1;}' ${outFile}.tmp | egrep -E ${chanNamePat} | \
         egrep -v '(\.max|\.min|\.rms|\.n)$' | sed 's/.mean$//' > ${outFile}.names
-    sort -u ${outFile}.names > ${outFile}
-    rm -f ${outFile}.tmp ${outFile}.names ${outFile}.err
+	en=$(date +%s)
+	el=$(expr $en - $st)
+	echo "extract base channels for ${server} took ${el} sec"
+	
+	st=$(date +%s)
+    sort -u < ${outFile}.names > ${outFile}
+	en=$(date +%s)
+	el=$(expr $en - $st)
+	echo "sort and uniquify base channels for ${server} took ${el} sec"
+	
+	baseCnt=$(wc -l ${outFile} | awk '{print $1}')
+	echo "${server} has ${baseCnt} current base channels"
+#    rm -f ${outFile}.tmp ${outFile}.names ${outFile}.err
 fi

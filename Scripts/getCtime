@@ -1,0 +1,5 @@
+GPSnow=$(lalapps_tconvert now) # get GPS time right now 
+UTCstartToday=$(lalapps_tconvert -f "%Y-%m-%d 00:00:00" ${GPSnow}) # get UTC start of today
+GPSstartToday=$(lalapps_tconvert ${UTCstartToday}) # get GPS start of today 
+GPSstartYesterday=$(expr ${GPSstartToday} - 24 \* 3600)
+

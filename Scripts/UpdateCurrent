@@ -1,0 +1,9 @@
+#!/bin/bash
+
+logFile=$(/usr/local/ldvw/bin/mkdname chanUpd log)
+echo "Channel availability updating started on $(date)" >~/t/${logFile}
+
+# find current channels
+/usr/local/ldvw/bin/getClist
+java -jar /usr/local/ldvw/chanAvailability/chanAvailability.jar -Xmx4g
+
