@@ -257,7 +257,7 @@ public class ChannelTable extends Table
         TreeSet<ChanInfo> ret = new TreeSet<>();
         Statement st = db.createStatement(1000);
         String q = "SELECT * from " + getName();
-        String w = " available = 1 ";
+        String w = " available >= 0 ";      // ignore thhis test for now
         if (server != null && !server.isEmpty())
         {
             w +=  " AND server='" + server + "'";
