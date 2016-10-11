@@ -32,6 +32,10 @@
         <servlet-name>SessionHistory</servlet-name>
         <servlet-class>edu.fullerton.ldvservlet.SessionHistory</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>FilterDesign</servlet-name>
+        <servlet-class>edu.fullerton.ldvservlet.FilterDesign</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>Env</servlet-name>
         <url-pattern>/env</url-pattern>
@@ -59,6 +63,10 @@
     <servlet-mapping>
         <servlet-name>SessionHistory</servlet-name>
         <url-pattern>/SessionHistory</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FilterDesign</servlet-name>
+        <url-pattern>/FilterDesign</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
