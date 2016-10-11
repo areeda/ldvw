@@ -22,6 +22,7 @@ import com.areeda.jaDatabaseSupport.Database;
 import com.areeda.jaDatabaseSupport.Table;
 import edu.fullerton.jspWebUtils.*;
 import edu.fullerton.ldvjutils.LdvTableException;
+import edu.fullerton.ldvjutils.UseLogInfo;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -265,4 +266,33 @@ public class UseLog extends Table
         return ret;
     }
 
+    public UseLogInfo streamNext() throws SQLException
+    {
+        UseLogInfo ret = null;
+        if (allStream != null && allStream.next())
+        {
+            ret = new UseLogInfo(allStream);
+        }
+        return ret;
+    }
+    
+    public int getNusers() throws LdvTableException
+    {
+        String qnusers = "select count(distinct user) as nusers from " + getName();
+        int ret = 0;
+        try
+        {
+            ResultSet rs = db.executeQuery(qnusers);
+            while (rs.next())
+            {
+                ret = rs.getInt("nusers");
+            }
+        }
+        catch (SQLException ex)
+        {
+            throw new LdvTableException("Getting number of distinct users: " + ex.getLocalizedMessage());
+        }
+        return ret;
+        
+    }
 }

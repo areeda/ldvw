@@ -30,7 +30,11 @@ import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import edu.fullerton.ldvjutils.LdvTableException;
 import java.sql.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -472,5 +476,31 @@ public class ViewUser extends Table
                         nBytes, pageTime, title);
         }
     }
-
+    /**
+     * Return a set containing the common names of all people who have accessed
+     * the site.
+     * @return  A set of strings containing the common names
+     * @throws LdvTableException  most likely a database error.
+     */
+    public Set<String> getAllNames() throws LdvTableException
+    {
+        Set<String> ret = new HashSet<>();
+        
+        String qcn = "SELECT cn from " + getName();
+        try
+        {
+            ResultSet rs =db.executeQuery(qcn);
+            while (rs.next())
+            {
+                ret.add(rs.getString("cn"));
+            }
+            rs.close();
+        }
+        catch (SQLException ex)
+        {
+            throw (new LdvTableException("Gettin list of user names", ex));
+        }
+        
+        return ret;
+    }
 }

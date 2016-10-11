@@ -148,7 +148,7 @@ public class ChannelIndex extends Table
     public void streamAll() throws SQLException
     {
         Statement myStmt = db.createStatement(1);
-        String query = "SELECT * from " + getName();
+        String query = "SELECT * from " + getName() + " ORDER BY name";
         allStream = myStmt.executeQuery(query);
     }
     /**
