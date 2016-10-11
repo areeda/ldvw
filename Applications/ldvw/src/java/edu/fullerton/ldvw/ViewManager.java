@@ -169,19 +169,8 @@ public class ViewManager
         {
             vuser = servletSupport.getVuser();
             uLog = servletSupport.getuLog();
-            String maintFilename  = "/usr/local/ldvw/maint.txt";
-            File maint = new File(maintFilename);
-            String maintMsg="";
-            
-            if(maint.canRead())
-            {
-                maintMsg=new String(Files.readAllBytes(Paths.get(maintFilename)));
-                vpage.setTitle("Maintenance Mode");
-                vpage.add(new PageItemHeader("Maintenance Mode", 2));
-                vpage.add(new PageItemHeader(maintMsg, 2));
-            }
 
-            if (!vuser.isValid() || (!maintMsg.isEmpty() && !vuser.isAdmin()))
+            if (!vuser.isValid() || (ServletSupport.inMaintMode() && !vuser.isAdmin()))
             {
                 String erMsg = "We're sorry but you do not have privileges to access this service.<br>"
                                + "You must be included in the appropriate community.<br>"
@@ -195,10 +184,7 @@ public class ViewManager
 
                     vpage.setTitle("Not Authorized");
                 }
-                else
-                {
-//                    vpage.add(new PageItemHeader(maintMsg, 2));
-                }
+
                 if (out == null)
                 {
                     out = response.getWriter();
