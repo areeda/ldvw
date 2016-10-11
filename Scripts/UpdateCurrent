@@ -7,3 +7,4 @@ echo "Channel availability updating started on $(date)" >~/t/${logFile}
 /usr/local/ldvw/bin/getClist
 java -jar /usr/local/ldvw/chanAvailability/chanAvailability.jar -Xmx4g
 
+echo "Channel availability updating ended on $(date)" >~/t/${logFile}

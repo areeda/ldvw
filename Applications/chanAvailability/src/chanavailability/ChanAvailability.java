@@ -68,7 +68,8 @@ public class ChanAvailability
     }
 
     /**
-     * Use nds_query to simultaneously get full channel lists from all sites.
+     * We used nds_query to simultaneously get full channel lists from all sites.
+     * Here we read in the results
      */
     private void getLists()
     {
@@ -109,7 +110,6 @@ public class ChanAvailability
 
     private void updateChannelIndex() 
     {
-        ArrayList<Integer> activeList = new ArrayList<>(200000);
         try
         {
             ViewerConfig vc;
@@ -121,6 +121,19 @@ public class ChanAvailability
                 System.out.print("Connected to: ");
                 System.out.println(vc.getLog());
             }
+            updateByName(db);
+        }
+        catch (ViewConfigException ex)
+        {
+            Logger.getLogger(ChanAvailability.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    void updateById(Database db)
+    {
+        try
+        {
+            ArrayList<Integer> activeList = new ArrayList<>(200000);
+            
             ChannelIndex index = new ChannelIndex(db);
             index.streamAll();
             
@@ -156,6 +169,7 @@ public class ChanAvailability
             
             // set them all not current
             String clrCmd = String.format("update %s set isCurrent=0", index.getName());
+            db.execute(clrCmd);
             
             StringBuilder updtList = new StringBuilder();
             int curUpdt = 0;
@@ -188,10 +202,60 @@ public class ChanAvailability
                 db.execute(updtCmd.toString());                
             }
         }
-        catch (SQLException | ViewConfigException ex)
+        catch (SQLException ex)
         {
             Logger.getLogger(ChanAvailability.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+    }
+
+    private void updateByName(Database db)
+    {
+        
+        try
+        {
+            ChannelIndex index = new ChannelIndex(db);
+            
+            // set them all not current
+            String clrCmd = String.format("update %s set isCurrent=0", index.getName());
+            db.execute(clrCmd);
+
+            StringBuilder updtList = new StringBuilder();
+            int curUpdt = 0;
+            int maxUpdt = 10000;
+
+            String updtPrefix = String.format("update %s set isCurrent=1 where ", index.getName());
+            StringBuilder updtCmd = new StringBuilder();
+            for (String name :curChans)
+            {
+                if (updtList.length() > 0)
+                {
+                    updtList.append(" or ");
+                }
+                updtList.append("name='").append(name).append("' ");
+                curUpdt++;
+                if (curUpdt >= maxUpdt)
+                {
+                    updtCmd.setLength(0);
+                    updtCmd.append(updtPrefix).append(updtList);
+                    db.execute(updtCmd.toString());
+                    curUpdt = 0;
+                    updtList.setLength(0);
+                }
+            }
+            // if any are left in buffer clear them
+            if (updtList.length() > 0)
+            {
+                updtCmd.setLength(0);
+                updtCmd.append(updtPrefix).append(updtList);
+                db.execute(updtCmd.toString());
+            }
+        }
+        catch (SQLException ex)
+        {
+            Logger.getLogger(ChanAvailability.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
 
     }
     
