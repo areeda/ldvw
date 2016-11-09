@@ -17,15 +17,16 @@
 package edu.fullerton.ldvservlet;
 
 import edu.fullerton.jspWebUtils.Page;
+import edu.fullerton.jspWebUtils.PageForm;
+import edu.fullerton.jspWebUtils.PageFormButton;
+import edu.fullerton.jspWebUtils.PageFormSelect;
+import edu.fullerton.jspWebUtils.PageFormText;
 import edu.fullerton.jspWebUtils.PageItem;
 import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import viewerconfig.ViewerConfig;
 
 /**
- * 
+ * Pages to design and test Second Order Section (SOS) filter definitions
  * @author Joseph Areeda <joseph.areeda@ligo.org>
  */
 public class FilterDesign extends HttpServlet
@@ -99,11 +100,31 @@ public class FilterDesign extends HttpServlet
             {
                 act = parameterMap.get(act)[0];
             }
+            PageForm form = new PageForm();
+            form.addHidden("replot", "true");
+            form.setAction(servletSupport.getServletPath());
+            form.setMethod("GET");
+            form.setNoSubmit(true);
+
             switch(act)
             {
                 case "new":
-                    newFilter();
+                    form.add(newFilter());
+                    break;
             }
+            PageFormButton upd = new PageFormButton("Update","Update","Update");
+            PageFormButton sav = new  PageFormButton("Save","Save","Save");
+            PageTable btns = new PageTable();
+            btns.setClassName("noborder");
+            PageTableRow btrw = new PageTableRow();
+            btrw.add(upd);
+            btrw.add(sav);
+            btrw.setClassAll("noborder");
+            btns.addRow(btrw);
+          
+            form.add(btns);
+            vpage.add(form);
+            
             servletSupport.showPage(response);
         }
         catch (WebUtilException ex)
@@ -156,26 +177,47 @@ public class FilterDesign extends HttpServlet
         return "Short description";
     }// </editor-fold>
 
-    private void newFilter() throws WebUtilException
+    private PageItem newFilter() throws WebUtilException
     {
         PageTable filters = new PageTable();
+        filters.setClassName("noborder");
         String[] hdrStrs = {"Type", "low or zero", "high or pole", "K"};
         
         PageTableRow hdr = new PageTableRow(hdrStrs, true);
+        hdr.setHeader();
+        hdr.setClassAll("noborder");
         filters.addRow(hdr);
         
         for(int i=0; i<10; i++)
         {
-            filters.addRow(newComp(i));
+            PageTableRow  row = newComp(i);
+            row.setClassAll("noborder");
+            filters.addRow(row);
         }
+        return filters;
     }
 
-    private PageItem newComp(int idn)
+    /**
+     *  Generate a new row  specifying a component
+     * 
+     **/
+    private PageTableRow newComp(int idn) throws WebUtilException
     {
         String[] sTypes = { "--", "low pass", "high pass", "band pass", 
             "band stop", "ZPK" };
         
         PageTableRow row = new PageTableRow();
+        String idstr = String.format("%02d", idn);
+        PageFormSelect ftyp =  new PageFormSelect("ftype_"+idstr, sTypes);
+        PageFormText f1 = new PageFormText("f1_"+idstr, "");
+        PageFormText f2 = new PageFormText("f2_"+idstr, "");
+        PageFormText k = new PageFormText("k_"+idstr, "");
         
+        row.add(ftyp);
+        row.add(f1);
+        row.add(f2);
+        row.add(k);
+        
+        return row;
     }
 }
