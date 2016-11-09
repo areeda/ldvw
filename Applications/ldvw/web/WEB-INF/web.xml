@@ -36,6 +36,10 @@
         <servlet-name>FilterDesign</servlet-name>
         <servlet-class>edu.fullerton.ldvservlet.FilterDesign</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>MaintMode</servlet-name>
+        <servlet-class>edu.fullerton.ldvservlet.MaintMode</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>Env</servlet-name>
         <url-pattern>/env</url-pattern>
@@ -67,6 +71,10 @@
     <servlet-mapping>
         <servlet-name>FilterDesign</servlet-name>
         <url-pattern>/FilterDesign</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>MaintMode</servlet-name>
+        <url-pattern>/MaintMode</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
