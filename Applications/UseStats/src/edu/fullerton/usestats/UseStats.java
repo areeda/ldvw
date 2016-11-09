@@ -30,7 +30,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
@@ -47,7 +46,8 @@ public class UseStats
 {
 
     /**
-     * Program to summarize our usage statistics
+     * Program to summarize our usage statistics by
+     * time periods
      * 
      * @param args the command line arguments
      */
@@ -56,7 +56,7 @@ public class UseStats
         UseStats me = new UseStats();
         me.doit();
     }
-    private int verbose;
+    private int verbose=6;
 
     private void doit()
     {
