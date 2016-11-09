@@ -17,7 +17,8 @@ html,body {
 th{
     text-align:center;
     font-family:arial;
-    background-color: #B0B0DD;
+    font-weight: bold;
+    background-color: #33ffff;
 }
 
 .chanSelList{
@@ -99,6 +100,7 @@ th{
 .SelectorTable{
     border: hidden;
     padding: 5px;
+    background-color: transparent;
 }
 .hdrTable{
     border: hidden;
@@ -116,6 +118,7 @@ th{
 }
 .noborder{
     border: hidden;
+    background-color: transparent;
 }
 .header {
     overflow: auto;
@@ -230,7 +233,7 @@ table.values th {padding:3px;border:1px solid black;border-collapse: collapse;te
 table.values {border-bottom:1px solid gray;}
 
 td, th {padding:3px;border: 1px solid black;;border-collapse:collapse;}
-tr th {text-align:left;background-color:#f0f0f0;color:#333; font-weight:bold;}
+tr {text-align:left;background-color:#f0f0f0;color:#333;}
 tr.bodd td {background-color:#edf3fe; padding-right: 12px;}
 tr.codd td {background-color:#dce2ed;}
 tr.odd td {background-color:#cbd1dc;padding-right: 12px;border-color: darkblue}
