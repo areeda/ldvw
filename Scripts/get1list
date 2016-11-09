@@ -18,7 +18,7 @@ n=$1
 server=${servers[${n}]}
 outFile=${outFiles[${n}]}
 echo "server: ${server} clist: ${outFile}"
-chanNamePat='[0-9A-Za-z]+:[0-9A-Za-z]+-[0-9A-Za-z]+_'
+chanNamePat='[0-9A-Za-z-]+:[0-9A-Za-z]+[-_][0-9A-Za-z]+_*'
 trendCutPat='(\.max|\.min|\.rms|\.n)$'
 
 # this complicated sequence of commands gets all channels at a particular time turning trends into base channel names
