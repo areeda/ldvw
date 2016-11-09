@@ -117,17 +117,17 @@ public abstract class GWpyBaseDefn extends PluginController
      */
     protected void addBandFilter()
     {
-        p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Upper filter limit (Hz)", "fupper",
-                                        "Cut off frequency, default = no filter");
-        p.setArgumentName("fupper");
-        p.setnDecimals(2);
-        addParameter(p);
         p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Lower filter limit (Hz)", "flower",
                                         "Cut off frequency, default = no filter");
         p.setArgumentName("flower");
         p.setnDecimals(2);
         addParameter(p);
         
+        p = ParameterFactory.buildParam(PluginParameter.Type.NUMBER, "Upper filter limit (Hz)", "fupper",
+                                        "Cut off frequency, default = no filter");
+        p.setArgumentName("fupper");
+        p.setnDecimals(2);
+        addParameter(p);
     }
     /**
      * Default frequency axis defaults to log, let them make it liniear.
