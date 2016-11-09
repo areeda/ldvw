@@ -228,6 +228,11 @@ public class ServletSupport
         File maint = new File(maintFilename);
         return maint.canRead();
     }
+
+    public static String getMaintFilename()
+    {
+        return maintFilename;
+    }
     
     public void addStandardHeader(String version) throws WebUtilException
     {
