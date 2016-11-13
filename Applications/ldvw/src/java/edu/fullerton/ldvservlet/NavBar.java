@@ -86,6 +86,9 @@ public class NavBar
             "Edit help", "EditHelp"
         },
         {
+            "Enter/exit maintance mode", "/MaintMode"
+        },
+        {
             "DB stats", "dbstats"
         },
         {
@@ -173,6 +176,10 @@ public class NavBar
                     if (command[1].matches("^http.?://.*"))
                     {
                         bsnav.addSubmenuLink(command[1], command[0], "_blank");
+                    }
+                    else if (command[1].startsWith("/"))
+                    {
+                        bsnav.addSubmenuLink(contextPath + command[1], command[0]);
                     }
                     else
                     {
