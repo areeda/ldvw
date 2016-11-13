@@ -19,12 +19,17 @@ package edu.fullerton.ldvservlet;
 import edu.fullerton.jspWebUtils.Page;
 import edu.fullerton.jspWebUtils.PageForm;
 import edu.fullerton.jspWebUtils.PageFormButton;
+import edu.fullerton.jspWebUtils.PageFormText;
+import edu.fullerton.jspWebUtils.PageItem;
+import edu.fullerton.jspWebUtils.PageItemHeader;
+import edu.fullerton.jspWebUtils.PageItemList;
 import edu.fullerton.jspWebUtils.PageTable;
 import edu.fullerton.jspWebUtils.PageTableRow;
 import edu.fullerton.jspWebUtils.WebUtilException;
+import static edu.fullerton.ldvservlet.ServletSupport.clearMaintMsg;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Map;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +37,8 @@ import javax.servlet.http.HttpServletResponse;
 import viewerconfig.ViewerConfig;
 
 /**
- *
+ * A servlet to control entering and exiting maintenance mode, with an 
+ * explanatory message.
  * @author Joseph Areeda <joseph.areeda@ligo.org>
  */
 public class MaintMode extends HttpServlet
@@ -40,6 +46,7 @@ public class MaintMode extends HttpServlet
     private ViewerConfig viewerConfig;
     private long loadTime;
     private String contextPath;
+    private Page vpage;
     /**
      * Initialization on loading servlet, one time things like
      *
@@ -87,11 +94,9 @@ public class MaintMode extends HttpServlet
             servletSupport = new ServletSupport();
             servletSupport.init(request, viewerConfig, false);
 
-            Page vpage = servletSupport.getVpage();
+            vpage = servletSupport.getVpage();
             vpage.includeJS("showByClass.js");
-            vpage.setTitle("Channel source list");
-            servletSupport.addStandardHeader("");
-            servletSupport.addNavBar();
+            vpage.setTitle("Manage maintenance mode");
             contextPath = request.getContextPath();
 
             Map<String, String[]> parameterMap = request.getParameterMap();
@@ -100,29 +105,63 @@ public class MaintMode extends HttpServlet
             {
                 act = parameterMap.get(act)[0];
             }
-            PageForm form = new PageForm();
-            form.addHidden("replot", "true");
-            form.setAction(servletSupport.getServletPath());
-            form.setMethod("GET");
-            form.setNoSubmit(true);
-
-            switch (act)
+            else if (parameterMap.containsKey("Maint Mode"))
             {
+                act = "maint";
             }
-            PageFormButton upd = new PageFormButton("Update", "Update", "Update");
-            PageFormButton sav = new PageFormButton("Save", "Save", "Save");
-            PageTable btns = new PageTable();
-            btns.setClassName("noborder");
-            PageTableRow btrw = new PageTableRow();
-            btrw.add(upd);
-            btrw.add(sav);
-            btrw.setClassAll("noborder");
-            btns.addRow(btrw);
+            else if (parameterMap.containsKey("Normal"))
+            {
+                act = "norm";
+            }
+            else  if (parameterMap.containsKey("Cancel"))
+            {
+                act = "cancel";
+            }
+            if (act.contentEquals("cancel"))
+            {
+                RequestDispatcher dispatcher = request.getRequestDispatcher("view");
+                dispatcher.forward(request, response);
+            }
+            else
+            {
+                
+                switch (act)
+                {
+                    case "norm":
+                        ServletSupport.clearMaintMsg();
+                        break;
+                        
+                    case "maint":
+                        String mmesg = parameterMap.get("mesg")[0];
+                        ServletSupport.setMaintMsg(mmesg);
+                        break;
+                }
+                servletSupport.addStandardHeader("");
+                servletSupport.addNavBar();
 
-            form.add(btns);
-            vpage.add(form);
+                
+                PageForm form = new PageForm();
+                form.setAction(servletSupport.getServletPath());
+                form.setMethod("GET");
+                form.setNoSubmit(true);
+                form.add(getCurSetup());
+                PageFormButton cancel = new PageFormButton("Cancel", "Cancel", "Cancel");
+                PageFormButton mmod = new PageFormButton("Maint Mode", "Maint Mode", "Maint Mode");
+                PageFormButton norm = new PageFormButton("Normal", "Normal", "Normal");
+                PageTable btns = new PageTable();
+                btns.setClassName("noborder");
+                PageTableRow btrw = new PageTableRow();
+                btrw.add(cancel);
+                btrw.add(mmod);
+                btrw.add(norm);
+                btrw.setClassAll("noborder");
+                btns.addRow(btrw);
 
-            servletSupport.showPage(response);
+                form.add(btns);
+                vpage.add(form);
+
+                servletSupport.showPage(response);
+            }
         }
         catch (WebUtilException ex)
         {
@@ -173,5 +212,29 @@ public class MaintMode extends HttpServlet
     {
         return "Short description";
     }// </editor-fold>
+
+    private PageItem getCurSetup() throws WebUtilException
+    {
+        PageItemList ret = new PageItemList();
+        String state = ServletSupport.inMaintMode() ? "Maintence mode" : "Normal mode";
+        PageItemHeader cur = new PageItemHeader("Currently in " + state, 3);
+        ret.add(cur);
+        
+        String msg = ServletSupport.getMaintMsg();
+        PageFormText msgArea = new PageFormText("mesg", msg, 40);
+        msgArea.setnLines(6);
+        msgArea.setUseEditor(true);
+        if (!msg.isEmpty())
+        {
+            String editorContent = msg.replaceAll("'", "&#39;").replaceAll("\\n", "");
+            editorContent = editorContent.replaceAll("\\r", "");
+            String script = String.format("tinyMCE.get('mesg').setContent('%1$s');", editorContent);
+            vpage.addLoadJS(script);
+        }
+
+        ret.add(msgArea);
+        
+        return ret;
+    }
 
 }
