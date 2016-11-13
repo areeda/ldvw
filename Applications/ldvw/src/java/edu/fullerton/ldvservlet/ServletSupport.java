@@ -34,6 +34,7 @@ import edu.fullerton.ldvjutils.LdvTableException;
 import edu.fullerton.ldvtables.UseLog;
 import edu.fullerton.ldvtables.ViewUser;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
@@ -41,8 +42,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,7 +68,7 @@ public class ServletSupport
     private ViewerConfig viewerConfig;
     private final long startTime;
     private String servletPath;
-    private static String maintFilename = "/usr/local/ldvw/maint.txt";
+    private static final String maintFilename = "/usr/local/ldvw/maint.txt";
 
 
     public ServletSupport()
@@ -234,27 +233,58 @@ public class ServletSupport
         return maintFilename;
     }
     
+    public static String getMaintMsg()
+    {
+        String ret = "";
+        File maint = new File(maintFilename);
+        if (maint.canRead())
+        {
+            try
+            {
+                ret = new String(Files.readAllBytes(Paths.get(maintFilename)));
+            }
+            catch (IOException ex)
+            {
+                ret = "Error reading the message.";
+            }
+        }
+        return ret;
+    }
+    
+    public static void setMaintMsg(String msg) throws WebUtilException
+    {
+        clearMaintMsg();
+        try (PrintWriter out = new PrintWriter(maintFilename))
+        {
+            out.println(msg);
+        }
+        catch (FileNotFoundException ex)
+        {
+            throw new WebUtilException("Setting maintenance mode message", ex);
+        }
+    }
+    
+    public static void clearMaintMsg()
+    {
+        File maint = new File(maintFilename);
+        if (maint.exists())
+        {
+            maint.delete();
+        }        
+    }
+    
     public void addStandardHeader(String version) throws WebUtilException
     {
         PageTable hdrTbl = new PageTable();
 
         hdrTbl.setClassName("hdrTable");
-        File maint = new File(maintFilename);
-        String maintMsg = "";
+        String maintMsg = getMaintMsg();
 
-        if (maint.canRead())
+        if(inMaintMode())
         {
-            try
-            {
-                maintMsg = new String(Files.readAllBytes(Paths.get(maintFilename)));
-            }
-            catch (IOException ex)
-            {
-                maintMsg = "Error reading the message.";
-            }
             vpage.setTitle("Maintenance Mode");
             vpage.add(new PageItemHeader("Maintenance Mode", 2));
-            vpage.add(new PageItemHeader(maintMsg, 2));
+            vpage.add(new PageItemHeader(maintMsg, 3,false));
         }
 
         
@@ -372,12 +402,12 @@ public class ServletSupport
         return db;
     }
 
-    public boolean isIsPrototype()
+    public boolean getIsPrototype()
     {
         return isPrototype;
     }
 
-    public boolean isIsNewSession()
+    public boolean getIsNewSession()
     {
         return isNewSession;
     }
