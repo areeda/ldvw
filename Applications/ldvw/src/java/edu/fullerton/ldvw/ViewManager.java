@@ -103,7 +103,7 @@ public class ViewManager
             servletPath = contextPath + request.getServletPath();
             helpUrl = servletSupport.getHelpUrl();
             vpage = servletSupport.getVpage();
-            isPrototype = servletSupport.isIsPrototype();
+            isPrototype = servletSupport.getIsPrototype();
             isNewSession = session.isNew();
             mainLoop();
         }
