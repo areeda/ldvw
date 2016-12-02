@@ -52,9 +52,10 @@ public class TimeAndDate
         820108813,      // 2006-Jan-01 
         914803214,      // 2009-Jan-01 
         1025135955,     // 2012-JUL-01
-        1119744017      // 2015-JUL-01
+        1119744017,     // 2015-JUL-01
+        1167264017      // 2017-JAN-01
     };
-    private static final long epoch = 315964800;      // gps epoc in unix time 315964800
+    private static final long epoch = 315964800;      // gps epoc in unix time Jan 09 23:59:54 UTC 1990
 
     /**
      * Convert GPS seconds to UTC seconds
