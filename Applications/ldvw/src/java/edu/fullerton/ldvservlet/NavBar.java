@@ -66,6 +66,9 @@ public class NavBar
             "Contact us", "contactUs"
         },
         {
+            "LDVW paper", "https://arxiv.org/abs/1611.01089"
+        },
+        {
             "Release notes", "https://ligodv.areeda.com/ligodv/dokuwiki/doku.php?id=ldvrelnotes"
         },
         {
