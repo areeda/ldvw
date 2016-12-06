@@ -105,7 +105,7 @@ public class ServletSupport
         isNewSession = session.isNew();
         if (! isNewSession)
         {
-            long sessionAge = System.currentTimeMillis() - session.getLastAccessedTime();
+            long sessionAge = System.currentTimeMillis() - session.getCreationTime();
             isNewSession = sessionAge > 30 * 60 * 1000;
         }
         vuser = new ViewUser(request, db);
@@ -133,9 +133,10 @@ public class ServletSupport
                 throw new ServletException(ermsg);
             }
         }
-
         session.setAttribute("isValidUser", vuser.isValid());
         session.setAttribute("isAdmin", vuser.isAdmin());
+        session.setAttribute("commonName", vuser.getCn());
+
     }
     /**
      * Read our config file, check database connection and that all necessary tables exist.
