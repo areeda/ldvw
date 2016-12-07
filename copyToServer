@@ -1,7 +1,7 @@
  #!/bib/bash
 
  # Run from the root LDVW folder. This script will copy  the dist
- #  folder and any subfolders of each program to the remote server
+ # folder and any subfolders of each program to the remote server
  # using ssh/scp
 
  progs="addimg2db
